@@ -55,10 +55,8 @@ class Client:
 							continue
 						for i, tank in enumerate(data["tanks"]):
 							tanks.append({
-								"have": i in self.account["tanks"],
-								"name": tank["name"],
-								"description": tank["description"],
-								"price": tank["price"]
+								**tank,
+								"have": i in self.account["tanks"]
 							})
 						self.send(["garage_data", tanks, self.account["selected_tank"]])
 				except IndexError:
