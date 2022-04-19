@@ -4,6 +4,7 @@
             "nick": "test",
             "password": "123456",
             "xp": 10,
+            "crystals": 999,
             "tanks": [0],
             "selected_tank": 0
         }

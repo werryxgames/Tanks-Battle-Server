@@ -87,6 +87,7 @@ class AccountManager:
 			"nick": nick,
 			"password": password,
 			"xp": 0,
+			"crystals": 0,
 			"tanks": [0],
 			"selected_tank": 0
 		}
