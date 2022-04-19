@@ -56,7 +56,11 @@ class NetworkedClient:
 								self.send(["login_fail", res])
 				except IndexError:
 					self.send(["something_wrong"])
+					self.conn.close()
+					break
 			except ConnectionResetError:
+				break
+			except ConnectionAbortedError:
 				break
 		if success:
 			self.logger.debug(f"Клиент '{self.addr[0]}:{self.addr[1]}' вошёл в аккаунт")
