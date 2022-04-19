@@ -21,6 +21,12 @@ class Client:
 			return False
 		return True
 
+	def refresh_account(self):
+		self.account = AccountManager.get_account(self.login)
+		if self.account == AccountManager.FAILED_UNKNOWN or self.account == AccountManager.FAILED_NOT_FOUND or self.account["password"] != self.password:
+			return False
+		return True
+
 	def send(self, message):
 		self.conn.send(dumps(message).encode("utf8"))
 		self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
@@ -37,6 +43,7 @@ class Client:
 					com = jdt[0]
 					args = jdt[1:]
 					if com == "get_account_data":
+						self.refresh_account()
 						self.send(["account_data", self.account["xp"]])
 				except IndexError:
 					self.send(["something_wrong"])
