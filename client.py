@@ -60,7 +60,7 @@ class Client:
 								"description": tank["description"],
 								"price": tank["price"]
 							})
-						self.send(["garage_data", tanks])
+						self.send(["garage_data", tanks, self.account["selected_tank"]])
 				except IndexError:
 					self.send(["something_wrong"])
 			except ConnectionResetError:

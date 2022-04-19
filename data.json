@@ -4,7 +4,8 @@
             "nick": "test",
             "password": "123456",
             "xp": 10,
-            "tanks": [0]
+            "tanks": [0],
+            "selected_tank": 0
         }
     ],
     "tanks": [
