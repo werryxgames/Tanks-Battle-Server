@@ -1,4 +1,4 @@
-from mjson import append, read
+from mjson import append, read, write
 
 class AccountManager:
 	SUCCESSFUL = 0
@@ -23,6 +23,21 @@ class AccountManager:
 			if account["nick"] == nick:
 				return account
 		return AccountManager.FAILED_NOT_FOUND
+
+	@staticmethod
+	def set_account(nick, key, value):
+		acc = AccountManager.get_account(nick)
+		if acc == AccountManager.FAILED_UNKNOWN or acc == AccountManager.FAILED_NOT_FOUND:
+			return acc
+		data = read("data.json")
+		if data is None:
+			return AccountManager.FAILED_UNKNOWN
+		try:
+			data["accounts"][data["accounts"].index(acc)][key] = value
+		except (ValueError, IndexError):
+			data[key] = [value]
+		if write("data.json", data):
+			return AccountManager.SUCCESSFUL
 
 	@staticmethod
 	def login_account(nick, password):
@@ -87,7 +102,9 @@ class AccountManager:
 			"nick": nick,
 			"password": password,
 			"xp": 0,
-			"tanks": {}
+			"crystals": 0,
+			"tanks": [0],
+			"selected_tank": 0
 		}
 
 		if append("data.json", "accounts", acc):

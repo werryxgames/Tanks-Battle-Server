@@ -1,6 +1,6 @@
 {
 	"host": "0.0.0.0",
 	"port": 7490,
-	"accept_client_versions": ["1.0", "1.1", "2.0", "3.0"],
+	"accept_client_versions": ["1.0", "1.1", "2.0", "3.0", "4.0"],
 	"clients_queue": 1
 }
