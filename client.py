@@ -53,7 +53,7 @@ class Client:
 						if data is None:
 							self.send(["garage_failed"])
 							continue
-						for i, tank in enumerate(self.data["tanks"]):
+						for i, tank in enumerate(data["tanks"]):
 							tanks.append({
 								"have": i in self.account["tanks"],
 								"name": tank["name"],
