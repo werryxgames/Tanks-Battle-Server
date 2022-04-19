@@ -45,6 +45,21 @@ class Client:
 					if com == "get_account_data":
 						self.refresh_account()
 						self.send(["account_data", self.account["xp"]])
+					elif com == "get_garage_data":
+						self.refresh_account()
+						tanks = []
+						data = read("data.json")
+						if data is None:
+							self.send(["garage_failed"])
+							continue
+						for i, tank in enumerate(self.data["tanks"]):
+							tanks.append({
+								"have": i in self.account["tanks"],
+								"name": tank["name"],
+								"description": tank["description"],
+								"price": tank["price"]
+							})
+						self.send(["garage_data", tanks])
 				except IndexError:
 					self.send(["something_wrong"])
 			except ConnectionResetError:

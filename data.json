@@ -4,7 +4,18 @@
             "nick": "test",
             "password": "123456",
             "xp": 10,
-            "tanks": {}
+            "tanks": [0]
+        }
+    ],
+    "tanks": [
+        {
+            "name": "Light",
+            "description": "Очень быстрый танк. Подходит для игроков, которые любят скорость, но он легко может упасть в яму",
+            "mass": 1,
+            "speed": 2000,
+            "gravity": 100,
+            "rotation_speed": 4000,
+            "price": 0
         }
     ]
 }
