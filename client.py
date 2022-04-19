@@ -45,7 +45,7 @@ class Client:
 					args = jdt[1:]
 					if com == "get_account_data":
 						self.refresh_account()
-						self.send(["account_data", self.account["xp"]])
+						self.send(["account_data", self.account["xp"], self.account["crystals"]])
 					elif com == "get_garage_data":
 						self.refresh_account()
 						tanks = []
@@ -59,7 +59,58 @@ class Client:
 								"have": i in self.account["tanks"]
 							})
 						self.send(["garage_data", tanks, self.account["selected_tank"]])
+					elif com == "select_tank":
+						if args[0] in self.account["tanks"]:
+							if AccountManager.set_account(self.account["nick"], "selected_tank", args[0]) != AccountManager.SUCCESSFUL:
+								self.send(["not_selected", 1])
+							else:
+								self.refresh_account()
+								tanks = []
+								data = read("data.json")
+								if data is None:
+									self.send(["not_selected", 2])
+									continue
+								for i, tank in enumerate(data["tanks"]):
+									tanks.append({
+										**tank,
+										"have": i in self.account["tanks"]
+									})
+								self.send(["garage_data", tanks, self.account["selected_tank"]])
+						else:
+							self.send(["not_selected", 0])
+					elif com == "buy_tank":
+						data = read("data.json")
+						if data is None:
+							self.send(["not_selected", 2])
+							continue
+						if args[0] not in self.account["tanks"] and len(data["tanks"]) > args[0]:
+							tank = data["tanks"][args[0]]
+							self.refresh_account()
+							if self.account["crystals"] >= tank["price"]:
+								if AccountManager.set_account(self.account["nick"], "crystals", self.account["crystals"] - tank["price"]) != AccountManager.SUCCESSFUL:
+									self.send(["not_selected", 1])
+								elif AccountManager.set_account(self.account["nick"], "tanks", [*self.account["tanks"], args[0]]) != AccountManager.SUCCESSFUL:
+									self.send(["not_selected", 1])
+								elif AccountManager.set_account(self.account["nick"], "selected_tank", args[0]) != AccountManager.SUCCESSFUL:
+									self.send(["not_selected", 1])
+								else:
+									self.refresh_account()
+									tanks = []
+									for i, tank_ in enumerate(data["tanks"]):
+										tanks.append({
+											**tank_,
+											"have": i in self.account["tanks"]
+										})
+									self.send(["garage_data", tanks, self.account["selected_tank"]])
+							else:
+								self.send(["buy_failed", 0])
+						else:
+							self.send(["not_selected", 0])
 				except IndexError:
 					self.send(["something_wrong"])
+					self.conn.close()
+					break
 			except ConnectionResetError:
+				break
+			except ConnectionAbortedError:
 				break
