@@ -10,7 +10,7 @@ def read(name):
 
 def write(name, data):
 	with open(name, "w", encoding="utf8") as f:
-		f.write(dumps(data, indent=4))
+		f.write(dumps(data, indent=4, ensure_ascii=False))
 	return True
 
 

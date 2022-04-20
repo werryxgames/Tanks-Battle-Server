@@ -1,5 +1,5 @@
-from accounts import AccountManager
 from json import loads, dumps
+from accounts import AccountManager
 from singleton import get_data
 from mjson import read
 

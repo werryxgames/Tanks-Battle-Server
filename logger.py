@@ -1,6 +1,6 @@
-from colorama import init, Fore, Style
 from datetime import datetime
 from re import sub
+from colorama import init, Fore, Style
 
 
 class Logger:
