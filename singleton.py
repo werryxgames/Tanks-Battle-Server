@@ -1,3 +1,6 @@
+from random import randint
+
+
 class Singleton(object):
 	def __new__(cls):
 		if not hasattr(cls, "instance"):
@@ -24,13 +27,16 @@ def add_match(name, max_players, creator):
 		"name": name,
 		"max_players": max_players,
 		"creator": creator,
-		"players": 0
+		"players": 0,
+		"map": randint(0, st.config["maps"] - 1)
 	}
 
 	try:
 		st.matches.append(battle)
 	except AttributeError:
 		st.matches = [battle]
+
+	return battle
 
 
 def get_matches():

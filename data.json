@@ -4,12 +4,13 @@
             "nick": "test",
             "password": "123456",
             "xp": 10,
-            "crystals": 499,
+            "crystals": 309,
             "tanks": [
+                1,
                 0,
-                1
+                2
             ],
-            "selected_tank": 1
+            "selected_tank": 2
         }
     ],
     "tanks": [
@@ -21,7 +22,7 @@
             "speed": 2000,
             "gravity": 100,
             "rotation_speed": 4000,
-            "price": 0
+            "price": 75
         },
         {
             "name": "Neuter",
@@ -31,7 +32,17 @@
             "speed": 1500,
             "gravity": 130,
             "rotation_speed": 3000,
-            "price": 100
+            "price": 0
+        },
+        {
+            "name": "Grave",
+            "description": "Очень крепкий танк, но достаточно медленный. Тяжело упасть в яму. Имеет очень крепкую броню",
+            "durability": 1000,
+            "mass": 3,
+            "speed": 900,
+            "gravity": 200,
+            "rotation_speed": 1500,
+            "price": 115
         }
     ]
 }

@@ -109,8 +109,8 @@ class AccountManager:
 			"password": password,
 			"xp": 0,
 			"crystals": 0,
-			"tanks": [0],
-			"selected_tank": 0
+			"tanks": [1],
+			"selected_tank": 1
 		}
 
 		if append("data.json", "accounts", acc):

@@ -31,45 +31,38 @@ class NetworkedClient:
 
 				self.logger.debug(f"Получены данные от клиента '{self.addr[0]}:{self.addr[1]}':", jdt)
 
-				try:
-					com = jdt[0]
-					args = jdt[1:]
+				com = jdt[0]
+				args = jdt[1:]
 
-					if com == "register":
-						if args[2] not in self.config["accept_client_versions"]:
-							self.send(["version_not_accepted"])
+				if com == "register":
+					if args[2] not in self.config["accept_client_versions"]:
+						self.send(["version_not_accepted"])
+					else:
+						self.client.version = args[2]
+
+						res = AccountManager.add_account(args[0], args[1])
+
+						if res == AccountManager.SUCCESSFUL:
+							self.send(["register_successful", args[0], args[1]])
+							success = self.client.set_login_data(args[0], args[1])
+							break
 						else:
-							self.client.version = args[2]
+							self.send(["register_fail", res])
 
-							res = AccountManager.add_account(args[0], args[1])
+				elif com == "login":
+					if args[2] not in self.config["accept_client_versions"]:
+						self.send(["version_not_accepted"])
+					else:
+						self.client.version = args[2]
 
-							if res == AccountManager.SUCCESSFUL:
-								self.send(["register_successful", args[0], args[1]])
-								success = self.client.set_login_data(args[0], args[1])
-								break
-							else:
-								self.send(["register_fail", res])
+						res = AccountManager.login_account(args[0], args[1])
 
-					elif com == "login":
-						if args[2] not in self.config["accept_client_versions"]:
-							self.send(["version_not_accepted"])
+						if res == AccountManager.SUCCESSFUL:
+							self.send(["login_successful", args[0], args[1]])
+							success = self.client.set_login_data(args[0], args[1])
+							break
 						else:
-							self.client.version = args[2]
-
-							res = AccountManager.login_account(args[0], args[1])
-
-							if res == AccountManager.SUCCESSFUL:
-								self.send(["login_successful", args[0], args[1]])
-								success = self.client.set_login_data(args[0], args[1])
-								break
-							else:
-								self.send(["login_fail", res])
-
-				except IndexError:
-					self.send(["something_wrong"])
-					self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-					self.conn.close()
-					break
+							self.send(["login_fail", res])
 
 			except (ConnectionResetError, ConnectionAbortedError):
 				self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
@@ -78,8 +71,11 @@ class NetworkedClient:
 
 			except BaseException as e:
 				self.logger.error(e)
-				self.send(["something_wrong"])
-				self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+				try:
+					self.send(["something_wrong"])
+					self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+				except OSError:
+					pass
 				self.conn.close()
 				break
 
