@@ -8,6 +8,7 @@ def main():
 	config = read("config.json")
 	logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_DEBUG)
 	set_data(config, logger)
+
 	start_tcp_server()
 
 

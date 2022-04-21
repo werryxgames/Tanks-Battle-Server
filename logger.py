@@ -19,32 +19,40 @@ class Logger:
 	@staticmethod
 	def date():
 		dt = datetime.today()
+
 		res = [str(dt.year)]
+
 		if len(str(dt.month)) < 2:
 			res.append("0" + str(dt.month))
 		else:
 			res.append(str(dt.month))
+
 		if len(str(dt.day)) < 2:
 			res.append("0" + str(dt.day))
 		else:
 			res.append(str(dt.day))
+
 		if len(str(dt.hour)) < 2:
 			res.append("0" + str(dt.hour))
 		else:
 			res.append(str(dt.hour))
+
 		if len(str(dt.minute)) < 2:
 			res.append("0" + str(dt.minute))
 		else:
 			res.append(str(dt.minute))
+
 		if len(str(dt.second)) < 2:
 			res.append("0" + str(dt.second))
 		else:
 			res.append(str(dt.second))
+
 		return res
 
 	def message(self, msg, level):
 		if self.level <= level:
 			print(msg)
+
 		if self.loglevel <= level:
 			with open("server.log", "a", encoding="utf8") as f:
 				dt = self.date()
@@ -54,28 +62,33 @@ class Logger:
 		msg = []
 		for i in message:
 			msg.append(str(i))
+
 		self.message(Fore.RED + prefix + " ".join(msg) + Fore.RESET, 4)
 
 	def error(self, *message, prefix="[Ошибка] "):
 		msg = []
 		for i in message:
 			msg.append(str(i))
+
 		self.message(Style.BRIGHT + Fore.RED + prefix + " ".join(msg) + Style.RESET_ALL, 3)
 
 	def warning(self, *message, prefix="[Предупреждение] "):
 		msg = []
 		for i in message:
 			msg.append(str(i))
+
 		self.message(Fore.YELLOW + prefix + " ".join(msg) + Fore.RESET, 2)
 
 	def info(self, *message, prefix="[Инфо] "):
 		msg = []
 		for i in message:
 			msg.append(str(i))
+
 		self.message(prefix + " ".join(msg), 1)
 
 	def debug(self, *message, prefix="[Отладка] "):
 		msg = []
 		for i in message:
 			msg.append(str(i))
+
 		self.message(Style.BRIGHT + Fore.BLACK + prefix + " ".join(msg) + Style.RESET_ALL, 0)

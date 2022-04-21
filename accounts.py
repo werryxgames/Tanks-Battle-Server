@@ -1,5 +1,6 @@
 from mjson import append, read, write
 
+
 class AccountManager:
 	SUCCESSFUL = 0
 	FAILED_NICK_LENGTH = 1
@@ -9,19 +10,23 @@ class AccountManager:
 	FAILED_UNSAFE_CHARACTERS = 5
 	FAILED_NOT_FOUND = 6
 	FAILED_PASSWORD_NOT_MATCH = 7
+	DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890-=+*/[]:;.,\\|&%#@!$^()"
 
 	@staticmethod
-	def check(string):
-		return set(string.lower()) <= set("qwertyuiopasdfghjklzxcvbnm1234567890-=+*/[]:;.,\\|&%#@!$^()")
+	def check(string, allowed=DEFAULT_ALLOWED):
+		return set(string.lower()) <= set(allowed)
 
 	@staticmethod
 	def get_account(nick):
 		data = read("data.json")
+
 		if data is None:
 			return AccountManager.FAILED_UNKNOWN
+
 		for account in data["accounts"]:
 			if account["nick"] == nick:
 				return account
+
 		return AccountManager.FAILED_NOT_FOUND
 
 	@staticmethod
@@ -29,6 +34,7 @@ class AccountManager:
 		acc = AccountManager.get_account(nick)
 		if acc == AccountManager.FAILED_UNKNOWN or acc == AccountManager.FAILED_NOT_FOUND:
 			return acc
+
 		data = read("data.json")
 		if data is None:
 			return AccountManager.FAILED_UNKNOWN
@@ -36,6 +42,7 @@ class AccountManager:
 			data["accounts"][data["accounts"].index(acc)][key] = value
 		except (ValueError, IndexError):
 			data[key] = [value]
+
 		if write("data.json", data):
 			return AccountManager.SUCCESSFUL
 
@@ -66,8 +73,7 @@ class AccountManager:
 			if account["nick"] == nick:
 				if account["password"] == password:
 					return AccountManager.SUCCESSFUL
-				else:
-					return AccountManager.FAILED_PASSWORD_NOT_MATCH
+				return AccountManager.FAILED_PASSWORD_NOT_MATCH
 
 		return AccountManager.FAILED_NOT_FOUND
 
