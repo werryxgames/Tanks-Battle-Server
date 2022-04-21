@@ -188,10 +188,14 @@ class Client:
 							continue
 						self.send(["battle_not_joined", 0])
 
-				except IndexError:
-					self.send(["something_wrong"])
-					self.conn.close()
-					break
-
 			except (ConnectionResetError, ConnectionAbortedError):
+				self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+				self.conn.close()
+				break
+
+			except BaseException as e:
+				self.logger.error(e)
+				self.send(["something_wrong"])
+				self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+				self.conn.close()
 				break

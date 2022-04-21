@@ -6,11 +6,13 @@ from singleton import set_data
 
 def main():
 	logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_DEBUG)
+
 	try:
 		config = read("config.json")
 		set_data(config, logger)
 
 		start_tcp_server()
+
 	except BaseException as e:
 		logger.error(e)
 
