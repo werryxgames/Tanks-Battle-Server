@@ -5,9 +5,10 @@ class Singleton(object):
 		return cls.instance
 
 
-def set_data(config=None, logger=None):
-	st = Singleton()
+st = Singleton()
 
+
+def set_data(config=None, logger=None):
 	if config is not None:
 		st.config = config
 	if logger is not None:
@@ -15,12 +16,10 @@ def set_data(config=None, logger=None):
 
 
 def get_data():
-	st = Singleton()
 	return (st.config, st.logger)
 
 
 def add_match(name, max_players, creator):
-	st = Singleton()
 	battle = {
 		"name": name,
 		"max_players": max_players,
@@ -36,7 +35,17 @@ def add_match(name, max_players, creator):
 
 def get_matches():
 	try:
-		st = Singleton()
 		return st.matches
 	except AttributeError:
 		return []
+
+
+def remove_match(name):
+	try:
+		for battle in st.matches:
+			if battle["name"] == name:
+				st.matches.remove(battle)
+				return True
+	except (AttributeError, IndexError):
+		pass
+	return False

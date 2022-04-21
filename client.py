@@ -1,6 +1,6 @@
 from json import loads, dumps
 from accounts import AccountManager
-from singleton import get_data, get_matches, add_match
+from singleton import get_data, get_matches, add_match, remove_match
 from mjson import read
 
 
@@ -160,14 +160,33 @@ class Client:
 							continue
 
 						matches = get_matches()
+						exit = False
 						for match_ in matches:
 							if match_["name"] == name:
 								self.send(["game_create_failed", 2])
-								continue
+								exit = True
+								break
+						if exit:
+							continue
 
 						match = add_match(name, int(max_players), self.account["nick"])
 
 						self.send(["game_created"])
+
+					elif com == "join_battle":
+						matches = get_matches()
+						exit = False
+						for match_ in matches:
+							if match_["name"] == args[0]:
+								match_["players"] += 1
+								self.send(["battle_joined"])
+								if match_["players"] >= match_["max_players"]:
+									remove_match(args[0])
+								exit = True
+								break
+						if exit:
+							continue
+						self.send(["battle_not_joined", 0])
 
 				except IndexError:
 					self.send(["something_wrong"])
