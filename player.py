@@ -1,7 +1,10 @@
 from json import loads, dumps
 from accounts import AccountManager
-from singleton import get_data
+from singleton import get_data, get_clients
 from mjson import read
+from battle_player import BattlePlayerr
+
+clients = get_clients()
 
 
 class Player:
@@ -14,6 +17,7 @@ class Player:
         self.login = None
         self.password = None
         self.account = None
+        self.bp = None
 
     def close(self):
         try:
@@ -54,29 +58,38 @@ class Player:
             jdt = loads(data.decode("utf8"))
 
             com = jdt[0]
-            # args = jdt[1:]
+            args = jdt[1:]
 
             if com == "get_battle_data":
                 self.refresh_account()
 
-                data = read("data.json")
-                if data is None:
-                    self.send(["error_battle_data"])
-                    return
+                self.bp = BattlePlayer(
+                    self.account["nick"],
+                    (0, 10, 0),
+                    (0, 0, 0),
+                    self.account["selected_tank"]
+                )
 
-                tank_data = data["tanks"][self.account["selected_tank"]]
-                res_data = {}
-                for k, v in tank_data.items():
-                    if k in ["durability", "mass", "speed", "gravity", "rotation_speed"]:
-                        res_data[k] = v
+                self.bdata["players"].append(self.bp)
 
                 self.send([
                     "battle_data",
                     self.bdata["map"],
-                    self.account["nick"],
-                    self.account["selected_tank"],
-                    res_data
+                    self.bp,
+                    self.bp.get_tank()
                 ])
+
+            if com == "request_tanks_data":
+                self.bp.position = args[0]
+                self.bp.rotation = args[1]
+
+                players = self.bdata["players"]
+                res = []
+                for pl in players:
+                    if pl is not self.bp:
+                        res.append([pl.json(), pl.get_tank()])
+
+                self.send(["tanks_data", res])
 
         except BaseException as e:
             self.logger.error(e)

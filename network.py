@@ -68,6 +68,9 @@ class NetworkedClient:
                             return
                         self.send(["login_fail", res])
 
+            except (ConnectionResetError, ConnectionAbortedError):
+                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+
             except BaseException as e:
                 self.logger.error(e)
                 self.close()
@@ -79,15 +82,9 @@ def start_server():
 
     sock = socket(AF_INET, SOCK_DGRAM)
     sock.bind((config["host"], config["port"]))
-    # sock.listen(config["clients_queue"])
 
     logger.info("Сервер запущен")
     logger.debug("Адрес:", config["host"] + ",", "порт:", config["port"])
-
-    # while True:
-    #     conn, addr = sock.accept()
-    #     nc = NetworkedClient(conn, addr)
-    #     Thread(target=nc.receive, daemon=True).start()
 
     while True:
         adrdata = sock.recvfrom(1024)

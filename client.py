@@ -1,8 +1,9 @@
 from json import loads, dumps
 from accounts import AccountManager
-from singleton import get_data, get_matches, add_match, remove_match, get_clients
+from singleton import get_data, get_matches, add_match, get_clients
 from mjson import read
 from player import Player
+from copy import deepcopy
 
 clients = get_clients()
 
@@ -147,12 +148,11 @@ class Client:
 
                 elif com == "get_matches":
                     matches = get_matches()
-                    result = []
-                    for match_ in matches:
-                        if match_["players"] < match_["max_players"]:
-                            result.append(match_)
+                    res = deepcopy(matches)
+                    for m in res:
+                        m["players"] = len(m["players"])
 
-                    self.send(["matches", result])
+                    self.send(["matches", res])
 
                 elif com == "create_match":
                     self.refresh_account()
@@ -192,15 +192,11 @@ class Client:
                             self.send(["game_create_failed", 2])
                             return
 
-                    match = add_match(name, int(max_players), self.account["nick"])
+                    match_ = add_match(name, int(max_players), self.account["nick"])
 
-                    match["players"] += 1
                     self.send(["game_created"])
 
-                    if match["players"] >= match["max_players"]:
-                        remove_match(match["name"])
-
-                    self.player = Player(self.sock, self.addr, match)
+                    self.player = Player(self.sock, self.addr, match_)
                     self.refresh_account()
 
                     self.player.set_login_data(self.login, self.password)
@@ -213,10 +209,7 @@ class Client:
                     for match_ in matches:
                         if match_["name"] == args[0]:
                             player_match = match_
-                            match_["players"] += 1
                             self.send(["battle_joined"])
-                            if match_["players"] >= match_["max_players"]:
-                                remove_match(args[0])
 
                             self.player = Player(self.sock, self.addr, player_match)
                             self.refresh_account()

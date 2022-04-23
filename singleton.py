@@ -32,7 +32,7 @@ def add_match(name, max_players, creator):
         "name": name,
         "max_players": max_players,
         "creator": creator,
-        "players": 0,
+        "players": [],
         "map": randint(0, st.config["maps"] - 1)
     }
 

@@ -1,4 +1,24 @@
-from absolute import add_imports
+from sys import path
+from os import path as opath
+
+
+def get_rp(file):
+    return opath.dirname(opath.realpath(file))
+
+
+rp = opath.dirname(get_rp(__file__))
+
+
+def pjoin(*args, **kwargs):
+    return opath.join(*args, **kwargs)
+
+
+def to_absolute(*args, **kwargs):
+    return pjoin(rp, *args, **kwargs)
+
+
+def add_imports(ipath=""):
+    path.append(to_absolute(ipath))
 
 add_imports()
 add_imports("tests")
@@ -37,7 +57,7 @@ def main(quiet=False):
         "name": "Test name",
         "max_players": 10,
         "creator": "Test creator",
-        "players": 0
+        "players": []
     }
     tester.check(battle, exp_battle)
     tester.test("get_matches", [exp_battle])  # Матч уже создан
