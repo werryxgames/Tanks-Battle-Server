@@ -7,6 +7,7 @@ from logger import Logger
 
 import singleton
 import mjson
+import accounts
 
 
 def main():
@@ -40,6 +41,15 @@ def main():
     tester.test("get_matches", [exp_battle])  # Матч уже создан
     tester.test("remove_match", True, exp_battle["name"])  # Должно успешно удалить матч
     tester.test("get_matches", [])  # Матч должен быть удалён
+    tester.end()
+
+    # Аккаунты
+    tester = Tester(logger, accounts.AccountManager)
+    tester.test("check", True, "Allowed name")  # 'Allowed name' состоит из разрешённых символов
+    tester.test("check", False, "<name>")  # '<name>' содержит '<>'
+    tester.test("check", True, "")  # Пустая строка не содержит запрещённых символов
+    tester.test("check", False, "Никнейм")  # Русские буквы не разрешены
+    # Остальных тестов AccountManager нет из-за изменения ими 'data.json'
     tester.end()
 
 

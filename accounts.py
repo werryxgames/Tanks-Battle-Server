@@ -10,7 +10,7 @@ class AccountManager:
     FAILED_UNSAFE_CHARACTERS = 5
     FAILED_NOT_FOUND = 6
     FAILED_PASSWORD_NOT_MATCH = 7
-    DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890-=+*/[]:;.,\\|&%#@!$^()"
+    DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890_ -=+*/[]:;.,\\|&%#@!$^()"
 
     @staticmethod
     def check(string, allowed=DEFAULT_ALLOWED):

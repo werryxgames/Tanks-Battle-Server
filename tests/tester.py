@@ -7,16 +7,20 @@ class Tester:
         self.module = module
         self.quiet = quiet
         self.num = 0
+        self.tfailed = 0
+        self.tsuccess = 0
         if not quiet:
             self.logger.info(f"Тестирование класса \"{self.module.__name__}\"", prefix="")
 
     def passed(self):
         if not self.quiet:
             self.logger.message(Fore.GREEN + f"Тест {self.num} пройден" + Fore.RESET)
+        self.tsuccess += 1
 
     def failed(self, reason):
         if not self.quiet:
             self.logger.error(f"Тест {self.num} провален: {reason}", prefix="")
+        self.tfailed += 1
 
     def ret_value(self, module_method, *args, **kwargs):
         try:
@@ -78,6 +82,10 @@ class Tester:
 
     def end(self):
         if not self.quiet:
+            self.logger.message(
+                f"Пройдено тестов: {self.tsuccess}, провалено: {self.tfailed}\
+ (всего: {self.num})"
+            )
             self.logger.message("")
         delattr(self, "logger")
         delattr(self, "module")
