@@ -11,6 +11,16 @@
                 2
             ],
             "selected_tank": 2
+        },
+        {
+            "nick": "test2",
+            "password": "123456",
+            "xp": 0,
+            "crystals": 0,
+            "tanks": [
+                1
+            ],
+            "selected_tank": 1
         }
     ],
     "tanks": [

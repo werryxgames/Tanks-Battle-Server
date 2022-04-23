@@ -75,7 +75,7 @@ class Player:
                 self.send([
                     "battle_data",
                     self.bdata["map"],
-                    self.bp,
+                    self.bp.json(),
                     self.bp.get_tank()
                 ])
 
