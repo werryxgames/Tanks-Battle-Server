@@ -1,19 +1,30 @@
 from json import loads, dumps
 from accounts import AccountManager
-from singleton import get_data, get_matches, add_match, remove_match
+from singleton import get_data, get_matches, add_match, remove_match, get_clients
 from mjson import read
 from player import Player
 
+clients = get_clients()
+
 
 class Client:
-    def __init__(self, conn, addr):
-        self.conn = conn
+    def __init__(self, sock, addr):
+        self.sock = sock
         self.addr = addr
         self.config, self.logger = get_data()
         self.version = None
         self.login = None
         self.password = None
         self.account = None
+        self.send_player = False
+
+    def close(self):
+        try:
+            self.send(["something_wrong"])
+            clients.pop(self.addr)
+            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+        except OSError:
+            pass
 
     def set_login_data(self, login, password):
         self.login = login
@@ -38,19 +49,15 @@ class Client:
         return True
 
     def send(self, message):
-        self.conn.send(dumps(message).encode("utf8"))
+        self.sock.sendto(dumps(message).encode("utf8"), self.addr)
         self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
 
-    def receive(self):
-        while True:
+    def receive(self, data):
+        if self.send_player:
+            self.player.receive(data)
+        else:
             try:
-                data = self.conn.recv(1024)
-
-                if not data:
-                    break
-
                 jdt = loads(data.decode("utf8"))
-                self.logger.debug(f"Получены данные от клиента '{self.addr[0]}:{self.addr[1]}':", jdt)
 
                 com = jdt[0]
                 args = jdt[1:]
@@ -65,7 +72,7 @@ class Client:
                     data = read("data.json")
                     if data is None:
                         self.send(["garage_failed"])
-                        continue
+                        return
                     for i, tank in enumerate(data["tanks"]):
                         tanks.append({
                             **tank,
@@ -87,7 +94,7 @@ class Client:
                             data = read("data.json")
                             if data is None:
                                 self.send(["not_selected", 2])
-                                continue
+                                return
                             for i, tank in enumerate(data["tanks"]):
                                 tanks.append({
                                     **tank,
@@ -101,7 +108,7 @@ class Client:
                     data = read("data.json")
                     if data is None:
                         self.send(["not_selected", 2])
-                        continue
+                        return
                     if args[0] not in self.account["tanks"] and len(data["tanks"]) > args[0]:
                         tank = data["tanks"][args[0]]
                         self.refresh_account()
@@ -152,42 +159,38 @@ class Client:
 
                     if not isinstance(args[0], str):
                         self.send(["game_create_failed", 1])
-                        continue
+                        return
                     if not isinstance(args[1], str):
                         self.send(["game_create_failed", 1])
-                        continue
+                        return
 
                     name = args[0].strip()
                     max_players = args[1].strip()
 
                     if len(name) < 3 or len(name) > 20:
                         self.send(["game_create_failed", 0])
-                        continue
+                        return
                     if len(max_players) < 1 or len(max_players) > 2:
                         self.send(["game_create_failed", 0])
-                        continue
+                        return
 
                     if not AccountManager.check(name, AccountManager.DEFAULT_ALLOWED + " "):
                         self.send(["game_create_failed", 3])
-                        continue
+                        return
                     if not AccountManager.check(max_players, "0123456789"):
                         self.send(["game_create_failed", 3])
-                        continue
+                        return
 
                     max_players = int(max_players)
                     if max_players < 1 or max_players > self.config["max_players_in_game"]:
                         self.send(["game_create_failed", 4])
-                        continue
+                        return
 
                     matches = get_matches()
-                    ex = False
                     for match_ in matches:
                         if match_["name"] == name:
                             self.send(["game_create_failed", 2])
-                            ex = True
-                            break
-                    if ex:
-                        continue
+                            return
 
                     match = add_match(name, int(max_players), self.account["nick"])
 
@@ -197,15 +200,14 @@ class Client:
                     if match["players"] >= match["max_players"]:
                         remove_match(match["name"])
 
-                    player = Player(self.conn, self.addr, match)
+                    self.player = Player(self.sock, self.addr, match)
                     self.refresh_account()
 
-                    player.set_login_data(self.login, self.password)
-                    player.receive()
+                    self.player.set_login_data(self.login, self.password)
+                    self.send_player = True
 
                 elif com == "join_battle":
                     matches = get_matches()
-                    ex = False
                     player_match = None
 
                     for match_ in matches:
@@ -215,33 +217,18 @@ class Client:
                             self.send(["battle_joined"])
                             if match_["players"] >= match_["max_players"]:
                                 remove_match(args[0])
-                            ex = True
-                            break
 
-                    if ex:
-                        player = Player(self.conn, self.addr, player_match)
-                        self.refresh_account()
+                            self.player = Player(self.sock, self.addr, player_match)
+                            self.refresh_account()
 
-                        player.set_login_data(self.login, self.password)
-                        player.receive()
+                            self.player.set_login_data(self.login, self.password)
+                            self.send_player = True
 
-                        continue
+                            return
+
                     self.send(["battle_not_joined", 0])
-
-                elif com == "request_tanks_data":
-                    pass
-
-            except (ConnectionResetError, ConnectionAbortedError):
-                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-                self.conn.close()
-                break
 
             except BaseException as e:
                 self.logger.error(e)
-                try:
-                    self.send(["something_wrong"])
-                    self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-                except OSError:
-                    pass
-                self.conn.close()
-                break
+                self.close()
+                return

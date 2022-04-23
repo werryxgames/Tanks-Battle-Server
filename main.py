@@ -1,5 +1,5 @@
 from mjson import read
-from network import start_tcp_server
+from network import start_server
 from logger import Logger
 from singleton import set_data
 from tests import tests
@@ -13,7 +13,7 @@ def main():
             config = read("config.json")
             set_data(config, logger)
 
-            start_tcp_server()
+            start_server()
 
         except BaseException as e:
             logger.error(e)

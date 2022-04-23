@@ -5,8 +5,8 @@ from mjson import read
 
 
 class Player:
-    def __init__(self, conn, addr, battle_data):
-        self.conn = conn
+    def __init__(self, sock, addr, battle_data):
+        self.sock = sock
         self.addr = addr
         self.bdata = battle_data
         self.config, self.logger = get_data()
@@ -14,6 +14,14 @@ class Player:
         self.login = None
         self.password = None
         self.account = None
+
+    def close(self):
+        try:
+            self.send(["something_wrong"])
+            clients.pop(self.addr)
+            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+        except OSError:
+            pass
 
     def set_login_data(self, login, password):
         self.login = login
@@ -38,53 +46,39 @@ class Player:
         return True
 
     def send(self, message):
-        self.conn.send(dumps(message).encode("utf8"))
+        self.sock.sendto(dumps(message).encode("utf8"), self.addr)
         self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
 
-    def receive(self):
-        while True:
-            try:
-                data = self.conn.recv(1024)
+    def receive(self, data):
+        try:
+            jdt = loads(data.decode("utf8"))
 
-                if not data:
-                    break
+            com = jdt[0]
+            # args = jdt[1:]
 
-                jdt = loads(data.decode("utf8"))
-                self.logger.debug(f"Получены данные от клиента '{self.addr[0]}:{self.addr[1]}':", jdt)
+            if com == "get_battle_data":
+                self.refresh_account()
 
-                com = jdt[0]
-                # args = jdt[1:]
+                data = read("data.json")
+                if data is None:
+                    self.send(["error_battle_data"])
+                    return
 
-                if com == "get_battle_data":
-                    self.refresh_account()
+                tank_data = data["tanks"][self.account["selected_tank"]]
+                res_data = {}
+                for k, v in tank_data.items():
+                    if k in ["durability", "mass", "speed", "gravity", "rotation_speed"]:
+                        res_data[k] = v
 
-                    data = read("data.json")
-                    if data is None:
-                        self.send(["error_battle_data"])
-                        continue
+                self.send([
+                    "battle_data",
+                    self.bdata["map"],
+                    self.account["nick"],
+                    self.account["selected_tank"],
+                    res_data
+                ])
 
-                    tank_data = data["tanks"][self.account["selected_tank"]]
-                    res_data = {}
-                    for k, v in tank_data.items():
-                        if k in ["durability", "mass", "speed", "gravity", "rotation_speed"]:
-                            res_data[k] = v
-
-                    self.send([
-                        "battle_data",
-                        self.bdata["map"],
-                        self.account["nick"],
-                        self.account["selected_tank"],
-                        res_data
-                    ])
-
-            except (ConnectionResetError, ConnectionAbortedError):
-                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-                self.conn.close()
-                break
-
-            except BaseException as e:
-                self.logger.error(e)
-                self.send(["something_wrong"])
-                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-                self.conn.close()
-                break
+        except BaseException as e:
+            self.logger.error(e)
+            self.close()
+            return

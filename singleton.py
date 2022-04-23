@@ -5,6 +5,7 @@ class Singleton:
     config = None
     logger = None
     matches = []
+    clients = {}
 
     def __new__(cls):
         if not hasattr(cls, "instance"):
@@ -53,3 +54,7 @@ def remove_match(name):
     except (AttributeError, IndexError):
         pass
     return False
+
+
+def get_clients():
+    return st.clients

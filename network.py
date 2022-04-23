@@ -1,35 +1,39 @@
-from json import loads, dumps
+from json import loads, dumps, JSONDecodeError
 from threading import Thread
-from socket import socket, AF_INET, SOCK_STREAM
+from socket import socket, AF_INET, SOCK_DGRAM
 from client import Client
 from accounts import AccountManager
-from singleton import get_data
+from singleton import get_data, get_clients
+
+clients = get_clients()
 
 
 class NetworkedClient:
-    def __init__(self, conn, addr):
-        self.conn = conn
+    def __init__(self, sock, addr):
+        self.sock = sock
         self.addr = addr
         self.config, self.logger = get_data()
-        self.client = Client(conn, addr)
+        self.client = Client(sock, addr)
+        self.send_client = False
+
+    def close(self):
+        try:
+            self.send(["something_wrong"])
+            clients.pop(self.addr)
+            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+        except OSError:
+            pass
 
     def send(self, message):
-        self.conn.send(dumps(message).encode("utf8"))
+        self.sock.sendto(dumps(message).encode("utf8"), self.addr)
         self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
 
-    def receive(self):
-        success = False
-        while True:
+    def receive(self, data):
+        if self.send_client:
+            self.client.receive(data)
+        else:
             try:
-                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' подключён")
-
-                data = self.conn.recv(1024)
-                if not data:
-                    break
-
                 jdt = loads(data.decode("utf8"))
-
-                self.logger.debug(f"Получены данные от клиента '{self.addr[0]}:{self.addr[1]}':", jdt)
 
                 com = jdt[0]
                 args = jdt[1:]
@@ -44,8 +48,9 @@ class NetworkedClient:
 
                         if res == AccountManager.SUCCESSFUL:
                             self.send(["register_successful", args[0], args[1]])
-                            success = self.client.set_login_data(args[0], args[1])
-                            break
+                            self.client.set_login_data(args[0], args[1])
+                            self.send_client = True
+                            return
                         self.send(["register_fail", res])
 
                 elif com == "login":
@@ -58,46 +63,49 @@ class NetworkedClient:
 
                         if res == AccountManager.SUCCESSFUL:
                             self.send(["login_successful", args[0], args[1]])
-                            success = self.client.set_login_data(args[0], args[1])
-                            break
+                            self.client.set_login_data(args[0], args[1])
+                            self.send_client = True
+                            return
                         self.send(["login_fail", res])
-
-            except (ConnectionResetError, ConnectionAbortedError):
-                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-                self.conn.close()
-                break
 
             except BaseException as e:
                 self.logger.error(e)
-                try:
-                    self.send(["something_wrong"])
-                    self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-                except OSError:
-                    pass
-                self.conn.close()
-                break
-
-        if success:
-            self.logger.debug(f"Клиент '{self.addr[0]}:{self.addr[1]}' вошёл в аккаунт")
-            self.client.receive()
-        else:
-            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-            self.conn.close()
+                self.close()
+                return
 
 
-def start_tcp_server():
+def start_server():
     config, logger = get_data()
 
-    sock = socket(AF_INET, SOCK_STREAM)
+    sock = socket(AF_INET, SOCK_DGRAM)
     sock.bind((config["host"], config["port"]))
-    sock.listen(config["clients_queue"])
+    # sock.listen(config["clients_queue"])
 
-    logger.info("TCP сервер запущен")
+    logger.info("Сервер запущен")
     logger.debug("Адрес:", config["host"] + ",", "порт:", config["port"])
 
+    # while True:
+    #     conn, addr = sock.accept()
+    #     nc = NetworkedClient(conn, addr)
+    #     Thread(target=nc.receive, daemon=True).start()
+
     while True:
-        conn, addr = sock.accept()
-        nc = NetworkedClient(conn, addr)
-        Thread(target=nc.receive, daemon=True).start()
+        adrdata = sock.recvfrom(1024)
+        data = adrdata[0]
+        addr = adrdata[1]
+        if addr not in clients.keys():
+            clients[addr] = NetworkedClient(sock, addr)
+            logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
+        try:
+            tdata = loads(data.decode('utf8'))
+            logger.debug(f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{tdata}'")
+            clients[addr].receive(data)
+        except JSONDecodeError:
+            try:
+                tdata = data.decode('utf8')
+                logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил не JSON данные: '{tdata}'")
+            except UnicodeDecodeError:
+                tdata = data
+                logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил не UTF-8 данные: '{tdata}'")
 
     sock.close()
