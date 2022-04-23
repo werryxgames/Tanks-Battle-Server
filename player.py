@@ -2,7 +2,7 @@ from json import loads, dumps
 from accounts import AccountManager
 from singleton import get_data, get_clients
 from mjson import read
-from battle_player import BattlePlayerr
+from battle_player import BattlePlayer
 
 clients = get_clients()
 
