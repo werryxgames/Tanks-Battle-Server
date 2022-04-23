@@ -1,6 +1,7 @@
 from datetime import datetime
 from re import sub
 from colorama import init, Fore, Style
+from absolute import to_absolute
 
 
 class Logger:
@@ -54,7 +55,7 @@ class Logger:
             print(msg)
 
         if self.loglevel <= level:
-            with open("server.log", "a", encoding="utf8") as f:
+            with open(to_absolute("server.log"), "a", encoding="utf8") as f:
                 dt = self.date()
                 f.write(
                     "{" + \

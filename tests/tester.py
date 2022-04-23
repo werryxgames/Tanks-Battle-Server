@@ -87,7 +87,11 @@ class Tester:
  (всего: {self.num})"
             )
             self.logger.message("")
+        tf = self.tfailed
         delattr(self, "logger")
         delattr(self, "module")
         delattr(self, "quiet")
         delattr(self, "num")
+        delattr(self, "tfailed")
+        delattr(self, "tsuccess")
+        return tf == 0
