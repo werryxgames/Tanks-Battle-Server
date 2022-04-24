@@ -6,7 +6,7 @@ from tests import tests
 
 
 def main():
-    logger = Logger(Logger.LEVEL_INFO, Logger.LEVEL_INFO)
+    logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_INFO)
 
     if tests.main(True):
         try:
@@ -16,7 +16,6 @@ def main():
             start_server()
 
         except BaseException as e:
-            raise
             logger.error(e)
     else:
         logger.critical("Один из тестов провален")

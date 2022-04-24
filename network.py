@@ -68,9 +68,6 @@ class NetworkedClient:
                             return
                         self.send(["login_fail", res])
 
-            except (ConnectionResetError, ConnectionAbortedError):
-                self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
-
             except BaseException as e:
                 self.logger.error(e)
                 self.close()
@@ -87,7 +84,10 @@ def start_server():
     logger.debug("Адрес:", config["host"] + ",", "порт:", config["port"])
 
     while True:
-        adrdata = sock.recvfrom(1024)
+        try:
+            adrdata = sock.recvfrom(1024)
+        except (ConnectionResetError, ConnectionAbortedError):
+            self.logger.info(f"Клиент отключён")
         data = adrdata[0]
         addr = adrdata[1]
         if addr not in clients.keys():
