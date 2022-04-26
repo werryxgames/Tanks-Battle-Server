@@ -16,7 +16,7 @@ def main():
             start_server()
 
         except BaseException as e:
-            logger.error(e)
+            logger.critical(e)
     else:
         logger.critical("Один из тестов провален")
 

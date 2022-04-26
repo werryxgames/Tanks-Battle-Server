@@ -87,7 +87,7 @@ def start_server():
         try:
             adrdata = sock.recvfrom(1024)
         except (ConnectionResetError, ConnectionAbortedError):
-            self.logger.info(f"Клиент отключён")
+            logger.info(f"Клиент отключён")
         data = adrdata[0]
         addr = adrdata[1]
         if addr not in clients.keys():
