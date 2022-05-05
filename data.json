@@ -32,6 +32,7 @@
             "speed": 2000,
             "gravity": 100,
             "rotation_speed": 4000,
+            "gun_rotation_speed": 60,
             "price": 75
         },
         {
@@ -42,6 +43,7 @@
             "speed": 1500,
             "gravity": 130,
             "rotation_speed": 3000,
+            "gun_rotation_speed": 60,
             "price": 0
         },
         {
@@ -52,6 +54,7 @@
             "speed": 900,
             "gravity": 200,
             "rotation_speed": 1500,
+            "gun_rotation_speed": 60,
             "price": 115
         }
     ]

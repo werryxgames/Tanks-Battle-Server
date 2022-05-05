@@ -67,7 +67,8 @@ class Player:
                     self.account["nick"],
                     (0, 10, 0),
                     (0, 0, 0),
-                    self.account["selected_tank"]
+                    self.account["selected_tank"],
+                    (0, 0, 0)
                 )
 
                 self.bdata["players"].append(self.bp)

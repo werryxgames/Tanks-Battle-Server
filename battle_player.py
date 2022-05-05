@@ -1,4 +1,3 @@
-from json import dumps
 from mjson import read
 
 
@@ -8,12 +7,14 @@ class BattlePlayer:
         nick,
         position,
         rotation,
-        tank
+        tank,
+        gun_rotation
     ):
         self.nick = nick
         self.position = position
         self.rotation = rotation
         self.tank = tank
+        self.gun_rotation = gun_rotation
 
     def get_tank(self):
         data = read("data.json")
@@ -23,7 +24,7 @@ class BattlePlayer:
         tank_data = data["tanks"][self.tank]
         res_data = {}
         for k, v in tank_data.items():
-            if k in ["durability", "mass", "speed", "gravity", "rotation_speed"]:
+            if k in ["durability", "mass", "speed", "gravity", "rotation_speed", "gun_rotation_speed"]:
                 res_data[k] = v
 
         return res_data 
