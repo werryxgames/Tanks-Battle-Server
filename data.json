@@ -3,14 +3,18 @@
         {
             "nick": "test",
             "password": "123456",
-            "xp": 587,
-            "crystals": 309,
+            "xp": 637,
+            "crystals": 229,
             "tanks": [
                 1,
                 0,
                 2
             ],
-            "selected_tank": 0
+            "guns": [
+                0
+            ],
+            "selected_tank": 0,
+            "selected_gun": 0
         },
         {
             "nick": "test2",
@@ -20,7 +24,11 @@
             "tanks": [
                 1
             ],
-            "selected_tank": 1
+            "guns": [
+                0
+            ],
+            "selected_tank": 1,
+            "selected_gun": 0
         }
     ],
     "tanks": [
@@ -32,7 +40,6 @@
             "speed": 2000,
             "gravity": 100,
             "rotation_speed": 4000,
-            "gun_rotation_speed": 60,
             "price": 75
         },
         {
@@ -43,7 +50,6 @@
             "speed": 1500,
             "gravity": 130,
             "rotation_speed": 3000,
-            "gun_rotation_speed": 60,
             "price": 0
         },
         {
@@ -54,8 +60,17 @@
             "speed": 900,
             "gravity": 200,
             "rotation_speed": 1500,
-            "gun_rotation_speed": 60,
             "price": 115
+        }
+    ],
+    "guns": [
+        {
+            "name": "Smoke",
+            "description": "Стандартная башня. Средняя по всем качествам",
+            "damage": 150,
+            "rotation_speed": 60,
+            "shot_speed": 100,
+            "price": 0
         }
     ]
 }

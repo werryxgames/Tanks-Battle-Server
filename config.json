@@ -1,7 +1,8 @@
 {
     "host": "0.0.0.0",
     "port": 7490,
-    "accept_client_versions": ["5.0", "6.0"],
+    "accept_client_versions": ["5.0", "6.0", "7.0"],
     "max_players_in_game": 10,
-    "maps": 1
+    "maps": 1,
+    "debug": false
 }

@@ -33,7 +33,8 @@ def add_match(name, max_players, creator):
         "max_players": max_players,
         "creator": creator,
         "players": [],
-        "map": randint(0, st.config["maps"] - 1)
+        "map": randint(0, st.config["maps"] - 1),
+        "messages": []
     }
 
     st.matches.append(battle)

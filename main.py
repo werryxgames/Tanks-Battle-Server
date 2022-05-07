@@ -6,17 +6,19 @@ from tests import tests
 
 
 def main():
-    logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_INFO)
+    logger = Logger(Logger.LEVEL_INFO, Logger.LEVEL_INFO)
+    config = read("config.json")
 
     if tests.main(True):
         try:
-            config = read("config.json")
             set_data(config, logger)
 
             start_server()
 
         except BaseException as e:
             logger.critical(e)
+            if config["debug"]:
+                raise
     else:
         logger.critical("Один из тестов провален")
 

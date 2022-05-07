@@ -70,6 +70,7 @@ class Client:
                 elif com == "get_garage_data":
                     self.refresh_account()
                     tanks = []
+                    guns = []
                     data = read("data.json")
                     if data is None:
                         self.send(["garage_failed"])
@@ -79,7 +80,12 @@ class Client:
                             **tank,
                             "have": i in self.account["tanks"]
                         })
-                    self.send(["garage_data", tanks, self.account["selected_tank"]])
+                    for i, gun in enumerate(data["guns"]):
+                        guns.append({
+                            **gun,
+                            "have": i in self.account["guns"]
+                        })
+                    self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
 
                 elif com == "select_tank":
                     if args[0] in self.account["tanks"]:
@@ -92,6 +98,7 @@ class Client:
                         else:
                             self.refresh_account()
                             tanks = []
+                            guns = []
                             data = read("data.json")
                             if data is None:
                                 self.send(["not_selected", 2])
@@ -101,7 +108,12 @@ class Client:
                                     **tank,
                                     "have": i in self.account["tanks"]
                                 })
-                            self.send(["garage_data", tanks, self.account["selected_tank"]])
+                            for i, gun in enumerate(data["guns"]):
+                                guns.append({
+                                    **gun,
+                                    "have": i in self.account["guns"]
+                                })
+                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
                     else:
                         self.send(["not_selected", 0])
 
@@ -135,12 +147,95 @@ class Client:
                             else:
                                 self.refresh_account()
                                 tanks = []
+                                guns = []
                                 for i, tank_ in enumerate(data["tanks"]):
                                     tanks.append({
                                         **tank_,
                                         "have": i in self.account["tanks"]
                                     })
-                                self.send(["garage_data", tanks, self.account["selected_tank"]])
+                                for i, gun in enumerate(data["guns"]):
+                                    guns.append({
+                                        **gun,
+                                        "have": i in self.account["guns"]
+                                    })
+                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+                        else:
+                            self.send(["buy_failed", 0])
+                    else:
+                        self.send(["not_selected", 0])
+
+                elif com == "select_gun":
+                    if args[0] in self.account["guns"]:
+                        if AccountManager.set_account(
+                            self.account["nick"],
+                            "selected_gun",
+                            args[0]
+                        ) != AccountManager.SUCCESSFUL:
+                            self.send(["not_selected", 1])
+                        else:
+                            self.refresh_account()
+                            tanks = []
+                            guns = []
+                            data = read("data.json")
+                            if data is None:
+                                self.send(["not_selected", 2])
+                                return
+                            for i, tank in enumerate(data["tanks"]):
+                                tanks.append({
+                                    **tank,
+                                    "have": i in self.account["tanks"]
+                                })
+                            for i, gun in enumerate(data["guns"]):
+                                guns.append({
+                                    **gun,
+                                    "have": i in self.account["guns"]
+                                })
+                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+                    else:
+                        self.send(["not_selected", 0])
+
+                elif com == "buy_gun":
+                    data = read("data.json")
+                    if data is None:
+                        self.send(["not_selected", 2])
+                        return
+                    if args[0] not in self.account["guns"] and len(data["guns"]) > args[0]:
+                        gun = data["guns"][args[0]]
+                        self.refresh_account()
+                        if self.account["crystals"] >= gun["price"]:
+                            if AccountManager.set_account(
+                                self.account["nick"],
+                                "crystals",
+                                self.account["crystals"] - gun["price"]
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            elif AccountManager.set_account(
+                                self.account["nick"],
+                                "guns",
+                                [*self.account["guns"], args[0]]
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            elif AccountManager.set_account(
+                                self.account["nick"],
+                                "selected_gun",
+                                args[0]
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            else:
+                                self.refresh_account()
+                                tanks = []
+                                guns = []
+                                for i, tank in enumerate(data["tanks"]):
+                                    tanks.append({
+                                        **tank,
+                                        "have": i in self.account["tanks"]
+                                    })
+                                for i, gun_ in enumerate(data["guns"]):
+                                    guns.append({
+                                        **gun_,
+                                        "have": i in self.account["guns"]
+                                    })
+                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
                         else:
                             self.send(["buy_failed", 0])
                     else:
@@ -151,6 +246,7 @@ class Client:
                     res = deepcopy(matches)
                     for m in res:
                         m["players"] = len(m["players"])
+                        del m["messages"]
 
                     self.send(["matches", res])
 
@@ -208,20 +304,27 @@ class Client:
 
                     for match_ in matches:
                         if match_["name"] == args[0]:
-                            player_match = match_
-                            self.send(["battle_joined"])
+                            if len(match_["players"]) < match_["max_players"]:
+                                player_match = match_
+                                self.send(["battle_joined"])
 
-                            self.player = Player(self.sock, self.addr, player_match)
-                            self.refresh_account()
+                                self.player = Player(self.sock, self.addr, player_match)
+                                self.refresh_account()
 
-                            self.player.set_login_data(self.login, self.password)
-                            self.send_player = True
+                                self.player.set_login_data(self.login, self.password)
+                                self.send_player = True
 
-                            return
+                                return
+                            else:
+                                self.send(["battle_not_joined", 1])
+
+                                return
 
                     self.send(["battle_not_joined", 0])
 
             except BaseException as e:
                 self.logger.error(e)
                 self.close()
+                if self.config["debug"]:
+                    raise
                 return

@@ -57,7 +57,8 @@ def main(quiet=False):
         "name": "Test name",
         "max_players": 10,
         "creator": "Test creator",
-        "players": []
+        "players": [],
+        "messages": []
     }
     tester.check(battle, exp_battle)
     tester.test("get_matches", [exp_battle])  # Матч уже создан
@@ -70,7 +71,7 @@ def main(quiet=False):
     tester.test("check", True, "Allowed name")  # 'Allowed name' состоит из разрешённых символов
     tester.test("check", False, "<name>")  # '<name>' содержит '<>'
     tester.test("check", True, "")  # Пустая строка не содержит запрещённых символов
-    tester.test("check", False, "Никнейм")  # Русские буквы не разрешены
+    tester.test("check", True, "Никнейм")  # Русские буквы разрешены
     # Остальных тестов AccountManager нет из-за изменения ими 'data.json'
     all_passed = tester.end() and all_passed
 
