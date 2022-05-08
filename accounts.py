@@ -1,3 +1,4 @@
+from datetime import datetime
 from mjson import append, read, write
 
 
@@ -10,6 +11,9 @@ class AccountManager:
     FAILED_UNSAFE_CHARACTERS = 5
     FAILED_NOT_FOUND = 6
     FAILED_PASSWORD_NOT_MATCH = 7
+    FAILED_BAN = 8
+    FAILED_CONSOLE = 9
+    FAILED_NOT_EXISTS = 10
     DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890_ -=+*/[]:;.,\\|&%#@!$^()йцукенгшщзхъфывапролджэячсмитьбюё"
 
     @staticmethod
@@ -28,6 +32,43 @@ class AccountManager:
                 return account
 
         return AccountManager.FAILED_NOT_FOUND
+
+    @staticmethod
+    def del_account_key(nick, key):
+        acc = AccountManager.get_account(nick)
+        if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
+            return acc
+
+        data = read("data.json")
+        if data is None:
+            return AccountManager.FAILED_UNKNOWN
+
+        try:
+            del data["accounts"][data["accounts"].index(acc)][key]
+
+            if write("data.json", data):
+                return AccountManager.SUCCESSFUL
+
+            return AccountManager.FAILED_UNKNOWN
+        except KeyError:
+            return AccountManager.FAILED_NOT_EXISTS
+
+    @staticmethod
+    def del_account(nick):
+        acc = AccountManager.get_account(nick)
+        if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
+            return acc
+
+        data = read("data.json")
+        if data is None:
+            return AccountManager.FAILED_UNKNOWN
+
+        del data["accounts"][data["accounts"].index(acc)]
+
+        if write("data.json", data):
+            return AccountManager.SUCCESSFUL
+
+        return AccountManager.FAILED_UNKNOWN
 
     @staticmethod
     def set_account(nick, key, value):
@@ -74,6 +115,17 @@ class AccountManager:
         for account in data["accounts"]:
             if account["nick"] == nick:
                 if account["password"] == password:
+                    if "console" in account:
+                        return AccountManager.FAILED_CONSOLE
+                    if "ban" in account:
+                        aban = account["ban"]
+                        if aban[0] != -1 and datetime.today().timestamp() > aban[0]:
+                            del account["ban"]
+                            write("data.json", data)
+                        else:
+                            if len(aban) > 1:
+                                return [AccountManager.FAILED_BAN, aban[0], aban[1]]
+                            return [AccountManager.FAILED_BAN, aban[0], None]
                     return AccountManager.SUCCESSFUL
                 return AccountManager.FAILED_PASSWORD_NOT_MATCH
 

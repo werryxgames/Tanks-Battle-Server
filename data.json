@@ -1,9 +1,14 @@
 {
     "accounts": [
         {
+            "nick": "CONSOLE",
+            "password": "test123",
+            "console": true
+        },
+        {
             "nick": "test",
             "password": "123456",
-            "xp": 637,
+            "xp": 1037,
             "crystals": 229,
             "tanks": [
                 1,

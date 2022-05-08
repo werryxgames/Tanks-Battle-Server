@@ -2,6 +2,7 @@ from json import loads, dumps, JSONDecodeError
 from threading import Thread
 from socket import socket, AF_INET, SOCK_DGRAM
 from client import Client
+from console import Console
 from accounts import AccountManager
 from singleton import get_data, get_clients
 
@@ -15,6 +16,7 @@ class NetworkedClient:
         self.config, self.logger = get_data()
         self.client = Client(sock, addr)
         self.send_client = False
+        self.console = None
 
     def close(self):
         try:
@@ -29,7 +31,9 @@ class NetworkedClient:
         self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
 
     def receive(self, data):
-        if self.send_client:
+        if self.console is not None:
+            self.console.receive(data)
+        elif self.send_client:
             self.client.receive(data)
         else:
             try:
@@ -66,6 +70,14 @@ class NetworkedClient:
                             self.client.set_login_data(args[0], args[1])
                             self.send_client = True
                             return
+                        if res == AccountManager.FAILED_CONSOLE:
+                            self.send(["login_fail", res, args[0], args[1]])
+                            self.console = Console(self.sock, self.addr)
+                            return
+                        if isinstance(res, list):
+                            if res[0] == AccountManager.FAILED_BAN:
+                                self.send(["login_fail", *res])
+                                return
                         self.send(["login_fail", res])
 
             except BaseException as e:

@@ -60,10 +60,23 @@ class Player:
         if len(mesgs) > self.msg:
             msg = mesgs[-1].get()
             if msg[0] == "player_leave":
-                self.send(["player_leave", msg[1]])
+                if msg[1] != self.bp.nick:
+                    self.send(["player_leave", msg[1]])
+                else:
+                    self.close()
             elif msg[0] == "player_join":
                 if msg[1][0] != self.bp.nick:
                     self.send(["player_join", msg[1][1:]])
+            elif msg[0] == "player_shoot":
+                if msg[1][0] != self.bp.nick:
+                    player = None
+                    for pl in self.bdata["players"]:
+                        if pl.nick == msg[1][0]:
+                            player = pl
+                            break
+                    if player is not None:
+                        gun = player.get_gun()
+                        self.send(["player_shoot", msg[1][1][0], msg[1][1][1], gun["shot_speed"], gun["damage"], msg[1][0]])
             self.msg += 1
 
     def receive(self, data):
@@ -121,6 +134,9 @@ class Player:
 
                 self.close()
                 return
+
+            elif com == "shoot":
+                self.bdata["messages"].append(GlobalMessage("player_shoot", [self.bp.nick, args[0]]))
 
         except BaseException as e:
             self.logger.error(e)
