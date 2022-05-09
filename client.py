@@ -55,7 +55,9 @@ class Client:
 
     def receive(self, data):
         if self.send_player:
-            self.player.receive(data)
+            if self.player.receive(data) == Player.BACK_TO_MENU:
+                self.send_player = False
+                self.player = None
         else:
             try:
                 jdt = loads(data.decode("utf8"))
@@ -321,6 +323,21 @@ class Client:
                                 return
 
                     self.send(["battle_not_joined", 0])
+
+                elif com == "request_settings":
+                    self.send(["settings", *self.account["settings"]])
+
+                elif com == "reset_settings":
+                    dsets = self.config["default_settings"]
+                    if AccountManager.set_account(self.account["nick"], "settings", dsets) != AccountManager.SUCCESSFUL:
+                        self.send(["failed", 0])
+                    else:
+                        self.send(["settings", *dsets])
+
+                elif com == "apply_settings":
+                    nsets = args
+                    if AccountManager.set_account(self.account["nick"], "settings", nsets) != AccountManager.SUCCESSFUL:
+                        self.send(["failed", 1])
 
             except BaseException as e:
                 self.logger.error(e)

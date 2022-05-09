@@ -8,7 +8,7 @@
         {
             "nick": "test",
             "password": "123456",
-            "xp": 1037,
+            "xp": 2022,
             "crystals": 229,
             "tanks": [
                 1,
@@ -19,7 +19,11 @@
                 0
             ],
             "selected_tank": 0,
-            "selected_gun": 0
+            "selected_gun": 0,
+            "settings": [
+                true,
+                true
+            ]
         },
         {
             "nick": "test2",
@@ -33,7 +37,11 @@
                 0
             ],
             "selected_tank": 1,
-            "selected_gun": 0
+            "selected_gun": 0,
+            "settings": [
+                true,
+                true
+            ]
         }
     ],
     "tanks": [

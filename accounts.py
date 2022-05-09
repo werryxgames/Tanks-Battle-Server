@@ -1,5 +1,6 @@
 from datetime import datetime
 from mjson import append, read, write
+from singleton import get_data
 
 
 class AccountManager:
@@ -164,7 +165,10 @@ class AccountManager:
             "xp": 0,
             "crystals": 0,
             "tanks": [1],
-            "selected_tank": 1
+            "guns": [0],
+            "selected_tank": 1,
+            "select_gun": 0,
+            "settings": get_data()[0]["default_settings"]
         }
 
         if append("data.json", "accounts", acc):

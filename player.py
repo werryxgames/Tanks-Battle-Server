@@ -9,6 +9,8 @@ clients = get_clients()
 
 
 class Player:
+    BACK_TO_MENU = 1
+
     def __init__(self, sock, addr, battle_data):
         self.sock = sock
         self.addr = addr
@@ -91,26 +93,30 @@ class Player:
             if com == "get_battle_data":
                 self.refresh_account()
 
+                tank = BattlePlayer.st_get_tank(self.account["selected_tank"])
+
                 self.bp = BattlePlayer(
                     self.account["nick"],
                     (0, 15, 0),
                     (0, 0, 0),
                     self.account["selected_tank"],
                     (0, 0, 0),
-                    self.account["selected_gun"]
+                    self.account["selected_gun"],
+                    tank["durability"]
                 )
 
                 self.bdata["players"].append(self.bp)
 
                 pls = []
                 for bp in self.bdata["players"]:
-                    pls.append([bp.json(), bp.get_tank(), bp.get_gun()])
+                    pls.append([bp.json(), tank, bp.get_gun()])
 
                 self.send([
                     "battle_data",
                     self.bdata["map"],
-                    *pls[-1],
-                    pls[:-1]
+                    pls[-1],
+                    pls[:-1],
+                    self.account["settings"]
                 ])
 
                 self.bdata["messages"].append(GlobalMessage("player_join", [self.bp.nick, self.bp.json(), self.bp.get_tank(), self.bp.get_gun()]))
@@ -119,6 +125,7 @@ class Player:
                 self.bp.position = args[0]
                 self.bp.rotation = args[1]
                 self.bp.gun_rotation = args[2]
+                self.bp.durability = args[3]
 
                 players = self.bdata["players"]
                 res = []
@@ -134,6 +141,11 @@ class Player:
 
                 self.close()
                 return
+
+            elif com == "leave_battle_menu":
+                self.bdata["players"].remove(self.bp)
+                self.bdata["messages"].append(GlobalMessage("player_leave", self.bp.nick))
+                return self.BACK_TO_MENU
 
             elif com == "shoot":
                 self.bdata["messages"].append(GlobalMessage("player_shoot", [self.bp.nick, args[0]]))
