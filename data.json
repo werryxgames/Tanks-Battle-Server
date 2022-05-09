@@ -41,30 +41,30 @@
             "name": "Light",
             "description": "Очень быстрый танк. Подходит для игроков, любящих скорость, однако легко может провалиться в яму",
             "durability": 400,
-            "mass": 1,
-            "speed": 2000,
-            "gravity": 100,
-            "rotation_speed": 4000,
+            "mass": 10000,
+            "speed": 20000000,
+            "gravity": 2000,
+            "rotation_speed": 40000000,
             "price": 75
         },
         {
             "name": "Neuter",
             "description": "Золотая середина между прочностью и скоростью. Отлично подойдёт для всех карт",
             "durability": 650,
-            "mass": 1.6,
-            "speed": 1500,
-            "gravity": 130,
-            "rotation_speed": 3000,
+            "mass": 16000,
+            "speed": 15000000,
+            "gravity": 2000,
+            "rotation_speed": 30000000,
             "price": 0
         },
         {
             "name": "Grave",
             "description": "Очень крепкий танк, но достаточно медленный. Тяжело упасть в яму. Имеет очень крепкую броню",
             "durability": 1000,
-            "mass": 3,
-            "speed": 900,
-            "gravity": 200,
-            "rotation_speed": 1500,
+            "mass": 30000,
+            "speed": 9000000,
+            "gravity": 2000,
+            "rotation_speed": 15000000,
             "price": 115
         }
     ],
@@ -75,6 +75,7 @@
             "damage": 150,
             "rotation_speed": 60,
             "shot_speed": 100,
+            "recoil": 4000000,
             "price": 0
         }
     ]

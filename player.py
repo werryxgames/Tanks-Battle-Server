@@ -93,7 +93,7 @@ class Player:
 
                 self.bp = BattlePlayer(
                     self.account["nick"],
-                    (0, 10, 0),
+                    (0, 15, 0),
                     (0, 0, 0),
                     self.account["selected_tank"],
                     (0, 0, 0),

@@ -39,7 +39,7 @@ class BattlePlayer:
         gun_data = data["guns"][self.gun]
         res_data = {}
         for k, v in gun_data.items():
-            if k in ["damage", "rotation_speed", "shot_speed", "damage"]:
+            if k in ["damage", "rotation_speed", "shot_speed", "damage", "recoil"]:
                 res_data[k] = v
 
         return res_data 
