@@ -1,4 +1,5 @@
 from random import randint
+from mjson import read
 
 
 class Singleton:
@@ -28,12 +29,14 @@ def get_data():
 
 
 def add_match(name, max_players, creator):
+    maps = read("data.json")["maps"]
+
     battle = {
         "name": name,
         "max_players": max_players,
         "creator": creator,
         "players": [],
-        "map": randint(0, st.config["maps"] - 1),
+        "map": randint(0, len(maps) - 1),
         "messages": []
     }
 

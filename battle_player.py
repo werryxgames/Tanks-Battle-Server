@@ -19,6 +19,7 @@ class BattlePlayer:
         self.gun_rotation = gun_rotation
         self.gun = gun
         self.durability = durability
+        self.last_damage = None
 
     @staticmethod
     def st_get_tank(tank):
@@ -45,10 +46,10 @@ class BattlePlayer:
         gun_data = data["guns"][self.gun]
         res_data = {}
         for k, v in gun_data.items():
-            if k in ["damage", "rotation_speed", "shot_speed", "damage", "recoil"]:
+            if k in ["damage", "rotation_speed", "shot_speed", "damage", "recoil", "recharge"]:
                 res_data[k] = v
 
-        return res_data 
+        return res_data
 
     def json(self):
         return self.__dict__

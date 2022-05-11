@@ -1,4 +1,5 @@
 from json import loads, dumps
+from random import choice
 from accounts import AccountManager
 from singleton import get_data, get_clients
 from mjson import read
@@ -81,6 +82,9 @@ class Player:
                         self.send(["player_shoot", msg[1][1][0], msg[1][1][1], gun["shot_speed"], gun["damage"], msg[1][0]])
             self.msg += 1
 
+    def randpoint(self):
+        return choice(read("data.json")["maps"][self.bdata["map"]]["spawn_points"])
+
     def receive(self, data):
         try:
             jdt = loads(data.decode("utf8"))
@@ -93,23 +97,21 @@ class Player:
             if com == "get_battle_data":
                 self.refresh_account()
 
-                tank = BattlePlayer.st_get_tank(self.account["selected_tank"])
-
                 self.bp = BattlePlayer(
                     self.account["nick"],
-                    (0, 15, 0),
+                    self.randpoint(),
                     (0, 0, 0),
                     self.account["selected_tank"],
                     (0, 0, 0),
                     self.account["selected_gun"],
-                    tank["durability"]
+                    BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"]
                 )
 
                 self.bdata["players"].append(self.bp)
 
                 pls = []
                 for bp in self.bdata["players"]:
-                    pls.append([bp.json(), tank, bp.get_gun()])
+                    pls.append([bp.json(), bp.get_tank(), bp.get_gun()])
 
                 self.send([
                     "battle_data",
@@ -122,18 +124,26 @@ class Player:
                 self.bdata["messages"].append(GlobalMessage("player_join", [self.bp.nick, self.bp.json(), self.bp.get_tank(), self.bp.get_gun()]))
 
             elif com == "request_tanks_data":
-                self.bp.position = args[0]
-                self.bp.rotation = args[1]
-                self.bp.gun_rotation = args[2]
-                self.bp.durability = args[3]
+                if args[3] > 0:
+                    self.bp.position = args[0]
+                    self.bp.rotation = args[1]
+                    self.bp.gun_rotation = args[2]
+                    self.bp.durability = args[3]
 
-                players = self.bdata["players"]
-                res = []
-                for pl in players:
-                    if pl is not self.bp:
-                        res.append([pl.json()])
+                    players = self.bdata["players"]
+                    res = []
+                    for pl in players:
+                        if pl is not self.bp:
+                            res.append([pl.json()])
 
-                self.send(["tanks_data", res])
+                    self.send(["tanks_data", res])
+                else:
+                    if self.bp.last_damage is not None:
+                        killer = AccountManager.get_account(self.bp.last_damage)
+                        if killer not in [AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND]:
+                            AccountManager.set_account(self.bp.last_damage, "crystals", killer["crystals"] + self.config["kill_reward_crystals"])
+                            AccountManager.set_account(self.bp.last_damage, "xp", killer["xp"] + self.config["kill_reward_xp"])
+                    self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"]])
 
             elif com == "leave_battle":
                 self.bdata["players"].remove(self.bp)
@@ -149,6 +159,9 @@ class Player:
 
             elif com == "shoot":
                 self.bdata["messages"].append(GlobalMessage("player_shoot", [self.bp.nick, args[0]]))
+
+            elif com == "damaged_by":
+                self.bp.last_damage = args[0]
 
         except BaseException as e:
             self.logger.error(e)

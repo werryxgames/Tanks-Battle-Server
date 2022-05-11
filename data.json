@@ -8,38 +8,40 @@
         {
             "nick": "test",
             "password": "123456",
-            "xp": 2022,
-            "crystals": 229,
+            "xp": 2612,
+            "crystals": 443,
             "tanks": [
                 1,
                 0,
                 2
             ],
             "guns": [
-                0
+                0,
+                1
             ],
             "selected_tank": 0,
-            "selected_gun": 0,
+            "selected_gun": 1,
             "settings": [
-                true,
+                false,
                 true
             ]
         },
         {
             "nick": "test2",
             "password": "123456",
-            "xp": 0,
-            "crystals": 0,
+            "xp": 330,
+            "crystals": 58,
             "tanks": [
                 1
             ],
             "guns": [
-                0
+                0,
+                1
             ],
             "selected_tank": 1,
-            "selected_gun": 0,
+            "selected_gun": 1,
             "settings": [
-                true,
+                false,
                 true
             ]
         }
@@ -50,9 +52,9 @@
             "description": "Очень быстрый танк. Подходит для игроков, любящих скорость, однако легко может провалиться в яму",
             "durability": 400,
             "mass": 10000,
-            "speed": 20000000,
-            "gravity": 2000,
-            "rotation_speed": 40000000,
+            "speed": 40000000,
+            "gravity": 30000000,
+            "rotation_speed": 80000000,
             "price": 75
         },
         {
@@ -60,9 +62,9 @@
             "description": "Золотая середина между прочностью и скоростью. Отлично подойдёт для всех карт",
             "durability": 650,
             "mass": 16000,
-            "speed": 15000000,
-            "gravity": 2000,
-            "rotation_speed": 30000000,
+            "speed": 30000000,
+            "gravity": 30000000,
+            "rotation_speed": 60000000,
             "price": 0
         },
         {
@@ -70,9 +72,9 @@
             "description": "Очень крепкий танк, но достаточно медленный. Тяжело упасть в яму. Имеет очень крепкую броню",
             "durability": 1000,
             "mass": 30000,
-            "speed": 9000000,
-            "gravity": 2000,
-            "rotation_speed": 15000000,
+            "speed": 40000000,
+            "gravity": 30000000,
+            "rotation_speed": 30000000,
             "price": 115
         }
     ],
@@ -80,11 +82,43 @@
         {
             "name": "Smoke",
             "description": "Стандартная башня. Средняя по всем качествам",
-            "damage": 150,
+            "damage": 80,
             "rotation_speed": 60,
             "shot_speed": 100,
-            "recoil": 4000000,
+            "recoil": 3000000,
+            "recharge": 1.5,
             "price": 0
+        },
+        {
+            "name": "Thunder",
+            "description": "Грозная башня. Большой урон, но и перезарядка больше",
+            "damage": 150,
+            "rotation_speed": 40,
+            "shot_speed": 200,
+            "recoil": 6000000,
+            "recharge": 2.5,
+            "price": 140
+        }
+    ],
+    "maps": [
+        {
+            "spawn_points": [
+                [
+                    0,
+                    15,
+                    0
+                ],
+                [
+                    -30,
+                    15,
+                    15
+                ],
+                [
+                    20,
+                    15,
+                    30
+                ]
+            ]
         }
     ]
 }

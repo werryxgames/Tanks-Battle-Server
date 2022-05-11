@@ -3,6 +3,7 @@ from network import start_server
 from logger import Logger
 from singleton import set_data
 from tests import tests
+from console import ConsoleExecutor
 
 
 def main():
@@ -12,6 +13,10 @@ def main():
     if tests.main(True):
         try:
             set_data(config, logger)
+
+            # cons = ConsoleExecutor(None, None, config, logger)
+            # while True:
+            #     cons.execute_text(input("> "))
 
             start_server()
 

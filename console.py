@@ -6,12 +6,124 @@ from message import GlobalMessage
 from accounts import AccountManager
 
 
+class Token:
+    def __init__(self, **kwargs):
+        self.dict = kwargs
+
+    def __getattr__(self, key):
+        return self.dict[key]
+
+    def __setattr__(self, key, value):
+        self.dict[key] = value
+
+    def __repr__(self):
+        return str(self.dict)
+
+
+# > Account("test").ban(Account.FOREVER, "Тестовая причина", -1)
+# [{"type": "varfunc", "value": "Account", "args": [{"type": "string",
+# "value": "test"}], "get": {"type": "varfunc", "value": "ban",
+# "args": [{"type": "varfunc", "value": "Account", "get": {"type":
+# "varfunc", "value": "FOREVER"}}, {"type": "string", "value":
+# "Тестовая причина"}, {"type": "integer", "value": -1}]}}]
+
+class Lexer:
+    def __init__(self, text, main=False):
+        self.text = text
+        self.main = main
+
+    def get(self):
+        text = self.text
+        main = self.main
+        tokens = []
+        single_quote = [False, ""]
+        double_quote = [False, ""]
+        num_buffer = ""
+        str_buffer = ""
+        next_i = 0
+        for i, e in enumerate(text):
+            if i < next_i:
+                continue
+            if e == "'":
+                if main:
+                    lx = Lexer(text[i:]).get()
+                    if lx is None:
+                        return None
+                    tokens.append(lx[0])
+                    next_i += lx[1]
+                elif not double_quote[0]:
+                    if single_quote[0]:
+                        return [Token(type="string", value=single_quote[1]), i]
+                    else:
+                        single_quote[0] = True
+                elif not single_quote[0]:
+                    double_quote[1] += e
+            elif e == '"':
+                if main:
+                    lx = Lexer(text[i:]).get()
+                    if lx is None:
+                        return None
+                    tokens.append(lx[0])
+                    next_i += lx[1]
+                elif not single_quote[0]:
+                    if double_quote[0]:
+                        return [Token(type="string", value=double_quote[1]), i]
+                    else:
+                        double_quote[0] = True
+                elif not double_quote[0]:
+                    single_quote[1] += e
+            elif single_quote[0] and not double_quote[0]:
+                single_quote[1] += e
+            elif double_quote[0] and not single_quote[0]:
+                double_quote[1] += e
+            elif e in "-1234567890" and main:
+                lx = Lexer(text[i:]).get()
+                if lx is None:
+                    return None
+                tokens.append(lx[0])
+                next_i += lx[1]
+            elif text[0] in "-1234567890" and not main:
+                if e == "-" and i != 0:
+                    return None
+                if e in "-1234567890":
+                    num_buffer += e
+                else:
+                    return [Token(type="integer", value=int(num_buffer)), i - 1]
+            elif e == ",":
+                tokens.append(Token(type="delimiter"))
+            elif e.lower() in "qwertyuiopasdfghjklzxcvbnm" and main:
+                lx = Lexer(text[i:]).get()
+                if lx is None:
+                    return None
+                tokens.append(lx[0])
+                next_i += lx[1]
+            elif text[0].lower() in "qwertyuiopasdfghjklzxcvbnm" and not main:
+                if e.lower() in "qwertyuiopasdfghjklzxcvbnm":
+                    str_buffer += e
+                else:
+                    print(str_buffer)
+                    return [Token(type="command", value=str_buffer), i - 1]
+            elif e == ".":
+                try:
+                    tokens[-1].command = Lexer(text[i + 1:], True)[0]
+                except IndexError:
+                    return None
+            next_i += 1
+        if single_quote[0] or double_quote[0]:
+            return None
+        if len(num_buffer) > 0:
+            return [Token(type="integer", value=int(num_buffer)), next_i - 1]
+        if len(str_buffer) > 0:
+            return [Token(type="command", value=str_buffer), next_i]
+        return [tokens, len(text)]
+
+
 class ConsoleExecutor:
     SUCCESSFUL = 0
     FAILED = 1
     USE_MSG = 2
 
-    def __init__(self, sock, addr, config, logger):
+    def __init__(self, sock=None, addr=None, config=None, logger=None):
         self.sock = sock
         self.addr = addr
         self.config = config
@@ -19,12 +131,13 @@ class ConsoleExecutor:
         self.vars = {}
 
     def send(self, message):
-        self.sock.sendto(dumps(["console_result", message]).encode("utf8"), self.addr)
-        self.logger.debug(f"Результат команды отправлен клиенту '{self.addr[0]}:{self.addr[1]}':", message)
-
-    def send_part(self, message):
-        self.sock.sendto(dumps(["console_result_part", message]).encode("utf8"), self.addr)
-        self.logger.debug(f"Часть результата команды отправлена клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+        if self.sock is not None:
+            self.sock.sendto(dumps(["console_result", message]).encode("utf8"), self.addr)
+        if self.logger is not None:
+            if self.addr is not None:
+                self.logger.debug(f"Результат команды отправлен клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+            else:
+                print(message)
 
     def execute(self, com, args):
         if com[0] == "$":
@@ -184,6 +297,12 @@ class ConsoleExecutor:
             return self.FAILED, "Команда не найдена"
 
     def execute_text(self, text):
+        # lx = Lexer(text, True).get()
+        # if lx is None:
+        #     print("Обнаружена ошибка в команде")
+        #     return
+        # print(lx[0])
+        # return
         splt = spl(text)
         buf = None
         msg = None
