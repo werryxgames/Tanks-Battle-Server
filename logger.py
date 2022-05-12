@@ -1,5 +1,6 @@
 from datetime import datetime
 from re import sub
+from traceback import format_exc
 from colorama import init, Fore, Style
 from absolute import to_absolute
 
@@ -64,6 +65,11 @@ class Logger:
                     sub(r"\x1b.*?m", r"", msg) + \
                     "\n"
                 )
+
+    def log_error_data(self, func=None):
+        if func is None:
+            func = self.error
+        func(format_exc()[:-1], prefix="")
 
     def critical(self, *message, prefix="[Критическая ошибка] "):
         msg = []

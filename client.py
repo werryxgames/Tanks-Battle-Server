@@ -23,7 +23,7 @@ class Client:
         try:
             self.send(["something_wrong"])
             clients.pop(self.addr)
-            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+            self.logger.info(f"Клиент '{self.account['nick']}' ('{self.addr[0]}:{self.addr[1]}') отключён")
         except OSError:
             pass
 
@@ -51,7 +51,7 @@ class Client:
 
     def send(self, message):
         self.sock.sendto(dumps(message).encode("utf8"), self.addr)
-        self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+        self.logger.debug(f"Отправлены данные клиенту '{self.account['nick']}' ('{self.addr[0]}:{self.addr[1]}'):", message)
 
     def receive(self, data):
         if self.send_player:
@@ -335,13 +335,17 @@ class Client:
                         self.send(["settings", *dsets])
 
                 elif com == "apply_settings":
-                    nsets = args
-                    if AccountManager.set_account(self.account["nick"], "settings", nsets) != AccountManager.SUCCESSFUL:
-                        self.send(["failed", 1])
+                    try:
+                        if 99999 > int(args[2]) > 10:
+                            nsets = args
+                            if AccountManager.set_account(self.account["nick"], "settings", nsets) != AccountManager.SUCCESSFUL:
+                                self.send(["failed", 1])
+                        else:
+                            self.send(["failed", 2])
+                    except ValueError:
+                        self.send(["failed", 3])
 
-            except BaseException as e:
-                self.logger.error(e)
+            except:
+                self.logger.log_error_data()
                 self.close()
-                if self.config["debug"]:
-                    raise
                 return

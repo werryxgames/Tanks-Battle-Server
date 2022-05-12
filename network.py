@@ -80,11 +80,9 @@ class NetworkedClient:
                                 return
                         self.send(["login_fail", res])
 
-            except BaseException as e:
-                self.logger.error(e)
+            except:
+                self.logger.log_error_data()
                 self.close()
-                if self.config["debug"]:
-                    raise
                 return
 
 

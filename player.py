@@ -1,5 +1,8 @@
 from json import loads, dumps
 from random import choice
+from threading import Thread
+from time import sleep
+from datetime import datetime
 from accounts import AccountManager
 from singleton import get_data, get_clients
 from mjson import read
@@ -23,12 +26,17 @@ class Player:
         self.account = None
         self.bp = None
         self.msg = len(battle_data["messages"])
+        self.last_request = -1
+        self.still_check_time = True
+        self.map = None
+        self.respawn_id = 0
 
     def close(self):
+        self.still_check_time = False
         try:
             self.send(["something_wrong"])
             clients.pop(self.addr)
-            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён")
+            self.logger.info(f"Клиент '{self.bp.nick}' ('{self.addr[0]}:{self.addr[1]}') отключён")
         except OSError:
             pass
 
@@ -56,7 +64,7 @@ class Player:
 
     def send(self, message):
         self.sock.sendto(dumps(message).encode("utf8"), self.addr)
-        self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+        self.logger.debug(f"Отправлены данные клиенту '{self.bp.nick}' ('{self.addr[0]}:{self.addr[1]}'):", message)
 
     def handle_messages(self):
         mesgs = self.bdata["messages"]
@@ -83,7 +91,19 @@ class Player:
             self.msg += 1
 
     def randpoint(self):
-        return choice(read("data.json")["maps"][self.bdata["map"]]["spawn_points"])
+        return choice(self.map["spawn_points"])
+
+    def check_time(self):
+        while self.still_check_time:
+            if datetime.today().timestamp() - self.config["max_player_noresponse_time"] > self.last_request:
+                self.bdata["players"].remove(self.bp)
+                self.bdata["messages"].append(GlobalMessage("player_leave", self.bp.nick))
+
+                self.close()
+
+                self.logger.debug(f"Игрок '{self.bp.nick}' отключён из-за неактивности")
+
+            sleep(1)
 
     def receive(self, data):
         try:
@@ -91,11 +111,15 @@ class Player:
 
             self.handle_messages()
 
+            self.last_request = datetime.today().timestamp()
+
             com = jdt[0]
             args = jdt[1:]
 
             if com == "get_battle_data":
                 self.refresh_account()
+
+                self.map = read("data.json")["maps"][self.bdata["map"]]
 
                 self.bp = BattlePlayer(
                     self.account["nick"],
@@ -123,27 +147,32 @@ class Player:
 
                 self.bdata["messages"].append(GlobalMessage("player_join", [self.bp.nick, self.bp.json(), self.bp.get_tank(), self.bp.get_gun()]))
 
+                Thread(target=self.check_time).start()
+
             elif com == "request_tanks_data":
                 if args[3] > 0:
-                    self.bp.position = args[0]
-                    self.bp.rotation = args[1]
-                    self.bp.gun_rotation = args[2]
-                    self.bp.durability = args[3]
+                    if args[0][1] > self.map["kill_y"]:
+                        self.bp.position = args[0]
+                        self.bp.rotation = args[1]
+                        self.bp.gun_rotation = args[2]
+                        self.bp.durability = args[3]
 
-                    players = self.bdata["players"]
-                    res = []
-                    for pl in players:
-                        if pl is not self.bp:
-                            res.append([pl.json()])
+                        players = self.bdata["players"]
+                        res = []
+                        for pl in players:
+                            if pl is not self.bp:
+                                res.append([pl.json()])
 
-                    self.send(["tanks_data", res])
+                        self.send(["tanks_data", res])
+                    else:
+                        self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"], self.respawn_id])
                 else:
                     if self.bp.last_damage is not None:
                         killer = AccountManager.get_account(self.bp.last_damage)
                         if killer not in [AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND]:
                             AccountManager.set_account(self.bp.last_damage, "crystals", killer["crystals"] + self.config["kill_reward_crystals"])
                             AccountManager.set_account(self.bp.last_damage, "xp", killer["xp"] + self.config["kill_reward_xp"])
-                    self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"]])
+                    self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"], self.respawn_id])
 
             elif com == "leave_battle":
                 self.bdata["players"].remove(self.bp)
@@ -155,6 +184,8 @@ class Player:
             elif com == "leave_battle_menu":
                 self.bdata["players"].remove(self.bp)
                 self.bdata["messages"].append(GlobalMessage("player_leave", self.bp.nick))
+
+                self.still_check_time = False
                 return self.BACK_TO_MENU
 
             elif com == "shoot":
@@ -163,9 +194,10 @@ class Player:
             elif com == "damaged_by":
                 self.bp.last_damage = args[0]
 
-        except BaseException as e:
-            self.logger.error(e)
+            elif com == "respawned":
+                self.respawn_id = args[0] + 1
+
+        except:
+            self.logger.log_error_data()
             self.close()
-            if self.config["debug"]:
-                raise
             return

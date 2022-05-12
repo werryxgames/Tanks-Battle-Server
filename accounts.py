@@ -167,7 +167,7 @@ class AccountManager:
             "tanks": [1],
             "guns": [0],
             "selected_tank": 1,
-            "select_gun": 0,
+            "selected_gun": 0,
             "settings": get_data()[0]["default_settings"]
         }
 

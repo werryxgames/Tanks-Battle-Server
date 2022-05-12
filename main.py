@@ -20,10 +20,8 @@ def main():
 
             start_server()
 
-        except BaseException as e:
-            logger.critical(e)
-            if config["debug"]:
-                raise
+        except:
+            logger.log_error_data(logger.critical)
     else:
         logger.critical("Один из тестов провален")
 
