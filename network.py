@@ -54,6 +54,7 @@ class NetworkedClient:
                             self.send(["register_successful", args[0], args[1]])
                             self.client.set_login_data(args[0], args[1])
                             self.send_client = True
+
                             return
 
                         self.send(["register_fail", res])
@@ -70,16 +71,19 @@ class NetworkedClient:
                             self.send(["login_successful", args[0], args[1]])
                             self.client.set_login_data(args[0], args[1])
                             self.send_client = True
+
                             return
 
                         if res == AccountManager.FAILED_CONSOLE:
                             self.send(["login_fail", res, args[0], args[1]])
                             self.console = Console(self.sock, self.addr)
+
                             return
 
                         if isinstance(res, list):
                             if res[0] == AccountManager.FAILED_BAN:
                                 self.send(["login_fail", *res])
+
                                 return
 
                         self.send(["login_fail", res])
@@ -87,6 +91,7 @@ class NetworkedClient:
             except:
                 self.logger.log_error_data()
                 self.close()
+
                 return
 
 
@@ -104,11 +109,14 @@ def start_server():
             adrdata = sock.recvfrom(1024)
         except (ConnectionResetError, ConnectionAbortedError):
             logger.debug(f"Клиент отключён")
+
         data = adrdata[0]
         addr = adrdata[1]
+
         if addr not in clients.keys():
             clients[addr] = NetworkedClient(sock, addr)
             logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
+
         try:
             tdata = loads(data.decode('utf8'))
             logger.debug(f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{tdata}'")

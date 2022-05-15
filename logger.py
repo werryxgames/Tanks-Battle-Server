@@ -69,6 +69,7 @@ class Logger:
     def log_error_data(self, func=None):
         if func is None:
             func = self.error
+
         func(format_exc()[:-1], prefix="")
 
     def critical(self, *message, prefix="[Критическая ошибка] "):

@@ -11,6 +11,7 @@ class Singleton:
     def __new__(cls):
         if not hasattr(cls, "instance"):
             cls.instance = super(Singleton, cls).__new__(cls)
+
         return cls.instance
 
 
@@ -20,6 +21,7 @@ st = Singleton()
 def set_data(config=None, logger=None):
     if config is not None:
         st.config = config
+
     if logger is not None:
         st.logger = logger
 
@@ -54,9 +56,11 @@ def remove_match(name):
         for battle in st.matches:
             if battle["name"] == name:
                 st.matches.remove(battle)
+
                 return True
     except (AttributeError, IndexError):
         pass
+
     return False
 
 

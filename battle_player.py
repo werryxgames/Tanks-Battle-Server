@@ -24,11 +24,13 @@ class BattlePlayer:
     @staticmethod
     def st_get_tank(tank):
         data = read("data.json")
+
         if data is None:
             return
 
         tank_data = data["tanks"][tank]
         res_data = {}
+
         for k, v in tank_data.items():
             if k in ["durability", "mass", "speed", "gravity", "rotation_speed", "gun_rotation_speed"]:
                 res_data[k] = v
@@ -40,11 +42,13 @@ class BattlePlayer:
 
     def get_gun(self):
         data = read("data.json")
+
         if data is None:
             return
 
         gun_data = data["guns"][self.gun]
         res_data = {}
+
         for k, v in gun_data.items():
             if k in ["damage", "rotation_speed", "shot_speed", "damage", "recoil", "recharge"]:
                 res_data[k] = v

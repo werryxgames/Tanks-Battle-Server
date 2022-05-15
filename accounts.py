@@ -37,10 +37,12 @@ class AccountManager:
     @staticmethod
     def del_account_key(nick, key):
         acc = AccountManager.get_account(nick)
+
         if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
             return acc
 
         data = read("data.json")
+
         if data is None:
             return AccountManager.FAILED_UNKNOWN
 
@@ -57,6 +59,7 @@ class AccountManager:
     @staticmethod
     def del_account(nick):
         acc = AccountManager.get_account(nick)
+
         if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
             return acc
 
@@ -74,12 +77,14 @@ class AccountManager:
     @staticmethod
     def set_account(nick, key, value):
         acc = AccountManager.get_account(nick)
+
         if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
             return acc
 
         data = read("data.json")
         if data is None:
             return AccountManager.FAILED_UNKNOWN
+
         try:
             data["accounts"][data["accounts"].index(acc)][key] = value
         except (ValueError, IndexError):
@@ -94,6 +99,7 @@ class AccountManager:
     def login_account(nick, password):
         if not isinstance(nick, str):
             return AccountManager.FAILED_UNKNOWN
+
         if not isinstance(password, str):
             return AccountManager.FAILED_UNKNOWN
 
@@ -102,17 +108,21 @@ class AccountManager:
 
         if len(nick) < 3 or len(nick) > 12:
             return AccountManager.FAILED_NICK_LENGTH
+
         if len(password) < 6 or len(password) > 16:
             return AccountManager.FAILED_PASSWORD_LENGTH
 
+
         if not AccountManager.check(nick):
             return AccountManager.FAILED_UNSAFE_CHARACTERS
+
         if not AccountManager.check(password):
             return AccountManager.FAILED_UNSAFE_CHARACTERS
 
         data = read("data.json")
         if data is None:
             return AccountManager.FAILED_UNKNOWN
+
         for account in data["accounts"]:
             if account["nick"] == nick:
                 if account["password"] == password:
@@ -120,12 +130,14 @@ class AccountManager:
                         return AccountManager.FAILED_CONSOLE
                     if "ban" in account:
                         aban = account["ban"]
+
                         if aban[0] != -1 and datetime.today().timestamp() > aban[0]:
                             del account["ban"]
                             write("data.json", data)
                         else:
                             if len(aban) > 1:
                                 return [AccountManager.FAILED_BAN, aban[0], aban[1]]
+
                             return [AccountManager.FAILED_BAN, aban[0], None]
                     return AccountManager.SUCCESSFUL
                 return AccountManager.FAILED_PASSWORD_NOT_MATCH
@@ -136,6 +148,7 @@ class AccountManager:
     def add_account(nick, password):
         if not isinstance(nick, str):
             return AccountManager.FAILED_UNKNOWN
+
         if not isinstance(password, str):
             return AccountManager.FAILED_UNKNOWN
 
@@ -144,17 +157,21 @@ class AccountManager:
 
         if len(nick) < 3 or len(nick) > 12:
             return AccountManager.FAILED_NICK_LENGTH
+
         if len(password) < 6 or len(password) > 16:
             return AccountManager.FAILED_PASSWORD_LENGTH
 
         if not AccountManager.check(nick):
             return AccountManager.FAILED_UNSAFE_CHARACTERS
+
         if not AccountManager.check(password):
             return AccountManager.FAILED_UNSAFE_CHARACTERS
 
         data = read("data.json")
+
         if data is None:
             return AccountManager.FAILED_UNKNOWN
+
         for account in data["accounts"]:
             if account["nick"] == nick:
                 return AccountManager.FAILED_NICK_ALREADY_USED
@@ -173,4 +190,5 @@ class AccountManager:
 
         if append("data.json", "accounts", acc):
             return AccountManager.SUCCESSFUL
+
         return AccountManager.FAILED_UNKNOWN

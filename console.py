@@ -37,6 +37,7 @@ class ConsoleExecutor:
 
                 key = args[2]
                 val = args[3]
+
                 if val[0] == "\\":
                     val = val[1:]
                 else:
@@ -44,7 +45,9 @@ class ConsoleExecutor:
                         val = int(val)
                     except ValueError:
                         pass
+
                 status = AccountManager.set_account(nick, key, val)
+
                 if status == AccountManager.SUCCESSFUL:
                     s = f"Установлено значение '{key}' в "
                     if isinstance(val, int):
@@ -62,7 +65,9 @@ class ConsoleExecutor:
                     key = args[2]
                 else:
                     key = None
+
                 status = AccountManager.get_account(nick)
+
                 if status == AccountManager.FAILED_NOT_FOUND:
                     return "Аккаунт не найден"
                 elif status == AccountManager.FAILED_UNKNOWN:
@@ -78,6 +83,7 @@ class ConsoleExecutor:
 
                 key = args[2]
                 status = AccountManager.del_account_key(nick, key)
+
                 if status == AccountManager.SUCCESSFUL:
                     return f"Удален ключ '{key}' для аккаунта '{nick}'"
                 elif status == AccountManager.FAILED_NOT_FOUND:
@@ -93,11 +99,13 @@ class ConsoleExecutor:
                     else:
                         time = args[2].split(".")
                         ts = datetime(int(time[2]), int(time[1]), int(time[0])).timestamp()
+
                     reason = None
                     if len(args) > 3:
                         reason = " ".join(args[3:])
 
                     status = AccountManager.set_account(nick, "ban", [ts, reason])
+
                     if status == AccountManager.SUCCESSFUL:
                         s = f"Аккаунт '{nick}' заблокирован "
                         if ts == -1:
@@ -118,6 +126,7 @@ class ConsoleExecutor:
                     return "Неверный синтаксис команды: 'account <никнейм> ban (<день>.<месяц>.<год> | -1) [причина]'"
             elif act == "unban":
                 status = AccountManager.del_account_key(nick, "ban")
+
                 if status == AccountManager.SUCCESSFUL:
                     return f"Аккаунт '{nick}' разблокирован"
                 elif status == AccountManager.FAILED_NOT_EXISTS:
@@ -129,6 +138,7 @@ class ConsoleExecutor:
             elif act == "remove":
                 if len(args) == 2:
                     status = AccountManager.del_account(nick)
+
                     if status == AccountManager.SUCCESSFUL:
                         return f"Аккаунт '{nick}' удалён"
                     elif status == AccountManager.FAILED_NOT_FOUND:
@@ -149,6 +159,7 @@ class ConsoleExecutor:
             battle = None
             player = None
             battles = get_matches()
+
             for i in battles:
                 for pl in i["players"]:
                     if pl.nick == nick:
@@ -157,6 +168,7 @@ class ConsoleExecutor:
                         break
                 if player is not None:
                     break
+
             if player is None:
                 return "Игрок не найден, или не в матче сейчас"
 
@@ -170,8 +182,10 @@ class ConsoleExecutor:
                 act2 = args[2]
                 if act2 == "players":
                     pls = []
+
                     for pl in battle["players"]:
                         pls.append(pl.nick)
+
                     return pls
                 elif act2 == "end":
                     del battles[battles.index(battle)]
@@ -193,17 +207,21 @@ class ConsoleExecutor:
                 arg = str(self.execute_text(" ".join(end), False))
                 args = []
                 st = start[1:]
+
                 if "$" in st:
                     st[st.index("$")] = arg
                 else:
                     st.append(arg)
+
                 res = self.execute(start[0], st)
+
                 if main:
                     self.send(res)
                 else:
                     return res
             else:
                 res = self.execute(splt[0], splt[1:])
+
                 if main:
                     self.send(res)
                 else:
@@ -240,8 +258,8 @@ class Console:
             if com == "console_command":
                 self.cexr.execute_text(" ".join(args))
 
-        except BaseException as e:
-            self.logger.error(e)
+        except:
+            self.logger.log_error_data()
             self.close()
-            if self.config["debug"]:
-                raise
+
+            return

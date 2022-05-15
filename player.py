@@ -33,6 +33,7 @@ class Player:
 
     def close(self):
         self.still_check_time = False
+
         try:
             self.send(["something_wrong"])
             clients.pop(self.addr)
@@ -81,10 +82,13 @@ class Player:
             elif msg[0] == "player_shoot":
                 if msg[1][0] != self.bp.nick:
                     player = None
+
                     for pl in self.bdata["players"]:
                         if pl.nick == msg[1][0]:
                             player = pl
+
                             break
+
                     if player is not None:
                         gun = player.get_gun()
                         self.send(["player_shoot", msg[1][1][0], msg[1][1][1], gun["shot_speed"], gun["damage"], msg[1][0]])
@@ -134,6 +138,7 @@ class Player:
                 self.bdata["players"].append(self.bp)
 
                 pls = []
+
                 for bp in self.bdata["players"]:
                     pls.append([bp.json(), bp.get_tank(), bp.get_gun()])
 
@@ -159,6 +164,7 @@ class Player:
 
                         players = self.bdata["players"]
                         res = []
+
                         for pl in players:
                             if pl is not self.bp:
                                 res.append([pl.json()])
@@ -169,6 +175,7 @@ class Player:
                 else:
                     if self.bp.last_damage is not None:
                         killer = AccountManager.get_account(self.bp.last_damage)
+
                         if killer not in [AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND]:
                             AccountManager.set_account(self.bp.last_damage, "crystals", killer["crystals"] + self.config["kill_reward_crystals"])
                             AccountManager.set_account(self.bp.last_damage, "xp", killer["xp"] + self.config["kill_reward_xp"])
@@ -179,6 +186,7 @@ class Player:
                 self.bdata["messages"].append(GlobalMessage("player_leave", self.bp.nick))
 
                 self.close()
+
                 return
 
             elif com == "leave_battle_menu":
@@ -186,6 +194,7 @@ class Player:
                 self.bdata["messages"].append(GlobalMessage("player_leave", self.bp.nick))
 
                 self.still_check_time = False
+
                 return self.BACK_TO_MENU
 
             elif com == "shoot":
@@ -200,4 +209,5 @@ class Player:
         except:
             self.logger.log_error_data()
             self.close()
+
             return

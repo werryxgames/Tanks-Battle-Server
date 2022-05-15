@@ -102,31 +102,38 @@ class Client:
                             tanks = []
                             guns = []
                             data = read("data.json")
+
                             if data is None:
                                 self.send(["not_selected", 2])
                                 return
+
                             for i, tank in enumerate(data["tanks"]):
                                 tanks.append({
                                     **tank,
                                     "have": i in self.account["tanks"]
                                 })
+
                             for i, gun in enumerate(data["guns"]):
                                 guns.append({
                                     **gun,
                                     "have": i in self.account["guns"]
                                 })
+
                             self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
                     else:
                         self.send(["not_selected", 0])
 
                 elif com == "buy_tank":
                     data = read("data.json")
+
                     if data is None:
                         self.send(["not_selected", 2])
                         return
+
                     if args[0] not in self.account["tanks"] and len(data["tanks"]) > args[0]:
                         tank = data["tanks"][args[0]]
                         self.refresh_account()
+
                         if self.account["crystals"] >= tank["price"]:
                             if AccountManager.set_account(
                                 self.account["nick"],
@@ -150,16 +157,19 @@ class Client:
                                 self.refresh_account()
                                 tanks = []
                                 guns = []
+
                                 for i, tank_ in enumerate(data["tanks"]):
                                     tanks.append({
                                         **tank_,
                                         "have": i in self.account["tanks"]
                                     })
+
                                 for i, gun in enumerate(data["guns"]):
                                     guns.append({
                                         **gun,
                                         "have": i in self.account["guns"]
                                     })
+
                                 self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
                         else:
                             self.send(["buy_failed", 0])
@@ -176,34 +186,42 @@ class Client:
                             self.send(["not_selected", 1])
                         else:
                             self.refresh_account()
+
                             tanks = []
                             guns = []
                             data = read("data.json")
+
                             if data is None:
                                 self.send(["not_selected", 2])
                                 return
+
                             for i, tank in enumerate(data["tanks"]):
                                 tanks.append({
                                     **tank,
                                     "have": i in self.account["tanks"]
                                 })
+
                             for i, gun in enumerate(data["guns"]):
                                 guns.append({
                                     **gun,
                                     "have": i in self.account["guns"]
                                 })
+
                             self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
                     else:
                         self.send(["not_selected", 0])
 
                 elif com == "buy_gun":
                     data = read("data.json")
+
                     if data is None:
                         self.send(["not_selected", 2])
                         return
+
                     if args[0] not in self.account["guns"] and len(data["guns"]) > args[0]:
                         gun = data["guns"][args[0]]
                         self.refresh_account()
+
                         if self.account["crystals"] >= gun["price"]:
                             if AccountManager.set_account(
                                 self.account["nick"],
@@ -227,16 +245,19 @@ class Client:
                                 self.refresh_account()
                                 tanks = []
                                 guns = []
+
                                 for i, tank in enumerate(data["tanks"]):
                                     tanks.append({
                                         **tank,
                                         "have": i in self.account["tanks"]
                                     })
+
                                 for i, gun_ in enumerate(data["guns"]):
                                     guns.append({
                                         **gun_,
                                         "have": i in self.account["guns"]
                                     })
+
                                 self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
                         else:
                             self.send(["buy_failed", 0])
@@ -246,6 +267,7 @@ class Client:
                 elif com == "get_matches":
                     matches = get_matches()
                     res = deepcopy(matches)
+
                     for m in res:
                         m["players"] = len(m["players"])
                         del m["messages"]
@@ -258,6 +280,7 @@ class Client:
                     if not isinstance(args[0], str):
                         self.send(["game_create_failed", 1])
                         return
+
                     if not isinstance(args[1], str):
                         self.send(["game_create_failed", 1])
                         return
@@ -268,6 +291,7 @@ class Client:
                     if len(name) < 3 or len(name) > 20:
                         self.send(["game_create_failed", 0])
                         return
+
                     if len(max_players) < 1 or len(max_players) > 2:
                         self.send(["game_create_failed", 0])
                         return
@@ -275,16 +299,19 @@ class Client:
                     if not AccountManager.check(name, AccountManager.DEFAULT_ALLOWED + " "):
                         self.send(["game_create_failed", 3])
                         return
+
                     if not AccountManager.check(max_players, "0123456789"):
                         self.send(["game_create_failed", 3])
                         return
 
                     max_players = int(max_players)
+
                     if max_players < 1 or max_players > self.config["max_players_in_game"]:
                         self.send(["game_create_failed", 4])
                         return
 
                     matches = get_matches()
+
                     for match_ in matches:
                         if match_["name"] == name:
                             self.send(["game_create_failed", 2])
@@ -329,6 +356,7 @@ class Client:
 
                 elif com == "reset_settings":
                     dsets = self.config["default_settings"]
+
                     if AccountManager.set_account(self.account["nick"], "settings", dsets) != AccountManager.SUCCESSFUL:
                         self.send(["failed", 0])
                     else:
@@ -338,6 +366,7 @@ class Client:
                     try:
                         if 99999 > int(args[2]) > 10:
                             nsets = args
+
                             if AccountManager.set_account(self.account["nick"], "settings", nsets) != AccountManager.SUCCESSFUL:
                                 self.send(["failed", 1])
                         else:
@@ -348,4 +377,5 @@ class Client:
             except:
                 self.logger.log_error_data()
                 self.close()
+
                 return
