@@ -71,14 +71,17 @@ class NetworkedClient:
                             self.client.set_login_data(args[0], args[1])
                             self.send_client = True
                             return
+
                         if res == AccountManager.FAILED_CONSOLE:
                             self.send(["login_fail", res, args[0], args[1]])
                             self.console = Console(self.sock, self.addr)
                             return
+
                         if isinstance(res, list):
                             if res[0] == AccountManager.FAILED_BAN:
                                 self.send(["login_fail", *res])
                                 return
+
                         self.send(["login_fail", res])
 
             except:
