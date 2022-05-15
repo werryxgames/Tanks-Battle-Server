@@ -32,6 +32,9 @@ class ConsoleExecutor:
             act = args[1]
 
             if act == "set":
+                if len(args) <= 3:
+                    return "Ошибка команды"
+
                 key = args[2]
                 val = args[3]
                 if val[0] == "\\":
@@ -70,6 +73,9 @@ class ConsoleExecutor:
                     else:
                         return status[key]
             elif act == "del":
+                if len(args) <= 2:
+                    return "Ошибка команды"
+
                 key = args[2]
                 status = AccountManager.del_account_key(nick, key)
                 if status == AccountManager.SUCCESSFUL:
@@ -177,9 +183,33 @@ class ConsoleExecutor:
         else:
             return "Команда не найдена"
 
-    def execute_text(self, text):
-        splt = spl(text)
-        self.send(self.execute(splt[0], splt[1:]))
+    def execute_text(self, text, main=True):
+        try:
+            splt = spl(text)
+            if "<" in splt:
+                index = splt.index("<")
+                start = splt[0:index]
+                end = splt[index + 1:]
+                arg = str(self.execute_text(" ".join(end), False))
+                args = []
+                st = start[1:]
+                if "$" in st:
+                    st[st.index("$")] = arg
+                else:
+                    st.append(arg)
+                res = self.execute(start[0], st)
+                if main:
+                    self.send(res)
+                else:
+                    return res
+            else:
+                res = self.execute(splt[0], splt[1:])
+                if main:
+                    self.send(res)
+                else:
+                    return res
+        except IndexError:
+            pass
 
 
 class Console:
