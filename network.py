@@ -55,6 +55,7 @@ class NetworkedClient:
                             self.client.set_login_data(args[0], args[1])
                             self.send_client = True
                             return
+
                         self.send(["register_fail", res])
 
                 elif com == "login":
