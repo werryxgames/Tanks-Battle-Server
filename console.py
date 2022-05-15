@@ -6,123 +6,7 @@ from message import GlobalMessage
 from accounts import AccountManager
 
 
-class Token:
-    def __init__(self, **kwargs):
-        self.dict = kwargs
-
-    def __getattr__(self, key):
-        return self.dict[key]
-
-    def __setattr__(self, key, value):
-        self.dict[key] = value
-
-    def __repr__(self):
-        return str(self.dict)
-
-
-# > Account("test").ban(Account.FOREVER, "Тестовая причина", -1)
-# [{"type": "varfunc", "value": "Account", "args": [{"type": "string",
-# "value": "test"}], "get": {"type": "varfunc", "value": "ban",
-# "args": [{"type": "varfunc", "value": "Account", "get": {"type":
-# "varfunc", "value": "FOREVER"}}, {"type": "string", "value":
-# "Тестовая причина"}, {"type": "integer", "value": -1}]}}]
-
-class Lexer:
-    def __init__(self, text, main=False):
-        self.text = text
-        self.main = main
-
-    def get(self):
-        text = self.text
-        main = self.main
-        tokens = []
-        single_quote = [False, ""]
-        double_quote = [False, ""]
-        num_buffer = ""
-        str_buffer = ""
-        next_i = 0
-        for i, e in enumerate(text):
-            if i < next_i:
-                continue
-            if e == "'":
-                if main:
-                    lx = Lexer(text[i:]).get()
-                    if lx is None:
-                        return None
-                    tokens.append(lx[0])
-                    next_i += lx[1]
-                elif not double_quote[0]:
-                    if single_quote[0]:
-                        return [Token(type="string", value=single_quote[1]), i]
-                    else:
-                        single_quote[0] = True
-                elif not single_quote[0]:
-                    double_quote[1] += e
-            elif e == '"':
-                if main:
-                    lx = Lexer(text[i:]).get()
-                    if lx is None:
-                        return None
-                    tokens.append(lx[0])
-                    next_i += lx[1]
-                elif not single_quote[0]:
-                    if double_quote[0]:
-                        return [Token(type="string", value=double_quote[1]), i]
-                    else:
-                        double_quote[0] = True
-                elif not double_quote[0]:
-                    single_quote[1] += e
-            elif single_quote[0] and not double_quote[0]:
-                single_quote[1] += e
-            elif double_quote[0] and not single_quote[0]:
-                double_quote[1] += e
-            elif e in "-1234567890" and main:
-                lx = Lexer(text[i:]).get()
-                if lx is None:
-                    return None
-                tokens.append(lx[0])
-                next_i += lx[1]
-            elif text[0] in "-1234567890" and not main:
-                if e == "-" and i != 0:
-                    return None
-                if e in "-1234567890":
-                    num_buffer += e
-                else:
-                    return [Token(type="integer", value=int(num_buffer)), i - 1]
-            elif e == ",":
-                tokens.append(Token(type="delimiter"))
-            elif e.lower() in "qwertyuiopasdfghjklzxcvbnm" and main:
-                lx = Lexer(text[i:]).get()
-                if lx is None:
-                    return None
-                tokens.append(lx[0])
-                next_i += lx[1]
-            elif text[0].lower() in "qwertyuiopasdfghjklzxcvbnm" and not main:
-                if e.lower() in "qwertyuiopasdfghjklzxcvbnm":
-                    str_buffer += e
-                else:
-                    print(str_buffer)
-                    return [Token(type="command", value=str_buffer), i - 1]
-            elif e == ".":
-                try:
-                    tokens[-1].command = Lexer(text[i + 1:], True)[0]
-                except IndexError:
-                    return None
-            next_i += 1
-        if single_quote[0] or double_quote[0]:
-            return None
-        if len(num_buffer) > 0:
-            return [Token(type="integer", value=int(num_buffer)), next_i - 1]
-        if len(str_buffer) > 0:
-            return [Token(type="command", value=str_buffer), next_i]
-        return [tokens, len(text)]
-
-
 class ConsoleExecutor:
-    SUCCESSFUL = 0
-    FAILED = 1
-    USE_MSG = 2
-
     def __init__(self, sock=None, addr=None, config=None, logger=None):
         self.sock = sock
         self.addr = addr
@@ -140,39 +24,36 @@ class ConsoleExecutor:
                 print(message)
 
     def execute(self, com, args):
-        if com[0] == "$":
-            try:
-                if com[1] == "!":
-                    var = self.vars[com[2:]]
-                    return self.USE_MSG, var[0]
-                elif com[1] == "@":
-                    var = self.vars[com[2:]]
-                    return self.USE_MSG, var[1]
-                else:
-                    var = self.vars[com[1:]]
-                    if var[0] == self.USE_MSG:
-                        return self.USE_MSG, var[1]
-                    else:
-                        return self.USE_MSG, var[0]
-            except KeyError:
-                return self.FAILED, f"Переменная '{com[1:]}' не найдена"
-        elif com == "account":
+        if com == "account":
             if len(args) < 2:
-                return self.FAILED, "Ошибка команды"
+                return "Ошибка команды"
 
             nick = args[0]
             act = args[1]
 
             if act == "set":
                 key = args[2]
-                val = loads(args[3])
+                val = args[3]
+                if val[0] == "\\":
+                    val = val[1:]
+                else:
+                    try:
+                        val = int(val)
+                    except ValueError:
+                        pass
                 status = AccountManager.set_account(nick, key, val)
                 if status == AccountManager.SUCCESSFUL:
-                    return self.SUCCESSFUL, f"Установлено значение '{key}' в {val} для аккаунта '{nick}'"
+                    s = f"Установлено значение '{key}' в "
+                    if isinstance(val, int):
+                        s += str(val)
+                    else:
+                        s += f"'{val}'"
+                    s += f" для аккаунта '{nick}'"
+                    return s
                 elif status == AccountManager.FAILED_NOT_FOUND:
-                    return self.FAILED, f"Аккаунт не найден"
+                    return "Аккаунт не найден"
                 elif status == AccountManager.FAILED_UNKNOWN:
-                    return self.FAILED, f"Не удалось выполнить команду"
+                    return "Не удалось выполнить команду"
             elif act == "get":
                 if len(args) > 2:
                     key = args[2]
@@ -180,25 +61,25 @@ class ConsoleExecutor:
                     key = None
                 status = AccountManager.get_account(nick)
                 if status == AccountManager.FAILED_NOT_FOUND:
-                    return self.FAILED, f"Аккаунт не найден"
+                    return "Аккаунт не найден"
                 elif status == AccountManager.FAILED_UNKNOWN:
-                    return self.FAILED, f"Не удалось выполнить команду"
+                    return "Не удалось выполнить команду"
                 else:
                     if key is None:
-                        return self.SUCCESSFUL, status
+                        return status
                     else:
-                        return self.SUCCESSFUL, status[key]
+                        return status[key]
             elif act == "del":
                 key = args[2]
                 status = AccountManager.del_account_key(nick, key)
                 if status == AccountManager.SUCCESSFUL:
-                    return self.SUCCESSFUL, f"Удален ключ '{key}' для аккаунта '{nick}'"
+                    return f"Удален ключ '{key}' для аккаунта '{nick}'"
                 elif status == AccountManager.FAILED_NOT_FOUND:
-                    return self.FAILED, f"Аккаунт не найден"
+                    return "Аккаунт не найден"
                 elif status == AccountManager.FAILED_UNKNOWN:
-                    return self.FAILED, f"Не удалось выполнить команду"
+                    return "Не удалось выполнить команду"
                 elif status == AccountManager.FAILED_NOT_EXISTS:
-                    return self.FAILED, f"Ключ '{key}' не найден в аккаунте '{nick}'"
+                    return f"Ключ '{key}' не найден в аккаунте '{nick}'"
             elif act == "ban":
                 try:
                     if args[2] == "-1":
@@ -222,39 +103,39 @@ class ConsoleExecutor:
                             s += " не указана"
                         else:
                             s += ": '" + reason + "'"
-                        return self.SUCCESSFUL, s
+                        return s
                     elif status == AccountManager.FAILED_NOT_FOUND:
-                        return self.FAILED, f"Аккаунт не найден"
+                        return f"Аккаунт не найден"
                     elif status == AccountManager.FAILED_UNKNOWN:
-                        return self.FAILED, f"Не удалось выполнить команду"
+                        return f"Не удалось выполнить команду"
                 except (ValueError, IndexError):
-                    return self.FAILED, "Неверный синтаксис команды: 'account <никнейм> ban (<день>.<месяц>.<год> | -1) [причина]'"
+                    return "Неверный синтаксис команды: 'account <никнейм> ban (<день>.<месяц>.<год> | -1) [причина]'"
             elif act == "unban":
                 status = AccountManager.del_account_key(nick, "ban")
                 if status == AccountManager.SUCCESSFUL:
-                    return self.SUCCESSFUL, f"Аккаунт '{nick}' разблокирован"
+                    return f"Аккаунт '{nick}' разблокирован"
                 elif status == AccountManager.FAILED_NOT_EXISTS:
-                    return self.FAILED, f"Аккаунт '{nick}' ещё не заблокирован"
+                    return f"Аккаунт '{nick}' ещё не заблокирован"
                 elif status == AccountManager.FAILED_NOT_FOUND:
-                    return self.FAILED, f"Аккаунт не найден"
+                    return "Аккаунт не найден"
                 elif status == AccountManager.FAILED_UNKNOWN:
-                    return self.FAILED, f"Не удалось выполнить команду"
+                    return "Не удалось выполнить команду"
             elif act == "remove":
                 if len(args) == 2:
                     status = AccountManager.del_account(nick)
                     if status == AccountManager.SUCCESSFUL:
-                        return self.SUCCESSFUL, f"Аккаунт '{nick}' удалён"
+                        return f"Аккаунт '{nick}' удалён"
                     elif status == AccountManager.FAILED_NOT_FOUND:
-                        return self.FAILED, f"Аккаунт не найден"
+                        return f"Аккаунт не найден"
                     elif status == AccountManager.FAILED_UNKNOWN:
-                        return self.FAILED, f"Не удалось выполнить команду"
+                        return f"Не удалось выполнить команду"
                 else:
-                    return self.FAILED, "Команда 'account <никнейм> remove' не принимает аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
+                    return "Команда 'account <никнейм> remove' не принимает аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
             else:
-                return self.FAILED, "Команда не найдена"
+                return "Команда не найдена"
         elif com == "player":
             if len(args) < 2:
-                return self.FAILED, "Ошибка команды"
+                return "Ошибка команды"
 
             nick = args[0]
             act = args[1]
@@ -271,61 +152,34 @@ class ConsoleExecutor:
                 if player is not None:
                     break
             if player is None:
-                return self.FAILED, "Игрок не найден, или не в матче сейчас"
+                return "Игрок не найден, или не в матче сейчас"
 
             if act == "kick":
                 battle["messages"].append(GlobalMessage("player_leave", nick))
-                return self.SUCCESSFUL, "Игрок отключён от матча"
+                return "Игрок отключён от матча"
             elif act == "battle":
                 if len(args) < 3:
-                    return self.FAILED, "Ошибка команды"
+                    return "Ошибка команды"
 
                 act2 = args[2]
                 if act2 == "players":
                     pls = []
                     for pl in battle["players"]:
                         pls.append(pl.nick)
-                    return self.SUCCESSFUL, pls
+                    return pls
                 elif act2 == "end":
                     del battles[battles.index(battle)]
-                    return self.SUCCESSFUL, "Матч завершён"
+                    return "Матч завершён"
                 else:
-                    return self.FAILED, "Команда не найдена"
+                    return "Команда не найдена"
             else:
-                return self.FAILED, "Команда не найдена"
+                return "Команда не найдена"
         else:
-            return self.FAILED, "Команда не найдена"
+            return "Команда не найдена"
 
     def execute_text(self, text):
-        # lx = Lexer(text, True).get()
-        # if lx is None:
-        #     print("Обнаружена ошибка в команде")
-        #     return
-        # print(lx[0])
-        # return
         splt = spl(text)
-        buf = None
-        msg = None
-        if len(splt) > 0:
-            command = []
-            wait = "command"
-            buffer = ""
-            for i in splt:
-                if i == ">":
-                    wait = "redirect"
-                elif wait == "redirect":
-                    if len(command) > 0:
-                        buf, msg = self.execute(command[0], command[1:])
-                        if i[0] == "$":
-                            self.vars[i[1:]] = [buf, msg]
-                        elif i == "@":
-                            self.send(msg)
-                        command = []
-                        wait = "command"
-                elif wait == "command":
-                    command.append(i)
-            if len(command) > 0:
-                self.send(self.execute(command[0], command[1:])[1])
+        self.send(self.execute(splt[0], splt[1:]))
 
 
 class Console:
