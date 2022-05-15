@@ -6,6 +6,7 @@ from console import Console
 from accounts import AccountManager
 from singleton import get_data, get_clients
 
+sock = None
 clients = get_clients()
 
 
@@ -13,7 +14,7 @@ class NetworkedClient:
     def __init__(self, sock, addr):
         self.sock = sock
         self.addr = addr
-        self.config, self.logger = get_data()
+        self.config, self.logger, self.gui = get_data()
         self.client = Client(sock, addr)
         self.send_client = False
         self.console = None
@@ -95,8 +96,21 @@ class NetworkedClient:
                 return
 
 
+def stop_server():
+    global sock
+
+    sock.close()
+
+
+def start_server_async():
+    thr = Thread(target=start_server, daemon=True)
+    thr.start()
+
+
 def start_server():
-    config, logger = get_data()
+    global sock
+
+    config, logger, gui = get_data()
 
     sock = socket(AF_INET, SOCK_DGRAM)
     sock.bind((config["host"], config["port"]))
@@ -104,11 +118,22 @@ def start_server():
     logger.info("Сервер запущен")
     logger.debug("Адрес:", config["host"] + ",", "порт:", config["port"])
 
+    if gui is not None:
+        if gui.state == 0:
+            gui.elements[2].configure(text=f"Статус: запущен\tIP: {config['host']}")
+            gui.elements[3].configure(text="Остановить", command=stop_server)
+
     while True:
         try:
             adrdata = sock.recvfrom(1024)
         except (ConnectionResetError, ConnectionAbortedError):
             logger.debug(f"Клиент отключён")
+        except OSError:
+            if gui is not None:
+                if gui.state == 0:
+                    gui.elements[2].configure(text="Статус: не запущен")
+                    gui.elements[3].configure(text="Запустить", command=start_server_async)
+            return
 
         data = adrdata[0]
         addr = adrdata[1]
