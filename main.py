@@ -14,10 +14,6 @@ def main():
         try:
             set_data(config, logger)
 
-            # cons = ConsoleExecutor(None, None, config, logger)
-            # while True:
-            #     cons.execute_text(input("> "))
-
             start_server()
 
         except:
