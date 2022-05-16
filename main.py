@@ -14,7 +14,7 @@ def init_window(config, logger):
     win = Window()
     win.wm_title("Tanks Battle Server")
     win.geometry("600x320")
-    win.tk.call("wm", "iconphoto", win._w, PhotoImage(file=to_absolute("icon.png")))
+    win.tk.call("wm", "iconphoto", win._w, PhotoImage(file=to_absolute("icon.png", temp=True)))
     win.configure(background="#555")
 
     style = Style(win)
