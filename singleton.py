@@ -31,7 +31,16 @@ def set_data(config=None, logger=None, win=None):
 
 
 def get_data():
-    return (st.config, st.logger, st.win)
+    data = []
+
+    if st.config is not None:
+        data.append(st.config)
+    if st.config is not None:
+        data.append(st.logger)
+    if st.win is not None:
+        data.append(st.win)
+
+    return data
 
 
 def add_match(name, max_players, creator):

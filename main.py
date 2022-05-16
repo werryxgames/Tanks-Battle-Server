@@ -4,8 +4,9 @@ from network import start_server, start_server_async
 from logger import Logger
 from singleton import set_data
 from tests import tests
-from console import ConsoleExecutor
-from tkinter.ttk import *
+from absolute import to_absolute
+from tkinter import PhotoImage
+from tkinter.ttk import Label, Button, Style
 from gui import Window
 
 
@@ -13,7 +14,7 @@ def init_window(config, logger):
     win = Window()
     win.wm_title("Tanks Battle Server")
     win.geometry("600x320")
-    win.iconbitmap("icon.ico")
+    win.tk.call("wm", "iconphoto", win._w, PhotoImage(file=to_absolute("icon.png")))
     win.configure(background="#555")
 
     style = Style(win)
@@ -44,12 +45,19 @@ def main():
     logger = Logger(Logger.LEVEL_INFO, Logger.LEVEL_INFO)
     config = read("config.json")
 
-    if tests.main(True):
+    check_tests = True
+
+    for i in argv:
+        if i.lower() == "--notests":
+            check_tests = False
+            break
+
+    if not check_tests or tests.main(True):
         try:
             show_gui = True
 
             for i in argv:
-                if i.lower() in ["--nogui", "-n"]:
+                if i.lower() == "--nogui":
                     show_gui = False
                     break
 
@@ -58,7 +66,7 @@ def main():
                 init_window(config, logger)
             else:
                 set_data(config, logger)
-                start_server()
+                start_server(config, logger)
 
         except:
             logger.log_error_data(logger.critical)

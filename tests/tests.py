@@ -38,14 +38,14 @@ def main(quiet=False):
 
     # Синглтон
     tester = Tester(logger, singleton, quiet)
-    tester.test("get_data", (None, None, None))  # Ещё не вызывалось 'set_data', должен вернуть (None, None)
+    tester.test("get_data", [])  # Ещё не вызывалось 'set_data', должен вернуть (None, None)
     tester.test("set_data", None, "123", 456, None)  # Функция должна всегда возвращать None
-    tester.test("get_data", ("123", 456, None))  # Функция должна вернуть то, что установила 'set_data'
+    tester.test("get_data", ["123", 456, ])  # Функция должна вернуть то, что установила 'set_data'
     tester.test("set_data", None, "234")  # Функция должна работать, устанавливая только одно значение
     tester.test("set_data", None, logger="789")  # Функция должна работать с **kwargs
-    tester.test("get_data", ("234", "789", None))  # Проверка значений после 'set_data'
+    tester.test("get_data", ["234", "789"])  # Проверка значений после 'set_data'
     tester.test("set_data", None, config=905)  # Функция должна работать с **kwargs
-    tester.test("get_data", (905, "789", None))  # Проверка значений после 'set_data'
+    tester.test("get_data", [905, "789"])  # Проверка значений после 'set_data'
     config = mjson.read("config.json")  # Установка значений для корректной работы оставшихся тестов
     singleton.set_data(config)
     tester.test("get_matches", [])  # Матчи ещё не созданы
