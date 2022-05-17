@@ -19,7 +19,7 @@ class Player:
         self.sock = sock
         self.addr = addr
         self.bdata = battle_data
-        self.config, self.logger = get_data()
+        self.config, self.logger = get_data()[:2]
         self.version = None
         self.login = None
         self.password = None

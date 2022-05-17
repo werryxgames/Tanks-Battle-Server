@@ -234,7 +234,7 @@ class Console:
     def __init__(self, sock, addr):
         self.sock = sock
         self.addr = addr
-        self.config, self.logger = get_data()
+        self.config, self.logger = get_data()[:2]
         self.cexr = ConsoleExecutor(self.sock, self.addr, self.config, self.logger)
 
     def send(self, message):

@@ -16,7 +16,7 @@ class NetworkedClient:
     def __init__(self, sock, addr):
         self.sock = sock
         self.addr = addr
-        self.config, self.logger = get_data()
+        self.config, self.logger = get_data()[:2]
         self.client = Client(sock, addr)
         self.send_client = False
         self.console = None
