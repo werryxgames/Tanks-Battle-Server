@@ -1,3 +1,4 @@
+from absolute import to_absolute
 from mjson import read
 
 
