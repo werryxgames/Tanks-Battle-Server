@@ -7,11 +7,12 @@ from accounts import AccountManager
 
 
 class ConsoleExecutor:
-    def __init__(self, sock=None, addr=None, config=None, logger=None):
+    def __init__(self, sock=None, addr=None, config=None, logger=None, win=None):
         self.sock = sock
         self.addr = addr
         self.config = config
         self.logger = logger
+        self.win = win
         self.vars = {}
 
     def send(self, message):
@@ -20,8 +21,10 @@ class ConsoleExecutor:
         if self.logger is not None:
             if self.addr is not None:
                 self.logger.debug(f"Результат команды отправлен клиенту '{self.addr[0]}:{self.addr[1]}':", message)
-            else:
-                print(message)
+        elif self.sock is None and self.win is not None and self.win.state == self.win.STATE_CONSOLE:
+            self.win.elements[2].configure(state="normal")
+            self.win.elements[2].insert("end", str(message) + "\n")
+            self.win.elements[2].configure(state="disabled")
 
     def execute(self, com, args):
         if com == "account":

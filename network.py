@@ -106,7 +106,7 @@ def stop_server():
     _config, _logger, gui = get_data()
 
     if gui is not None:
-        if gui.state == 0:
+        if gui.state == gui.STATE_MAIN:
             gui.elements[2].configure(text="Статус: не запущен")
             gui.elements[3].configure(text="Запустить", command=start_server_async)
 
@@ -120,7 +120,7 @@ def start_server_async():
     thr.start()
 
     if gui is not None:
-        if gui.state == 0:
+        if gui.state == gui.STATE_MAIN:
             gui.elements[2].configure(text=f"Статус: запущен\tIP: {config['host']}")
             gui.elements[3].configure(text="Остановить", command=stop_server)
 
