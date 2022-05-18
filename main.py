@@ -1,7 +1,7 @@
 from sys import argv, exit
 from json.decoder import JSONDecodeError
 from mjson import read
-from network import start_server, start_server_async
+from network import start_server, start_server_async, stop_server, is_active
 from logger import Logger
 from singleton import set_data
 from tests import tests
@@ -102,6 +102,9 @@ def tab_main(config, win):
     win.place(Label, {"text": "Github: https://github.com/werryxgames/Tanks-Battle-Server", "font": "Arial 8"}, relx=0, rely=1, x=2, y=-2, anchor="sw")
     win.place(Label, {"text": "Вебсайт: https://werryxgames.ml", "font": "Arial 8"}, relx=1, rely=1, x=-2, y=-2, anchor="se")
 
+    if is_active():
+        win.elements[2].configure(text=f"Статус: запущен\tIP: {config['host']}")
+        win.elements[3].configure(text="Остановить", command=stop_server)
 
 def init_window(config, logger):
     win = Window()

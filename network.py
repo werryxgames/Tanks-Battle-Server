@@ -98,6 +98,10 @@ class NetworkedClient:
                 return
 
 
+def is_active():
+    return thr is not None
+
+
 def stop_server():
     global sock, thr
 
@@ -109,6 +113,8 @@ def stop_server():
         if gui.state == gui.STATE_MAIN:
             gui.elements[2].configure(text="Статус: не запущен")
             gui.elements[3].configure(text="Запустить", command=start_server_async)
+
+    thr = None
 
 
 def start_server_async():
