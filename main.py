@@ -1,4 +1,4 @@
-from sys import argv, exit
+from sys import argv
 from json.decoder import JSONDecodeError
 from mjson import read
 from network import start_server, start_server_async, stop_server, is_active
@@ -11,6 +11,7 @@ from tkinter.messagebox import showerror
 from tkinter.ttk import Label, Button, Style
 from gui import Window
 from console import ConsoleExecutor
+from close import stop
 
 
 def current_clear(win):
@@ -112,6 +113,7 @@ def init_window(config, logger):
     win.geometry("600x320")
     win.tk.call("wm", "iconphoto", win._w, PhotoImage(file=to_absolute("icon.png", temp=True)))
     win.configure(background="#444")
+    win.protocol("WM_DELETE_WINDOW", lambda: stop(0))
 
     style = Style(win)
     style.theme_use("clam")
@@ -144,7 +146,7 @@ def main():
             root.withdraw()
             showerror("Ошибка запуска Tanks Battle Server", "Не удалось загрузить конфигурацию. Возможно файл был повреждён")
 
-        exit(1)
+        stop(1)
 
 
     check_tests = True

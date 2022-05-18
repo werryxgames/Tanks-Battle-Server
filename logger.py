@@ -67,10 +67,13 @@ class Logger:
                 )
 
     def log_error_data(self, func=None):
-        if func is None:
-            func = self.error
+        traceback = format_exc()[:-1]
 
-        func(format_exc()[:-1], prefix="")
+        if "\nSystemExit: " not in traceback:
+            if func is None:
+                func = self.error
+
+            func(traceback, prefix="")
 
     def critical(self, *message, prefix="[Критическая ошибка] "):
         msg = []
