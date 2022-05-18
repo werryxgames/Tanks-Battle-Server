@@ -1,10 +1,10 @@
 {
     "host": "0.0.0.0",
     "port": 7490,
-    "accept_client_versions": ["11.0", "12.0"],
+    "accept_client_versions": ["11.0", "12.0", "12.1"],
     "max_players_in_game": 10,
     "maps": 1,
-    "default_settings": [true, true, 100],
+    "default_settings": [false, true, 500],
     "kill_reward_crystals": 2,
     "kill_reward_xp": 5,
     "max_player_noresponse_time": 10

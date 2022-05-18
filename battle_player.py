@@ -1,3 +1,4 @@
+from absolute import to_absolute
 from mjson import read
 
 
@@ -23,7 +24,7 @@ class BattlePlayer:
 
     @staticmethod
     def st_get_tank(tank):
-        data = read("data.json")
+        data = read(to_absolute("data.json"))
 
         if data is None:
             return

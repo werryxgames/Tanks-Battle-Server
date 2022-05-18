@@ -72,11 +72,14 @@ class Tester:
             self.failed("метод не найден")
             return False
         except BaseException as e:
-            if isinstance(e, result):
-                self.passed()
-                return True
-            self.failed(f"произошла ошибка \"{type(e).__name__}\"")
-            return False
+            try:
+                if isinstance(e, result):
+                    self.passed()
+                    return True
+                raise
+            except:
+                self.failed(f"произошла ошибка \"{type(e).__name__}\"")
+                return False
         self.passed()
         return True
 

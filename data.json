@@ -1,54 +1,5 @@
 {
-    "accounts": [
-        {
-            "nick": "CONSOLE",
-            "password": "test123",
-            "console": true
-        },
-        {
-            "nick": "test",
-            "password": "123456",
-            "xp": 3427,
-            "crystals": 639,
-            "tanks": [
-                1,
-                0,
-                2,
-                3
-            ],
-            "guns": [
-                0,
-                1
-            ],
-            "selected_tank": 3,
-            "selected_gun": 1,
-            "settings": [
-                false,
-                true,
-                "500"
-            ]
-        },
-        {
-            "nick": "test2",
-            "password": "123456",
-            "xp": 480,
-            "crystals": 118,
-            "tanks": [
-                1
-            ],
-            "guns": [
-                0,
-                1
-            ],
-            "selected_tank": 1,
-            "selected_gun": 1,
-            "settings": [
-                false,
-                true,
-                "1000"
-            ]
-        }
-    ],
+    "accounts": [],
     "tanks": [
         {
             "name": "Light",

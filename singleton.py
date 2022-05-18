@@ -5,6 +5,7 @@ from mjson import read
 class Singleton:
     config = None
     logger = None
+    win = None
     matches = []
     clients = {}
 
@@ -18,16 +19,28 @@ class Singleton:
 st = Singleton()
 
 
-def set_data(config=None, logger=None):
+def set_data(config=None, logger=None, win=None):
     if config is not None:
         st.config = config
 
     if logger is not None:
         st.logger = logger
 
+    if win is not None:
+        st.win = win
+
 
 def get_data():
-    return (st.config, st.logger)
+    data = []
+
+    if st.config is not None:
+        data.append(st.config)
+    if st.config is not None:
+        data.append(st.logger)
+    if st.win is not None:
+        data.append(st.win)
+
+    return data
 
 
 def add_match(name, max_players, creator):
