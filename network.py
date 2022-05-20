@@ -166,7 +166,8 @@ def start_server(config, logger):
 
         try:
             tdata = loads(data.decode('utf8'))
-            logger.debug(f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{tdata}'")
+            func = [logger.debug, logger.slow][int(tdata[0] == -1)]
+            func(f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{tdata[1]}'")
             clients[addr].receive(data)
         except JSONDecodeError:
             try:
@@ -175,6 +176,9 @@ def start_server(config, logger):
             except UnicodeDecodeError:
                 tdata = data
                 logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил не UTF-8 данные: '{tdata}'")
+        except IndexError:
+            tdata = data
+            logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил неверные данные: '{tdata}'")
 
     sock.close()
 
