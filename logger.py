@@ -6,12 +6,13 @@ from absolute import to_absolute
 
 
 class Logger:
-    LEVEL_NONE = 5
-    LEVEL_CRITICAL = 4
-    LEVEL_ERROR = 3
-    LEVEL_WARNING = 2
-    LEVEL_INFO = 1
-    LEVEL_DEBUG = 0
+    LEVEL_NONE = 6
+    LEVEL_CRITICAL = 5
+    LEVEL_ERROR = 4
+    LEVEL_WARNING = 3
+    LEVEL_INFO = 2
+    LEVEL_DEBUG = 1
+    LEVEL_SLOW = 0
 
     def __init__(self, level, loglevel):
         init()
@@ -75,37 +76,29 @@ class Logger:
 
             func(traceback, prefix="")
 
-    def critical(self, *message, prefix="[Критическая ошибка] "):
+    @staticmethod
+    def join_message(message):
         msg = []
+
         for i in message:
             msg.append(str(i))
 
-        self.message(Fore.RED + prefix + " ".join(msg) + Fore.RESET, 4)
+        return " ".join(msg)
+
+    def critical(self, *message, prefix="[Критическая ошибка] "):
+        self.message(Fore.RED + prefix + self.join_message(message) + Fore.RESET, self.LEVEL_CRITICAL)
 
     def error(self, *message, prefix="[Ошибка] "):
-        msg = []
-        for i in message:
-            msg.append(str(i))
-
-        self.message(Style.BRIGHT + Fore.RED + prefix + " ".join(msg) + Style.RESET_ALL, 3)
+        self.message(Style.BRIGHT + Fore.RED + prefix + self.join_message(message) + Style.RESET_ALL, self.LEVEL_ERROR)
 
     def warning(self, *message, prefix="[Предупреждение] "):
-        msg = []
-        for i in message:
-            msg.append(str(i))
-
-        self.message(Fore.YELLOW + prefix + " ".join(msg) + Fore.RESET, 2)
+        self.message(Fore.YELLOW + prefix + self.join_message(message) + Fore.RESET, self.LEVEL_WARNING)
 
     def info(self, *message, prefix="[Инфо] "):
-        msg = []
-        for i in message:
-            msg.append(str(i))
-
-        self.message(prefix + " ".join(msg), 1)
+        self.message(prefix + self.join_message(message), self.LEVEL_INFO)
 
     def debug(self, *message, prefix="[Отладка] "):
-        msg = []
-        for i in message:
-            msg.append(str(i))
+        self.message(Style.BRIGHT + Fore.BLACK + prefix + self.join_message(message) + Style.RESET_ALL, self.LEVEL_DEBUG)
 
-        self.message(Style.BRIGHT + Fore.BLACK + prefix + " ".join(msg) + Style.RESET_ALL, 0)
+    def slow(self, *message, prefix="[Отладка (матч)] "):
+        self.message(Style.BRIGHT + Fore.BLACK + prefix + self.join_message(message) + Style.RESET_ALL, self.LEVEL_SLOW)

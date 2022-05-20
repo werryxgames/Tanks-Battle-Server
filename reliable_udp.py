@@ -35,7 +35,7 @@ class ReliableUDP:
 
     def send_unreliable(self, message):
         self.sock.sendto(dumps([-1, message]).encode("utf8"), self.addr)
-        self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+        self.logger.slow(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
 
     def receive(self, data):
         try:
