@@ -7,9 +7,10 @@ from accounts import AccountManager
 
 
 class ConsoleExecutor:
-    def __init__(self, sock=None, addr=None, config=None, logger=None, win=None):
+    def __init__(self, sock=None, addr=None, config=None, logger=None, win=None, rudp=None):
         self.sock = sock
         self.addr = addr
+        self.rudp = rudp
         self.config = config
         self.logger = logger
         self.win = win
@@ -17,7 +18,7 @@ class ConsoleExecutor:
 
     def send(self, message):
         if self.sock is not None:
-            self.sock.sendto(dumps(["console_result", message]).encode("utf8"), self.addr)
+            self.rudp.send(["console_result", message])
         if self.logger is not None:
             if self.addr is not None:
                 self.logger.debug(f"Результат команды отправлен клиенту '{self.addr[0]}:{self.addr[1]}':", message)
@@ -251,10 +252,8 @@ class Console:
         except OSError:
             pass
 
-    def receive(self, data):
+    def receive(self, jdt):
         try:
-            jdt = loads(data.decode("utf8"))
-
             com = jdt[0]
             args = jdt[1:]
 
