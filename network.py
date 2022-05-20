@@ -6,6 +6,7 @@ from client import Client
 from console import Console
 from accounts import AccountManager
 from singleton import get_data, get_clients, set_data
+from reliable_udp import ReliableUDP
 
 thr = None
 sock = None
@@ -16,8 +17,9 @@ class NetworkedClient:
     def __init__(self, sock, addr):
         self.sock = sock
         self.addr = addr
+        self.rudp = ReliableUDP(sock, addr)
         self.config, self.logger = get_data()[:2]
-        self.client = Client(sock, addr)
+        self.client = Client(sock, addr, self.rudp)
         self.send_client = False
         self.console = None
 
@@ -29,21 +31,30 @@ class NetworkedClient:
         except OSError:
             pass
 
-    def send(self, message):
-        self.sock.sendto(dumps(message).encode("utf8"), self.addr)
-        self.logger.debug(f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+    def send(self, *args, **kwargs):
+        self.rudp.send(*args, **kwargs)
 
     def receive(self, data):
+        rudp = self.rudp.receive(data)
+
+        if rudp is False:
+            self.close()
+
+            return
+
+        if rudp is None:
+            return
+
+        pdata = rudp
+
         if self.console is not None:
-            self.console.receive(data)
+            self.console.receive(pdata)
         elif self.send_client:
-            self.client.receive(data)
+            self.client.receive(pdata)
         else:
             try:
-                jdt = loads(data.decode("utf8"))
-
-                com = jdt[0]
-                args = jdt[1:]
+                com = pdata[0]
+                args = pdata[1:]
 
                 if com == "register":
                     if args[2] not in self.config["accept_client_versions"]:
@@ -79,7 +90,7 @@ class NetworkedClient:
 
                         if res == AccountManager.FAILED_CONSOLE:
                             self.send(["login_fail", res, args[0], args[1]])
-                            self.console = Console(self.sock, self.addr)
+                            self.console = Console(self.sock, self.addr, self.rudp)
 
                             return
 

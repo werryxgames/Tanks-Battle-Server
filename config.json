@@ -7,5 +7,6 @@
     "default_settings": [false, true, 500],
     "kill_reward_crystals": 2,
     "kill_reward_xp": 5,
-    "max_player_noresponse_time": 10
+    "max_player_noresponse_time": 10,
+    "udp_reliable_resend_timeout": 0.1
 }

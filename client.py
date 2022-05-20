@@ -9,9 +9,10 @@ clients = get_clients()
 
 
 class Client:
-    def __init__(self, sock, addr):
+    def __init__(self, sock, addr, rudp):
         self.sock = sock
         self.addr = addr
+        self.rudp = rudp
         self.config, self.logger = get_data()[:2]
         self.version = None
         self.login = None
@@ -49,19 +50,16 @@ class Client:
 
         return True
 
-    def send(self, message):
-        self.sock.sendto(dumps(message).encode("utf8"), self.addr)
-        self.logger.debug(f"Отправлены данные клиенту '{self.account['nick']}' ('{self.addr[0]}:{self.addr[1]}'):", message)
+    def send(self, *args, **kwargs):
+        self.rudp.send(*args, **kwargs)
 
-    def receive(self, data):
+    def receive(self, jdt):
         if self.send_player:
-            if self.player.receive(data) == Player.BACK_TO_MENU:
+            if self.player.receive(jdt) == Player.BACK_TO_MENU:
                 self.send_player = False
                 self.player = None
         else:
             try:
-                jdt = loads(data.decode("utf8"))
-
                 com = jdt[0]
                 args = jdt[1:]
 
@@ -321,7 +319,7 @@ class Client:
 
                     self.send(["game_created"])
 
-                    self.player = Player(self.sock, self.addr, match_)
+                    self.player = Player(self.sock, self.addr, match_, self.rudp)
                     self.refresh_account()
 
                     self.player.set_login_data(self.login, self.password)
@@ -337,7 +335,7 @@ class Client:
                                 player_match = match_
                                 self.send(["battle_joined"])
 
-                                self.player = Player(self.sock, self.addr, player_match)
+                                self.player = Player(self.sock, self.addr, player_match, self.rudp)
                                 self.refresh_account()
 
                                 self.player.set_login_data(self.login, self.password)

@@ -15,10 +15,11 @@ clients = get_clients()
 class Player:
     BACK_TO_MENU = 1
 
-    def __init__(self, sock, addr, battle_data):
+    def __init__(self, sock, addr, battle_data, rudp):
         self.sock = sock
         self.addr = addr
         self.bdata = battle_data
+        self.rudp = rudp
         self.config, self.logger = get_data()[:2]
         self.version = None
         self.login = None
@@ -63,9 +64,11 @@ class Player:
 
         return True
 
-    def send(self, message):
-        self.sock.sendto(dumps(message).encode("utf8"), self.addr)
-        self.logger.debug(f"Отправлены данные клиенту '{self.bp.nick}' ('{self.addr[0]}:{self.addr[1]}'):", message)
+    def send(self, *args, **kwargs):
+        self.rudp.send(*args, **kwargs)
+
+    def send_unreliable(self, *args, **kwargs):
+        self.rudp.send_unreliable(*args, **kwargs)
 
     def handle_messages(self):
         mesgs = self.bdata["messages"]
@@ -109,10 +112,8 @@ class Player:
 
             sleep(1)
 
-    def receive(self, data):
+    def receive(self, jdt):
         try:
-            jdt = loads(data.decode("utf8"))
-
             self.handle_messages()
 
             self.last_request = datetime.today().timestamp()
@@ -169,7 +170,7 @@ class Player:
                             if pl is not self.bp:
                                 res.append([pl.json()])
 
-                        self.send(["tanks_data", res])
+                        self.send_unreliable(["tanks_data", res])
                     else:
                         self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"], self.respawn_id])
                 else:
