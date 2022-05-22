@@ -6,12 +6,18 @@ from logger import Logger
 from singleton import set_data
 from tests import tests
 from absolute import to_absolute
-from tkinter import PhotoImage, Text, Entry, Tk
-from tkinter.messagebox import showerror
-from tkinter.ttk import Label, Button, Style
-from gui import Window
 from console import ConsoleExecutor
 from close import stop
+
+gui = True
+
+try:
+    from tkinter import PhotoImage, Text, Entry, Tk
+    from tkinter.messagebox import showerror
+    from tkinter.ttk import Label, Button, Style
+    from gui import Window
+except ImportError:
+    gui = False
 
 
 def current_clear(win):
@@ -129,13 +135,14 @@ def init_window(config, logger):
 
 
 def main():
+    global gui
+
     logger = Logger(Logger.LEVEL_INFO, Logger.LEVEL_INFO)
+
     try:
         config = read("config.json")
     except JSONDecodeError:
         logger.critical("Не удалось загрузить конфигурацию. Возможно файл был повреждён")
-
-        gui = True
 
         for i in argv:
             if i.lower() == "--nogui":
@@ -158,14 +165,12 @@ def main():
 
     if not check_tests or tests.main(True):
         try:
-            show_gui = True
-
             for i in argv:
                 if i.lower() == "--nogui":
-                    show_gui = False
+                    gui = False
                     break
 
-            if show_gui:
+            if gui:
                 logger = Logger(Logger.LEVEL_CRITICAL, Logger.LEVEL_INFO)
                 init_window(config, logger)
             else:
