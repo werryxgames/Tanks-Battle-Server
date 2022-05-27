@@ -114,7 +114,8 @@ class Player:
 
     def receive(self, jdt):
         try:
-            self.handle_messages()
+            if self.bp is not None:
+                self.handle_messages()
 
             self.last_request = datetime.today().timestamp()
 
