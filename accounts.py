@@ -183,8 +183,10 @@ class AccountManager:
             "crystals": 0,
             "tanks": [1],
             "guns": [0],
+            "pts": [],
             "selected_tank": 1,
             "selected_gun": 0,
+            "selected_pt": -1,
             "settings": get_data()[0]["default_settings"]
         }
 

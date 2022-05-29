@@ -134,7 +134,8 @@ class Player:
                     self.account["selected_tank"],
                     (0, 0, 0),
                     self.account["selected_gun"],
-                    BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"]
+                    BattlePlayer.st_get_tank(self.account["selected_tank"], self.account["selected_pt"])["durability"],
+                    self.account["selected_pt"]
                 )
 
                 self.bdata["players"].append(self.bp)
@@ -173,7 +174,7 @@ class Player:
 
                         self.send_unreliable(["tanks_data", res])
                     else:
-                        self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"], self.respawn_id])
+                        self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"], self.account["selected_pt"])["durability"], self.respawn_id])
                 else:
                     if self.bp.last_damage is not None:
                         killer = AccountManager.get_account(self.bp.last_damage)
@@ -181,7 +182,7 @@ class Player:
                         if killer not in [AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND]:
                             AccountManager.set_account(self.bp.last_damage, "crystals", killer["crystals"] + self.config["kill_reward_crystals"])
                             AccountManager.set_account(self.bp.last_damage, "xp", killer["xp"] + self.config["kill_reward_xp"])
-                    self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"])["durability"], self.respawn_id])
+                    self.send(["respawn", self.randpoint(), BattlePlayer.st_get_tank(self.account["selected_tank"], self.account["selected_pt"])["durability"], self.respawn_id])
 
             elif com == "leave_battle":
                 self.bdata["players"].remove(self.bp)

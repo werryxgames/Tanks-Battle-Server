@@ -71,25 +71,42 @@ class Client:
                     self.refresh_account()
                     tanks = []
                     guns = []
+                    pts = []
                     data = read("data.json")
+
                     if data is None:
                         self.send(["garage_failed"])
                         return
+
                     for i, tank in enumerate(data["tanks"]):
                         tanks.append({
                             **tank,
                             "have": i in self.account["tanks"]
                         })
+
                     for i, gun in enumerate(data["guns"]):
                         guns.append({
                             **gun,
                             "have": i in self.account["guns"]
                         })
-                    self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+
+                    for i, pt in enumerate(data["pts"]):
+                        pts.append({
+                            **pt,
+                            "have": i in self.account["pts"]
+                        })
+
+                    self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
 
                 elif com == "select_tank":
                     if args[0] in self.account["tanks"]:
                         if AccountManager.set_account(
+                            self.account["nick"],
+                            "selected_pt",
+                            -1
+                        ) != AccountManager.SUCCESSFUL:
+                            self.send(["not_selected", 1])
+                        elif AccountManager.set_account(
                             self.account["nick"],
                             "selected_tank",
                             args[0]
@@ -99,6 +116,7 @@ class Client:
                             self.refresh_account()
                             tanks = []
                             guns = []
+                            pts = []
                             data = read("data.json")
 
                             if data is None:
@@ -117,7 +135,13 @@ class Client:
                                     "have": i in self.account["guns"]
                                 })
 
-                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+                            for i, pt in enumerate(data["pts"]):
+                                pts.append({
+                                    **pt,
+                                    "have": i in self.account["pts"]
+                                })
+
+                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
                     else:
                         self.send(["not_selected", 0])
 
@@ -147,6 +171,12 @@ class Client:
                                 self.send(["not_selected", 1])
                             elif AccountManager.set_account(
                                 self.account["nick"],
+                                "selected_pt",
+                                -1
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            elif AccountManager.set_account(
+                                self.account["nick"],
                                 "selected_tank",
                                 args[0]
                             ) != AccountManager.SUCCESSFUL:
@@ -155,6 +185,7 @@ class Client:
                                 self.refresh_account()
                                 tanks = []
                                 guns = []
+                                pts = []
 
                                 for i, tank_ in enumerate(data["tanks"]):
                                     tanks.append({
@@ -168,7 +199,13 @@ class Client:
                                         "have": i in self.account["guns"]
                                     })
 
-                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+                                for i, pt in enumerate(data["pts"]):
+                                    pts.append({
+                                        **pt,
+                                        "have": i in self.account["pts"]
+                                    })
+
+                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
                         else:
                             self.send(["buy_failed", 0])
                     else:
@@ -177,6 +214,12 @@ class Client:
                 elif com == "select_gun":
                     if args[0] in self.account["guns"]:
                         if AccountManager.set_account(
+                            self.account["nick"],
+                            "selected_pt",
+                            -1
+                        ) != AccountManager.SUCCESSFUL:
+                            self.send(["not_selected", 1])
+                        elif AccountManager.set_account(
                             self.account["nick"],
                             "selected_gun",
                             args[0]
@@ -187,15 +230,16 @@ class Client:
 
                             tanks = []
                             guns = []
+                            pts = []
                             data = read("data.json")
 
                             if data is None:
                                 self.send(["not_selected", 2])
                                 return
 
-                            for i, tank in enumerate(data["tanks"]):
+                            for i, tank_ in enumerate(data["tanks"]):
                                 tanks.append({
-                                    **tank,
+                                    **tank_,
                                     "have": i in self.account["tanks"]
                                 })
 
@@ -205,7 +249,13 @@ class Client:
                                     "have": i in self.account["guns"]
                                 })
 
-                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+                            for i, pt in enumerate(data["pts"]):
+                                pts.append({
+                                    **pt,
+                                    "have": i in self.account["pts"]
+                                })
+
+                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
                     else:
                         self.send(["not_selected", 0])
 
@@ -235,6 +285,12 @@ class Client:
                                 self.send(["not_selected", 1])
                             elif AccountManager.set_account(
                                 self.account["nick"],
+                                "selected_pt",
+                                -1
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            elif AccountManager.set_account(
+                                self.account["nick"],
                                 "selected_gun",
                                 args[0]
                             ) != AccountManager.SUCCESSFUL:
@@ -243,20 +299,129 @@ class Client:
                                 self.refresh_account()
                                 tanks = []
                                 guns = []
+                                pts = []
 
-                                for i, tank in enumerate(data["tanks"]):
+                                for i, tank_ in enumerate(data["tanks"]):
                                     tanks.append({
-                                        **tank,
+                                        **tank_,
                                         "have": i in self.account["tanks"]
                                     })
 
-                                for i, gun_ in enumerate(data["guns"]):
+                                for i, gun in enumerate(data["guns"]):
                                     guns.append({
-                                        **gun_,
+                                        **gun,
                                         "have": i in self.account["guns"]
                                     })
 
-                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"]])
+                                for i, pt in enumerate(data["pts"]):
+                                    pts.append({
+                                        **pt,
+                                        "have": i in self.account["pts"]
+                                    })
+
+                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                        else:
+                            self.send(["buy_failed", 0])
+                    else:
+                        self.send(["not_selected", 0])
+
+                elif com == "select_pt":
+                    if args[0] in self.account["pts"]:
+                        if AccountManager.set_account(
+                            self.account["nick"],
+                            "selected_pt",
+                            args[0]
+                        ) != AccountManager.SUCCESSFUL:
+                            self.send(["not_selected", 1])
+                        else:
+                            self.refresh_account()
+
+                            tanks = []
+                            guns = []
+                            pts = []
+                            data = read("data.json")
+
+                            if data is None:
+                                self.send(["not_selected", 2])
+                                return
+
+                            for i, tank_ in enumerate(data["tanks"]):
+                                tanks.append({
+                                    **tank_,
+                                    "have": i in self.account["tanks"]
+                                })
+
+                            for i, gun in enumerate(data["guns"]):
+                                guns.append({
+                                    **gun,
+                                    "have": i in self.account["guns"]
+                                })
+
+                            for i, pt in enumerate(data["pts"]):
+                                pts.append({
+                                    **pt,
+                                    "have": i in self.account["pts"]
+                                })
+
+                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                    else:
+                        self.send(["not_selected", 0])
+
+                elif com == "buy_pt":
+                    data = read("data.json")
+
+                    if data is None:
+                        self.send(["not_selected", 2])
+                        return
+
+                    if args[0] not in self.account["pts"] and len(data["pts"]) > args[0]:
+                        pt = data["pts"][args[0]]
+                        self.refresh_account()
+
+                        if self.account["crystals"] >= pt["price"]:
+                            if AccountManager.set_account(
+                                self.account["nick"],
+                                "crystals",
+                                self.account["crystals"] - pt["price"]
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            elif AccountManager.set_account(
+                                self.account["nick"],
+                                "pts",
+                                [*self.account["pts"], args[0]]
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            elif AccountManager.set_account(
+                                self.account["nick"],
+                                "selected_pt",
+                                args[0]
+                            ) != AccountManager.SUCCESSFUL:
+                                self.send(["not_selected", 1])
+                            else:
+                                self.refresh_account()
+                                tanks = []
+                                guns = []
+                                pts = []
+
+                                for i, tank_ in enumerate(data["tanks"]):
+                                    tanks.append({
+                                        **tank_,
+                                        "have": i in self.account["tanks"]
+                                    })
+
+                                for i, gun in enumerate(data["guns"]):
+                                    guns.append({
+                                        **gun,
+                                        "have": i in self.account["guns"]
+                                    })
+
+                                for i, pt in enumerate(data["pts"]):
+                                    pts.append({
+                                        **pt,
+                                        "have": i in self.account["pts"]
+                                    })
+
+                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
                         else:
                             self.send(["buy_failed", 0])
                     else:
