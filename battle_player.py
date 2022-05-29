@@ -11,7 +11,8 @@ class BattlePlayer:
         tank,
         gun_rotation,
         gun,
-        durability
+        durability,
+        pt
     ):
         self.nick = nick
         self.position = position
@@ -20,16 +21,21 @@ class BattlePlayer:
         self.gun_rotation = gun_rotation
         self.gun = gun
         self.durability = durability
+        self.pt = pt
         self.last_damage = None
 
     @staticmethod
-    def st_get_tank(tank):
+    def st_get_tank(tank, pt):
         data = read(to_absolute("data.json"))
 
         if data is None:
             return
 
-        tank_data = data["tanks"][tank]
+        if pt == -1:
+            tank_data = data["tanks"][tank]
+        else:
+            tank_data = data["pts"][pt]["tank"]
+
         res_data = {}
 
         for k, v in tank_data.items():
@@ -39,7 +45,7 @@ class BattlePlayer:
         return res_data
 
     def get_tank(self):
-        return self.st_get_tank(self.tank)
+        return self.st_get_tank(self.tank, self.pt)
 
     def get_gun(self):
         data = read("data.json")
@@ -47,7 +53,11 @@ class BattlePlayer:
         if data is None:
             return
 
-        gun_data = data["guns"][self.gun]
+        if self.pt == -1:
+            gun_data = data["guns"][self.gun]
+        else:
+            gun_data = data["pts"][self.pt]["gun"]
+
         res_data = {}
 
         for k, v in gun_data.items():

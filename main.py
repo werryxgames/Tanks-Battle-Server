@@ -137,7 +137,7 @@ def init_window(config, logger):
 def main():
     global gui
 
-    logger = Logger(Logger.LEVEL_INFO, Logger.LEVEL_INFO)
+    logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_INFO)
 
     try:
         config = read("config.json")

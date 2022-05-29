@@ -177,6 +177,7 @@ def start_server(config, logger):
                 tdata = data
                 logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил не UTF-8 данные: '{tdata}'")
         except IndexError:
+            clients[addr].sendto(dumps(["version_not_accepted"]).encode("utf8"), self.addr)
             tdata = data
             logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил неверные данные: '{tdata}'")
 

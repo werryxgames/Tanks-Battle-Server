@@ -64,6 +64,27 @@
             "price": 140
         }
     ],
+    "pts": [
+        {
+            "name": "ЛТ-21 \"Хомяк\"",
+            "description": "Первый комплект",
+            "tank": {
+                "durability": 450,
+                "mass": 12000,
+                "speed": 36000000,
+                "gravity": 30000000,
+                "rotation_speed": 75000000
+            },
+            "gun": {
+                "damage": 100,
+                "rotation_speed": 90,
+                "shot_speed": 180,
+                "recoil": 4000000,
+                "recharge": 1.8
+            },
+            "price": 210
+        }
+    ],
     "maps": [
         {
             "spawn_points": [
