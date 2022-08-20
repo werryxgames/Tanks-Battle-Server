@@ -9,15 +9,21 @@ from absolute import to_absolute
 from console import ConsoleExecutor
 from close import stop
 
-gui = True
+is_support_gui = True
 
 try:
-    from tkinter import PhotoImage, Text, Entry, Tk
+    from tkinter import PhotoImage, Text, Entry, Tk, TclError
     from tkinter.messagebox import showerror
     from tkinter.ttk import Label, Button, Style
     from gui import Window
 except ImportError:
-    gui = False
+    is_support_gui = False
+
+try:
+    Tk().destroy()
+except TclError:
+    is_support_gui = False
+
 
 
 def current_clear(win):
@@ -135,7 +141,7 @@ def init_window(config, logger):
 
 
 def main():
-    global gui
+    global is_support_gui
 
     logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_INFO)
 
@@ -146,9 +152,9 @@ def main():
 
         for i in argv:
             if i.lower() == "--nogui":
-                gui = False
+                is_support_gui = False
 
-        if gui:
+        if is_support_gui:
             root = Tk()
             root.withdraw()
             showerror("Ошибка запуска Tanks Battle Server", "Не удалось загрузить конфигурацию. Возможно файл был повреждён")
@@ -167,10 +173,10 @@ def main():
         try:
             for i in argv:
                 if i.lower() == "--nogui":
-                    gui = False
+                    is_support_gui = False
                     break
 
-            if gui:
+            if is_support_gui:
                 logger = Logger(Logger.LEVEL_CRITICAL, Logger.LEVEL_INFO)
                 init_window(config, logger)
             else:
