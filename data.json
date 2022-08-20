@@ -83,6 +83,63 @@
                 "recharge": 1.8
             },
             "price": 210
+        },
+        {
+            "name": "WZ-Kj. 90",
+            "description": "Комплект прорыва, но выезжат на большое количество врагов на ней плохая идея. Имеет хорошую броню, а пробитие позволяет отправлять в ангар даже тяжёлых танков на большом расстоянии",
+            "tank": {
+                "durability": 600,
+                "mass": 25000,
+                "speed": 45000000,
+                "gravity": 40000000,
+                "rotation_speed": 40000000
+            },
+            "gun": {
+                "damage": 590,
+                "rotation_speed": 0,
+                "shot_speed": 360,
+                "recoil": 20000000,
+                "recharge": 3
+            },
+            "price": 1949
+        },
+        {
+            "name": "NS-Merrion II",
+            "description": "Легкий танк разведки, не имеет брони практически на 90%. Старайтесь избегать контактов с высококалиберными противниками",
+            "tank": {
+                "durability": 400,
+                "mass": 20000,
+                "speed": 46000000,
+                "gravity": 30000000,
+                "rotation_speed": 81000000
+            },
+            "gun": {
+                "damage": 120,
+                "rotation_speed": 112,
+                "shot_speed": 190,
+                "recoil": 6000000,
+                "recharge": 1
+            },
+            "price": 990
+        },
+        {
+            "name": "Bofors Tornvagn II",
+            "description": "Экранированый прототип Tornvagn с экранами и непробиваемой башней. Хороший танк, но не забывайте прятать командирскую башню. Она частенько будет под прицелом",
+            "tank": {
+                "durability": 970,
+                "mass": 28000,
+                "speed": 45000000,
+                "gravity": 40000000,
+                "rotation_speed": 41000000
+            },
+            "gun": {
+                "damage": 300,
+                "rotation_speed": 75,
+                "shot_speed": 220,
+                "recoil": 9000000,
+                "recharge": 3
+            },
+            "price": 1500
         }
     ],
     "maps": [
