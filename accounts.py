@@ -1,9 +1,11 @@
+"""Модуль управления аккаунтами."""
 from datetime import datetime
 from mjson import append, read, write
 from singleton import get_data
 
 
 class AccountManager:
+    """Управляет аккаунтами."""
     SUCCESSFUL = 0
     FAILED_NICK_LENGTH = 1
     FAILED_UNKNOWN = 2
@@ -15,14 +17,17 @@ class AccountManager:
     FAILED_BAN = 8
     FAILED_CONSOLE = 9
     FAILED_NOT_EXISTS = 10
-    DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890_ -=+*/[]:;.,\\|&%#@!$^()йцукенгшщзхъфывапролджэячсмитьбюё"
+    DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890_ -=+*/[]:;.,\\|&%\
+#@!$^()йцукенгшщзхъфывапролджэячсмитьбюё"
 
     @staticmethod
     def check(string, allowed=DEFAULT_ALLOWED):
+        """Проверяет состоит ли string только из allowed."""
         return set(string.lower()) <= set(allowed)
 
     @staticmethod
     def get_account(nick):
+        """Возвращает аккаунт с логином nick."""
         data = read("data.json")
 
         if data is None:
@@ -36,9 +41,13 @@ class AccountManager:
 
     @staticmethod
     def del_account_key(nick, key):
+        """Удаляет key у аккаунта с логином nick."""
         acc = AccountManager.get_account(nick)
 
-        if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
+        if acc in (
+            AccountManager.FAILED_UNKNOWN,
+            AccountManager.FAILED_NOT_FOUND
+        ):
             return acc
 
         data = read("data.json")
@@ -58,9 +67,13 @@ class AccountManager:
 
     @staticmethod
     def del_account(nick):
+        """Удаляет аккаунт с логином nick."""
         acc = AccountManager.get_account(nick)
 
-        if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
+        if acc in (
+            AccountManager.FAILED_UNKNOWN,
+            AccountManager.FAILED_NOT_FOUND
+        ):
             return acc
 
         data = read("data.json")
@@ -76,9 +89,13 @@ class AccountManager:
 
     @staticmethod
     def set_account(nick, key, value):
+        """Устанавливает значение key в value для аккаунта с логином nick."""
         acc = AccountManager.get_account(nick)
 
-        if acc in (AccountManager.FAILED_UNKNOWN, AccountManager.FAILED_NOT_FOUND):
+        if acc in (
+            AccountManager.FAILED_UNKNOWN,
+            AccountManager.FAILED_NOT_FOUND
+        ):
             return acc
 
         data = read("data.json")
@@ -97,6 +114,7 @@ class AccountManager:
 
     @staticmethod
     def login_account(nick, password):
+        """Проверяет верные ли данные для входа."""
         if not isinstance(nick, str):
             return AccountManager.FAILED_UNKNOWN
 
@@ -111,7 +129,6 @@ class AccountManager:
 
         if len(password) < 6 or len(password) > 16:
             return AccountManager.FAILED_PASSWORD_LENGTH
-
 
         if not AccountManager.check(nick):
             return AccountManager.FAILED_UNSAFE_CHARACTERS
@@ -131,12 +148,17 @@ class AccountManager:
                     if "ban" in account:
                         aban = account["ban"]
 
-                        if aban[0] != -1 and datetime.today().timestamp() > aban[0]:
+                        if aban[0] != -1 and datetime.today().timestamp() \
+                                > aban[0]:
                             del account["ban"]
                             write("data.json", data)
                         else:
                             if len(aban) > 1:
-                                return [AccountManager.FAILED_BAN, aban[0], aban[1]]
+                                return [
+                                    AccountManager.FAILED_BAN,
+                                    aban[0],
+                                    aban[1]
+                                ]
 
                             return [AccountManager.FAILED_BAN, aban[0], None]
                     return AccountManager.SUCCESSFUL
@@ -146,6 +168,7 @@ class AccountManager:
 
     @staticmethod
     def add_account(nick, password):
+        """Создаёт новый аккаунт."""
         if not isinstance(nick, str):
             return AccountManager.FAILED_UNKNOWN
 

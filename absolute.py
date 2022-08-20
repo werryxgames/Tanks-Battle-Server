@@ -1,9 +1,11 @@
+"""Модуль управления относительным путём."""
 import sys
 from os import path, mkdir
 from shutil import copytree, copy
 
 
 def get_rp(file):
+    """Возвращает абсолютный путь к файлу."""
     return path.dirname(path.realpath(file))
 
 
@@ -11,10 +13,15 @@ rp = get_rp(__file__)
 
 
 def pjoin(*args, **kwargs):
+    """Возвращает абсолютный путь из относительного."""
     return path.join(*args, **kwargs)
 
 
 def to_absolute(*args, temp=False, **kwargs):
+    """Превращает относительный путь в асболютный.
+
+    Если не задан temp, в исполняемом файле, то будет сохранять данные.
+    """
     orig_path = pjoin(rp, *args, **kwargs)
 
     if hasattr(sys, "_MEIPASS"):
@@ -41,4 +48,5 @@ def to_absolute(*args, temp=False, **kwargs):
 
 
 def add_imports(ipath=""):
+    """Добавляет путь импортов."""
     sys.path.append(to_absolute(ipath))
