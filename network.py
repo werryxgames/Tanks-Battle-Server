@@ -28,7 +28,7 @@ class NetworkedClient:
     def __init__(self, sock_, addr):
         self.sock = sock_
         self.addr = addr
-        self.rudp = ReliableUDP(sock, addr)
+        self.rudp = ReliableUDP(sock_, addr)
 
         data = get_data()
         self.config = data[0]
