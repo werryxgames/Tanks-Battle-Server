@@ -1,5 +1,57 @@
 {
-    "accounts": [],
+    "accounts": [
+        {
+            "nick": "Werryx",
+            "password": "123456",
+            "xp": 0,
+            "crystals": 994881,
+            "tanks": [
+                1,
+                0,
+                2,
+                3
+            ],
+            "guns": [
+                0,
+                1
+            ],
+            "pts": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "selected_tank": 3,
+            "selected_gun": 1,
+            "selected_pt": 3,
+            "settings": [
+                false,
+                true,
+                500
+            ]
+        },
+        {
+            "nick": "Werryx2",
+            "password": "123456",
+            "xp": 0,
+            "crystals": 0,
+            "tanks": [
+                1
+            ],
+            "guns": [
+                0
+            ],
+            "pts": [],
+            "selected_tank": 1,
+            "selected_gun": 0,
+            "selected_pt": -1,
+            "settings": [
+                false,
+                true,
+                500
+            ]
+        }
+    ],
     "tanks": [
         {
             "name": "Light",

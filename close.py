@@ -1,9 +1,13 @@
-from network import stop_server, is_active
-from sys import exit
+"""Модуль остановки."""
+from sys import exit as exit_
+
+from network import is_active
+from network import stop_server
 
 
 def stop(*args, **kwargs):
+    """Останавливает сервер."""
     if is_active():
         stop_server()
 
-    exit(*args, **kwargs)
+    exit_(*args, **kwargs)

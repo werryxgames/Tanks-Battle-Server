@@ -4,13 +4,13 @@ from sys import argv
 
 from absolute import to_absolute
 from close import stop
-from close import stop
 from console import ConsoleExecutor
 from logger import Logger
 from mjson import read
 from network import is_active
 from network import start_server
 from network import start_server_async
+from network import stop_server
 from singleton import set_data
 from tests import tests
 
@@ -388,7 +388,7 @@ def init_window(config, logger):
     win.tk.call(
         "wm",
         "iconphoto",
-        win._w,
+        win,
         PhotoImage(file=to_absolute("icon.png", temp=True))
     )
     win.configure(background="#444")

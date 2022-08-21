@@ -1,11 +1,16 @@
+"""Модуль для логгирования сообщений."""
 from datetime import datetime
 from re import sub
 from traceback import format_exc
-from colorama import init, Fore, Style
+
 from absolute import to_absolute
+from colorama import Fore
+from colorama import Style
+from colorama import init
 
 
 class Logger:
+    """Класс для логгирования сообщений."""
     LEVEL_NONE = 6
     LEVEL_CRITICAL = 5
     LEVEL_ERROR = 4
@@ -21,6 +26,7 @@ class Logger:
 
     @staticmethod
     def date():
+        """Возвращает текущую дату."""
         dt = datetime.today()
 
         res = [str(dt.year)]
@@ -53,6 +59,7 @@ class Logger:
         return res
 
     def message(self, msg, level=LEVEL_INFO):
+        """Записывает и выводит на экран сообщение."""
         if self.level <= level:
             print(msg)
 
@@ -60,14 +67,15 @@ class Logger:
             with open(to_absolute("server.log"), "a", encoding="utf8") as f:
                 dt = self.date()
                 f.write(
-                    "{" + \
-                    f"{dt[2]}.{dt[1]}.{dt[0]} {dt[3]}:{dt[4]}:{dt[5]}" + \
-                    "} " + \
-                    sub(r"\x1b.*?m", r"", msg) + \
+                    "{" +
+                    f"{dt[2]}.{dt[1]}.{dt[0]} {dt[3]}:{dt[4]}:{dt[5]}" +
+                    "} " +
+                    sub(r"\x1b.*?m", r"", msg) +
                     "\n"
                 )
 
     def log_error_data(self, func=None):
+        """Вызывает func с Tracebackом."""
         traceback = format_exc()[:-1]
 
         if "\nSystemExit: " not in traceback:
@@ -78,6 +86,7 @@ class Logger:
 
     @staticmethod
     def join_message(message):
+        """Соединяет сообщение в строку."""
         msg = []
 
         for i in message:
@@ -86,19 +95,62 @@ class Logger:
         return " ".join(msg)
 
     def critical(self, *message, prefix="[Критическая ошибка] "):
-        self.message(Fore.RED + prefix + self.join_message(message) + Fore.RESET, self.LEVEL_CRITICAL)
+        """Выводит критическую ошибку."""
+        self.message(
+            Fore.RED +
+            prefix +
+            self.join_message(message) +
+            Fore.RESET,
+            self.LEVEL_CRITICAL
+        )
 
     def error(self, *message, prefix="[Ошибка] "):
-        self.message(Style.BRIGHT + Fore.RED + prefix + self.join_message(message) + Style.RESET_ALL, self.LEVEL_ERROR)
+        """Выводит ошибку."""
+        self.message(
+            Style.BRIGHT +
+            Fore.RED +
+            prefix +
+            self.join_message(message) +
+            Style.RESET_ALL,
+            self.LEVEL_ERROR
+        )
 
     def warning(self, *message, prefix="[Предупреждение] "):
-        self.message(Fore.YELLOW + prefix + self.join_message(message) + Fore.RESET, self.LEVEL_WARNING)
+        """Выводит предупреждение."""
+        self.message(
+            Fore.YELLOW +
+            prefix +
+            self.join_message(message) +
+            Fore.RESET,
+            self.LEVEL_WARNING
+        )
 
     def info(self, *message, prefix="[Инфо] "):
-        self.message(prefix + self.join_message(message), self.LEVEL_INFO)
+        """Выводит информацию."""
+        self.message(
+            prefix +
+            self.join_message(message),
+            self.LEVEL_INFO
+        )
 
     def debug(self, *message, prefix="[Отладка] "):
-        self.message(Style.BRIGHT + Fore.BLACK + prefix + self.join_message(message) + Style.RESET_ALL, self.LEVEL_DEBUG)
+        """Выводит отладочную информацию."""
+        self.message(
+            Style.BRIGHT +
+            Fore.BLACK +
+            prefix +
+            self.join_message(message) +
+            Style.RESET_ALL,
+            self.LEVEL_DEBUG
+        )
 
     def slow(self, *message, prefix="[Отладка (матч)] "):
-        self.message(Style.BRIGHT + Fore.BLACK + prefix + self.join_message(message) + Style.RESET_ALL, self.LEVEL_SLOW)
+        """Выводит очень частую информацию (медленно)."""
+        self.message(
+            Style.BRIGHT +
+            Fore.BLACK +
+            prefix +
+            self.join_message(message) +
+            Style.RESET_ALL,
+            self.LEVEL_SLOW
+        )

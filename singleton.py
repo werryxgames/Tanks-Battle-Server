@@ -1,8 +1,11 @@
+"""Модуль синглтона."""
 from random import randint
+
 from mjson import read
 
 
 class Singleton:
+    """Класс синглтона."""
     config = None
     logger = None
     win = None
@@ -20,6 +23,7 @@ st = Singleton()
 
 
 def set_data(config=None, logger=None, win=None):
+    """Устанавливает данные в синглтон."""
     if config is not None:
         st.config = config
 
@@ -31,6 +35,7 @@ def set_data(config=None, logger=None, win=None):
 
 
 def get_data():
+    """Получает данные из синглтона."""
     data = []
 
     if st.config is not None:
@@ -44,6 +49,7 @@ def get_data():
 
 
 def add_match(name, max_players, creator):
+    """Добавляет матч."""
     maps = read("data.json")["maps"]
 
     battle = {
@@ -61,10 +67,12 @@ def add_match(name, max_players, creator):
 
 
 def get_matches():
+    """Возвращает список всех матчей."""
     return st.matches
 
 
 def remove_match(name):
+    """Удаляет матч."""
     try:
         for battle in st.matches:
             if battle["name"] == name:
@@ -78,4 +86,5 @@ def remove_match(name):
 
 
 def get_clients():
+    """Возвращает список всех клиентов."""
     return st.clients

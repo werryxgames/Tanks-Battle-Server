@@ -1,13 +1,26 @@
-from json import loads, dumps
+"""Модуль консоли."""
 from datetime import datetime
+from json import dumps
 from shlex import split as spl
-from singleton import get_data, get_matches
-from message import GlobalMessage
+
 from accounts import AccountManager
+from message import GlobalMessage
+from singleton import get_data
+from singleton import get_matches
 
 
 class ConsoleExecutor:
-    def __init__(self, sock=None, addr=None, config=None, logger=None, win=None, rudp=None):
+    """Выполняет консольные команды."""
+
+    def __init__(
+        self,
+        sock=None,
+        addr=None,
+        config=None,
+        logger=None,
+        win=None,
+        rudp=None
+    ):
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
@@ -17,17 +30,23 @@ class ConsoleExecutor:
         self.vars = {}
 
     def send(self, message):
+        """Отправляет Reliable UDP сообщение клиенту."""
         if self.sock is not None:
             self.rudp.send(["console_result", message])
+
         if self.logger is not None:
             if self.addr is not None:
-                self.logger.debug(f"Результат команды отправлен клиенту '{self.addr[0]}:{self.addr[1]}':", message)
-        elif self.sock is None and self.win is not None and self.win.state == self.win.STATE_CONSOLE:
+                self.logger.debug(f"Результат команды отправлен клиенту '\
+{self.addr[0]}:{self.addr[1]}':", message)
+        elif self.sock is None and self.win is not None and \
+                self.win.state == self.win.STATE_CONSOLE:
             self.win.elements[2].configure(state="normal")
             self.win.elements[2].insert("end", str(message) + "\n")
             self.win.elements[2].configure(state="disabled")
 
-    def execute(self, com, args):
+    @staticmethod
+    def execute(com, args):
+        """Выполняет команду com с аргументами args."""
         if com == "account":
             if len(args) < 2:
                 return "Ошибка команды"
@@ -60,9 +79,11 @@ class ConsoleExecutor:
                         s += f"'{val}'"
                     s += f" для аккаунта '{nick}'"
                     return s
-                elif status == AccountManager.FAILED_NOT_FOUND:
+
+                if status == AccountManager.FAILED_NOT_FOUND:
                     return "Аккаунт не найден"
-                elif status == AccountManager.FAILED_UNKNOWN:
+
+                if status == AccountManager.FAILED_UNKNOWN:
                     return "Не удалось выполнить команду"
             elif act == "get":
                 if len(args) > 2:
@@ -74,13 +95,14 @@ class ConsoleExecutor:
 
                 if status == AccountManager.FAILED_NOT_FOUND:
                     return "Аккаунт не найден"
-                elif status == AccountManager.FAILED_UNKNOWN:
+
+                if status == AccountManager.FAILED_UNKNOWN:
                     return "Не удалось выполнить команду"
-                else:
-                    if key is None:
-                        return status
-                    else:
-                        return status[key]
+
+                if key is None:
+                    return status
+
+                return status[key]
             elif act == "del":
                 if len(args) <= 2:
                     return "Ошибка команды"
@@ -90,11 +112,14 @@ class ConsoleExecutor:
 
                 if status == AccountManager.SUCCESSFUL:
                     return f"Удален ключ '{key}' для аккаунта '{nick}'"
-                elif status == AccountManager.FAILED_NOT_FOUND:
+
+                if status == AccountManager.FAILED_NOT_FOUND:
                     return "Аккаунт не найден"
-                elif status == AccountManager.FAILED_UNKNOWN:
+
+                if status == AccountManager.FAILED_UNKNOWN:
                     return "Не удалось выполнить команду"
-                elif status == AccountManager.FAILED_NOT_EXISTS:
+
+                if status == AccountManager.FAILED_NOT_EXISTS:
                     return f"Ключ '{key}' не найден в аккаунте '{nick}'"
             elif act == "ban":
                 try:
@@ -102,13 +127,21 @@ class ConsoleExecutor:
                         ts = -1
                     else:
                         time = args[2].split(".")
-                        ts = datetime(int(time[2]), int(time[1]), int(time[0])).timestamp()
+                        ts = datetime(
+                            int(time[2]),
+                            int(time[1]),
+                            int(time[0])
+                        ).timestamp()
 
                     reason = None
                     if len(args) > 3:
                         reason = " ".join(args[3:])
 
-                    status = AccountManager.set_account(nick, "ban", [ts, reason])
+                    status = AccountManager.set_account(
+                        nick,
+                        "ban",
+                        [ts, reason]
+                    )
 
                     if status == AccountManager.SUCCESSFUL:
                         s = f"Аккаунт '{nick}' заблокирован "
@@ -122,22 +155,28 @@ class ConsoleExecutor:
                         else:
                             s += ": '" + reason + "'"
                         return s
-                    elif status == AccountManager.FAILED_NOT_FOUND:
-                        return f"Аккаунт не найден"
-                    elif status == AccountManager.FAILED_UNKNOWN:
-                        return f"Не удалось выполнить команду"
+
+                    if status == AccountManager.FAILED_NOT_FOUND:
+                        return "Аккаунт не найден"
+
+                    if status == AccountManager.FAILED_UNKNOWN:
+                        return "Не удалось выполнить команду"
                 except (ValueError, IndexError):
-                    return "Неверный синтаксис команды: 'account <никнейм> ban (<день>.<месяц>.<год> | -1) [причина]'"
+                    return "Неверный синтаксис команды: 'account <никнейм> \
+ban (<день>.<месяц>.<год> | -1) [причина]'"
             elif act == "unban":
                 status = AccountManager.del_account_key(nick, "ban")
 
                 if status == AccountManager.SUCCESSFUL:
                     return f"Аккаунт '{nick}' разблокирован"
-                elif status == AccountManager.FAILED_NOT_EXISTS:
+
+                if status == AccountManager.FAILED_NOT_EXISTS:
                     return f"Аккаунт '{nick}' ещё не заблокирован"
-                elif status == AccountManager.FAILED_NOT_FOUND:
+
+                if status == AccountManager.FAILED_NOT_FOUND:
                     return "Аккаунт не найден"
-                elif status == AccountManager.FAILED_UNKNOWN:
+
+                if status == AccountManager.FAILED_UNKNOWN:
                     return "Не удалось выполнить команду"
             elif act == "remove":
                 if len(args) == 2:
@@ -145,14 +184,15 @@ class ConsoleExecutor:
 
                     if status == AccountManager.SUCCESSFUL:
                         return f"Аккаунт '{nick}' удалён"
-                    elif status == AccountManager.FAILED_NOT_FOUND:
-                        return f"Аккаунт не найден"
-                    elif status == AccountManager.FAILED_UNKNOWN:
-                        return f"Не удалось выполнить команду"
+
+                    if status == AccountManager.FAILED_NOT_FOUND:
+                        return "Аккаунт не найден"
+
+                    if status == AccountManager.FAILED_UNKNOWN:
+                        return "Не удалось выполнить команду"
                 else:
-                    return "Команда 'account <никнейм> remove' не принимает аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
-            else:
-                return "Команда не найдена"
+                    return "Команда 'account <никнейм> remove' не принимает \
+аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
         elif com == "player":
             if len(args) < 2:
                 return "Ошибка команды"
@@ -179,11 +219,12 @@ class ConsoleExecutor:
             if act == "kick":
                 battle["messages"].append(GlobalMessage("player_leave", nick))
                 return "Игрок отключён от матча"
-            elif act == "battle":
+            if act == "battle":
                 if len(args) < 3:
                     return "Ошибка команды"
 
                 act2 = args[2]
+
                 if act2 == "players":
                     pls = []
 
@@ -191,25 +232,23 @@ class ConsoleExecutor:
                         pls.append(pl.nick)
 
                     return pls
-                elif act2 == "end":
+
+                if act2 == "end":
                     del battles[battles.index(battle)]
                     return "Матч завершён"
-                else:
-                    return "Команда не найдена"
-            else:
-                return "Команда не найдена"
-        else:
-            return "Команда не найдена"
+
+        return "Команда не найдена"
 
     def execute_text(self, text, main=True):
+        """Выполняет команду как текст."""
         try:
             splt = spl(text)
+
             if "<" in splt:
                 index = splt.index("<")
                 start = splt[0:index]
                 end = splt[index + 1:]
                 arg = str(self.execute_text(" ".join(end), False))
-                args = []
                 st = start[1:]
 
                 if "$" in st:
@@ -233,27 +272,48 @@ class ConsoleExecutor:
         except IndexError:
             pass
 
+        return None
+
 
 class Console:
+    """Класс консоли команд."""
+
     def __init__(self, sock, addr, rudp):
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
-        self.config, self.logger = get_data()[:2]
-        self.cexr = ConsoleExecutor(self.sock, self.addr, self.config, self.logger, rudp=self.rudp)
+
+        data = get_data()
+        self.config = data[0]
+        self.logger = data[1]
+
+        self.cexr = ConsoleExecutor(
+            self.sock,
+            self.addr,
+            self.config,
+            self.logger,
+            rudp=self.rudp
+        )
 
     def send(self, message):
+        """Отправляет сообщение клиенту."""
         self.sock.sendto(dumps(message).encode("utf8"), self.addr)
-        self.logger.debug(f"Сообщение отправлено клиенту '{self.addr[0]}:{self.addr[1]}':", message)
+        self.logger.debug(
+            f"Сообщение отправлено клиенту '{self.addr[0]}:{self.addr[1]}':",
+            message
+        )
 
     def close(self):
+        """Закрывает соединение с клиентом."""
         try:
             self.send(["something_wrong"])
-            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' вызвал ошибку на сервере")
+            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' вызвал \
+ошибку на сервере")
         except OSError:
             pass
 
     def receive(self, jdt):
+        """Обрабатывает данные, полученные от клиента"""
         try:
             com = jdt[0]
             args = jdt[1:]
@@ -261,7 +321,7 @@ class Console:
             if com == "console_command":
                 self.cexr.execute_text(" ".join(args))
 
-        except:
+        except BaseException:
             self.logger.log_error_data()
             self.close()
 

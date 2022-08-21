@@ -1,6 +1,8 @@
 """Модуль управления аккаунтами."""
 from datetime import datetime
-from mjson import append, read, write
+from mjson import append
+from mjson import read
+from mjson import write
 from singleton import get_data
 
 

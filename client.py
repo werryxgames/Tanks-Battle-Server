@@ -1,59 +1,77 @@
-from json import loads, dumps
+"""Клиент Tanks Battle."""
+from copy import deepcopy
+
 from accounts import AccountManager
-from singleton import get_data, get_matches, add_match, get_clients
 from mjson import read
 from player import Player
-from copy import deepcopy
+from singleton import add_match
+from singleton import get_clients
+from singleton import get_data
+from singleton import get_matches
 
 clients = get_clients()
 
 
 class Client:
+    """Класс клиента в игре."""
+
     def __init__(self, sock, addr, rudp):
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
-        self.config, self.logger = get_data()[:2]
+
+        data = get_data()
+        self.config = data[0]
+        self.logger = data[1]
+
         self.version = None
         self.login = None
         self.password = None
         self.account = None
+        self.player = None
         self.send_player = False
 
     def close(self):
+        """Закрывает соединение с клиентом из-за ошибки."""
         try:
             self.send(["something_wrong"])
             clients.pop(self.addr)
-            self.logger.info(f"Клиент '{self.account['nick']}' ('{self.addr[0]}:{self.addr[1]}') отключён")
+            self.logger.info(
+                f"Клиент '{self.account['nick']}' ('{self.addr[0]}:\
+{self.addr[1]}') отключён")
         except OSError:
             pass
 
     def set_login_data(self, login, password):
+        """Устанавливает данные для авторизации."""
         self.login = login
         self.password = password
         self.account = AccountManager.get_account(login)
 
         if self.account == AccountManager.FAILED_UNKNOWN or \
-        self.account == AccountManager.FAILED_NOT_FOUND or \
-        self.account["password"] != password:
+                self.account == AccountManager.FAILED_NOT_FOUND or \
+                self.account["password"] != password:
             return False
 
         return True
 
     def refresh_account(self):
+        """Перезагружает аккаунт и проверяет доступен ли он."""
         self.account = AccountManager.get_account(self.login)
 
         if self.account == AccountManager.FAILED_UNKNOWN or \
-        self.account == AccountManager.FAILED_NOT_FOUND or \
-        self.account["password"] != self.password:
+                self.account == AccountManager.FAILED_NOT_FOUND or \
+                self.account["password"] != self.password:
             return False
 
         return True
 
     def send(self, *args, **kwargs):
+        """Отправляет Reliable UDP пакет клиенту."""
         self.rudp.send(*args, **kwargs)
 
     def receive(self, jdt):
+        """Обрабатывает пакет клиента."""
         if self.send_player:
             if self.player.receive(jdt) == Player.BACK_TO_MENU:
                 self.send_player = False
@@ -65,7 +83,11 @@ class Client:
 
                 if com == "get_account_data":
                     self.refresh_account()
-                    self.send(["account_data", self.account["xp"], self.account["crystals"]])
+                    self.send([
+                        "account_data",
+                        self.account["xp"],
+                        self.account["crystals"]
+                    ])
 
                 elif com == "get_garage_data":
                     self.refresh_account()
@@ -96,7 +118,15 @@ class Client:
                             "have": i in self.account["pts"]
                         })
 
-                    self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                    self.send([
+                        "garage_data",
+                        tanks,
+                        self.account["selected_tank"],
+                        guns,
+                        self.account["selected_gun"],
+                        pts,
+                        self.account["selected_pt"]
+                    ])
 
                 elif com == "select_tank":
                     if args[0] in self.account["tanks"]:
@@ -141,7 +171,15 @@ class Client:
                                     "have": i in self.account["pts"]
                                 })
 
-                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                            self.send([
+                                "garage_data",
+                                tanks,
+                                self.account["selected_tank"],
+                                guns,
+                                self.account["selected_gun"],
+                                pts,
+                                self.account["selected_pt"]
+                            ])
                     else:
                         self.send(["not_selected", 0])
 
@@ -152,7 +190,9 @@ class Client:
                         self.send(["not_selected", 2])
                         return
 
-                    if args[0] not in self.account["tanks"] and len(data["tanks"]) > args[0]:
+                    if args[0] not in self.account["tanks"] and len(
+                        data["tanks"]
+                    ) > args[0]:
                         tank = data["tanks"][args[0]]
                         self.refresh_account()
 
@@ -205,7 +245,15 @@ class Client:
                                         "have": i in self.account["pts"]
                                     })
 
-                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                                self.send([
+                                    "garage_data",
+                                    tanks,
+                                    self.account["selected_tank"],
+                                    guns,
+                                    self.account["selected_gun"],
+                                    pts,
+                                    self.account["selected_pt"]
+                                ])
                         else:
                             self.send(["buy_failed", 0])
                     else:
@@ -255,7 +303,15 @@ class Client:
                                     "have": i in self.account["pts"]
                                 })
 
-                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                            self.send([
+                                "garage_data",
+                                tanks,
+                                self.account["selected_tank"],
+                                guns,
+                                self.account["selected_gun"],
+                                pts,
+                                self.account["selected_pt"]
+                            ])
                     else:
                         self.send(["not_selected", 0])
 
@@ -266,7 +322,9 @@ class Client:
                         self.send(["not_selected", 2])
                         return
 
-                    if args[0] not in self.account["guns"] and len(data["guns"]) > args[0]:
+                    if args[0] not in self.account["guns"] and len(
+                        data["guns"]
+                    ) > args[0]:
                         gun = data["guns"][args[0]]
                         self.refresh_account()
 
@@ -319,7 +377,15 @@ class Client:
                                         "have": i in self.account["pts"]
                                     })
 
-                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                                self.send([
+                                    "garage_data",
+                                    tanks,
+                                    self.account["selected_tank"],
+                                    guns,
+                                    self.account["selected_gun"],
+                                    pts,
+                                    self.account["selected_pt"]
+                                ])
                         else:
                             self.send(["buy_failed", 0])
                     else:
@@ -363,7 +429,15 @@ class Client:
                                     "have": i in self.account["pts"]
                                 })
 
-                            self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                            self.send([
+                                "garage_data",
+                                tanks,
+                                self.account["selected_tank"],
+                                guns,
+                                self.account["selected_gun"],
+                                pts,
+                                self.account["selected_pt"]
+                            ])
                     else:
                         self.send(["not_selected", 0])
 
@@ -374,7 +448,9 @@ class Client:
                         self.send(["not_selected", 2])
                         return
 
-                    if args[0] not in self.account["pts"] and len(data["pts"]) > args[0]:
+                    if args[0] not in self.account["pts"] and len(
+                        data["pts"]
+                    ) > args[0]:
                         pt = data["pts"][args[0]]
                         self.refresh_account()
 
@@ -421,7 +497,15 @@ class Client:
                                         "have": i in self.account["pts"]
                                     })
 
-                                self.send(["garage_data", tanks, self.account["selected_tank"], guns, self.account["selected_gun"], pts, self.account["selected_pt"]])
+                                self.send([
+                                    "garage_data",
+                                    tanks,
+                                    self.account["selected_tank"],
+                                    guns,
+                                    self.account["selected_gun"],
+                                    pts,
+                                    self.account["selected_pt"]
+                                ])
                         else:
                             self.send(["buy_failed", 0])
                     else:
@@ -459,7 +543,10 @@ class Client:
                         self.send(["game_create_failed", 0])
                         return
 
-                    if not AccountManager.check(name, AccountManager.DEFAULT_ALLOWED + " "):
+                    if not AccountManager.check(
+                        name,
+                        AccountManager.DEFAULT_ALLOWED + " "
+                    ):
                         self.send(["game_create_failed", 3])
                         return
 
@@ -469,7 +556,8 @@ class Client:
 
                     max_players = int(max_players)
 
-                    if max_players < 1 or max_players > self.config["max_players_in_game"]:
+                    if max_players < 1 or max_players > self.config["max_play\
+ers_in_game"]:
                         self.send(["game_create_failed", 4])
                         return
 
@@ -480,11 +568,20 @@ class Client:
                             self.send(["game_create_failed", 2])
                             return
 
-                    match_ = add_match(name, int(max_players), self.account["nick"])
+                    match_ = add_match(
+                        name,
+                        int(max_players),
+                        self.account["nick"]
+                    )
 
                     self.send(["game_created"])
 
-                    self.player = Player(self.sock, self.addr, match_, self.rudp)
+                    self.player = Player(
+                        self.sock,
+                        self.addr,
+                        match_,
+                        self.rudp
+                    )
                     self.refresh_account()
 
                     self.player.set_login_data(self.login, self.password)
@@ -496,21 +593,31 @@ class Client:
 
                     for match_ in matches:
                         if match_["name"] == args[0]:
-                            if len(match_["players"]) < match_["max_players"]:
+                            if len(
+                                match_["players"]
+                            ) < match_["max_players"]:
                                 player_match = match_
                                 self.send(["battle_joined"])
 
-                                self.player = Player(self.sock, self.addr, player_match, self.rudp)
+                                self.player = Player(
+                                    self.sock,
+                                    self.addr,
+                                    player_match,
+                                    self.rudp
+                                )
                                 self.refresh_account()
 
-                                self.player.set_login_data(self.login, self.password)
+                                self.player.set_login_data(
+                                    self.login,
+                                    self.password
+                                )
                                 self.send_player = True
 
                                 return
-                            else:
-                                self.send(["battle_not_joined", 1])
 
-                                return
+                            self.send(["battle_not_joined", 1])
+
+                            return
 
                     self.send(["battle_not_joined", 0])
 
@@ -520,7 +627,11 @@ class Client:
                 elif com == "reset_settings":
                     dsets = self.config["default_settings"]
 
-                    if AccountManager.set_account(self.account["nick"], "settings", dsets) != AccountManager.SUCCESSFUL:
+                    if AccountManager.set_account(
+                        self.account["nick"],
+                        "settings",
+                        dsets
+                    ) != AccountManager.SUCCESSFUL:
                         self.send(["failed", 0])
                     else:
                         self.send(["settings", *dsets])
@@ -530,14 +641,18 @@ class Client:
                         if 99999 > int(args[2]) > 10:
                             nsets = args
 
-                            if AccountManager.set_account(self.account["nick"], "settings", nsets) != AccountManager.SUCCESSFUL:
+                            if AccountManager.set_account(
+                                self.account["nick"],
+                                "settings",
+                                nsets
+                            ) != AccountManager.SUCCESSFUL:
                                 self.send(["failed", 1])
                         else:
                             self.send(["failed", 2])
                     except ValueError:
                         self.send(["failed", 3])
 
-            except:
+            except BaseException:
                 self.logger.log_error_data()
                 self.close()
 

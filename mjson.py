@@ -1,24 +1,30 @@
-from json import loads, dumps
+"""Модуль JSON."""
+from json import dumps
+from json import loads
+
 from absolute import to_absolute
 
 
 def read(name):
+    """Возвращает данные из *.json файла."""
     data = None
 
-    with open(to_absolute(name), encoding="utf8") as f:
-        data = loads(f.read())
+    with open(to_absolute(name), encoding="utf8") as file:
+        data = loads(file.read())
 
     return data
 
 
 def write(name, data):
-    with open(to_absolute(name), "w", encoding="utf8") as f:
-        f.write(dumps(data, indent=4, ensure_ascii=False))
+    """Записывает данные в *.json файл."""
+    with open(to_absolute(name), "w", encoding="utf8") as file:
+        file.write(dumps(data, indent=4, ensure_ascii=False))
 
     return True
 
 
 def append(name, key, value):
+    """Добавляет value к key файла name."""
     data = read(name)
 
     if data is None:

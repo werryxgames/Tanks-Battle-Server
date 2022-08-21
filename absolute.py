@@ -1,7 +1,10 @@
 """Модуль управления относительным путём."""
 import sys
-from os import path, mkdir
-from shutil import copytree, copy
+
+from os import mkdir
+from os import path
+from shutil import copy
+from shutil import copytree
 
 
 def get_rp(file):
