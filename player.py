@@ -77,8 +77,6 @@ class Player:
             if msg[0] == "player_leave":
                 if msg[1] != self.bp.nick:
                     self.send(["player_leave", msg[1]])
-                else:
-                    self.close()
             elif msg[0] == "player_join":
                 if msg[1][0] != self.bp.nick:
                     self.send(["player_join", msg[1][1:]])
@@ -188,7 +186,7 @@ class Player:
                 self.bdata["players"].remove(self.bp)
                 self.bdata["messages"].append(GlobalMessage("player_leave", self.bp.nick))
 
-                self.close()
+                self.still_check_time = False
 
                 return
 

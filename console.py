@@ -235,11 +235,12 @@ class ConsoleExecutor:
 
 
 class Console:
-    def __init__(self, sock, addr):
+    def __init__(self, sock, addr, rudp):
         self.sock = sock
         self.addr = addr
+        self.rudp = rudp
         self.config, self.logger = get_data()[:2]
-        self.cexr = ConsoleExecutor(self.sock, self.addr, self.config, self.logger)
+        self.cexr = ConsoleExecutor(self.sock, self.addr, self.config, self.logger, rudp=self.rudp)
 
     def send(self, message):
         self.sock.sendto(dumps(message).encode("utf8"), self.addr)

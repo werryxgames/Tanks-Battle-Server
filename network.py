@@ -47,6 +47,12 @@ class NetworkedClient:
 
         pdata = rudp
 
+        if pdata[0] in ["client_disconnected", "leave_battle"]:
+            clients.pop(self.addr)
+
+            if pdata[0] == "client_disconnected":
+                return
+
         if self.console is not None:
             self.console.receive(pdata)
         elif self.send_client:
@@ -108,6 +114,17 @@ class NetworkedClient:
 
                 return
 
+    def check_is_first(self, data):
+        if self.send_client:
+            return True
+
+        pdata = loads(data.decode("utf8"))
+
+        if pdata[0] < 0:
+            return False
+
+        return pdata[1][0] in ["login", "register"]
+
 
 def is_active():
     return thr is not None
@@ -154,15 +171,20 @@ def start_server(config, logger):
     while True:
         try:
             adrdata = sock.recvfrom(1024)
-        except (ConnectionResetError, ConnectionAbortedError):
-            logger.debug(f"Клиент отключён")
+        except (ConnectionResetError, ConnectionAbortedError) as exc:
+            continue
 
         data = adrdata[0]
         addr = adrdata[1]
 
         if addr not in clients.keys():
             clients[addr] = NetworkedClient(sock, addr)
-            logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
+
+            if clients[addr].check_is_first(data):
+                logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
+            else:
+                del clients[addr]
+                continue
 
         try:
             tdata = loads(data.decode('utf8'))
@@ -177,7 +199,7 @@ def start_server(config, logger):
                 tdata = data
                 logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил не UTF-8 данные: '{tdata}'")
         except IndexError:
-            clients[addr].sendto(dumps(["version_not_accepted"]).encode("utf8"), self.addr)
+            clients[addr].sendto(dumps(["version_not_accepted"]).encode("utf8"), addr)
             tdata = data
             logger.warning(f"Клиент '{addr[0]}:{addr[1]}' отправил неверные данные: '{tdata}'")
 
