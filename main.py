@@ -1,14 +1,18 @@
 """Tanks Battle Server - Сервер для Tanks Battle."""
-from sys import argv
 from json.decoder import JSONDecodeError
-from mjson import read
-from network import start_server, start_server_async, stop_server, is_active
+from sys import argv
+
+from absolute import to_absolute
+from close import stop
+from close import stop
+from console import ConsoleExecutor
 from logger import Logger
+from mjson import read
+from network import is_active
+from network import start_server
+from network import start_server_async
 from singleton import set_data
 from tests import tests
-from absolute import to_absolute
-from console import ConsoleExecutor
-from close import stop
 
 is_support_gui = True
 
@@ -460,7 +464,9 @@ def main():
             else:
                 set_data(config, logger)
                 start_server(config, logger)
-
+        except KeyboardInterrupt:
+            logger.info("Сервер остановлен")
+            stop(0)
         except BaseException:
             logger.log_error_data(logger.critical)
     else:
