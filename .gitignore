@@ -3,5 +3,6 @@
 win_icon.ico
 build
 dist
-Tanks Battle Server.spec
+*.spec
 venv
+build.bat

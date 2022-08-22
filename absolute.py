@@ -6,6 +6,8 @@ from os import path
 from shutil import copy
 from shutil import copytree
 
+VERSION = "1.4.1"
+
 
 def get_rp(file):
     """Возвращает абсолютный путь к файлу."""
@@ -32,7 +34,7 @@ def to_absolute(*args, temp=False, **kwargs):
             return orig_path
 
         abs_home = path.abspath(path.expanduser("~"))
-        abs_dir = path.join(abs_home, ".TBServer")
+        abs_dir = path.join(abs_home, f".TBServer_v.{VERSION}")
 
         if not path.exists(abs_dir):
             mkdir(abs_dir)
