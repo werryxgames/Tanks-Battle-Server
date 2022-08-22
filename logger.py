@@ -67,11 +67,8 @@ class Logger:
             with open(to_absolute("server.log"), "a", encoding="utf8") as f:
                 dt = self.date()
                 f.write(
-                    "{" +
-                    f"{dt[2]}.{dt[1]}.{dt[0]} {dt[3]}:{dt[4]}:{dt[5]}" +
-                    "} " +
-                    sub(r"\x1b.*?m", r"", msg) +
-                    "\n"
+                    "{" + f"{dt[2]}.{dt[1]}.{dt[0]} {dt[3]}:{dt[4]}:\
+{dt[5]}" + "} " + sub(r"\x1b.*?m", r"", msg) + "\n"
                 )
 
     def log_error_data(self, func=None):
@@ -97,60 +94,47 @@ class Logger:
     def critical(self, *message, prefix="[Критическая ошибка] "):
         """Выводит критическую ошибку."""
         self.message(
-            Fore.RED +
-            prefix +
-            self.join_message(message) +
-            Fore.RESET,
+            Fore.RED + prefix + self.join_message(message) + Fore.RESET,
             self.LEVEL_CRITICAL
         )
 
     def error(self, *message, prefix="[Ошибка] "):
         """Выводит ошибку."""
         self.message(
-            Style.BRIGHT +
-            Fore.RED +
-            prefix +
-            self.join_message(message) +
-            Style.RESET_ALL,
+            Style.BRIGHT + Fore.RED + prefix + self.join_message(
+                message
+            ) + Style.RESET_ALL,
             self.LEVEL_ERROR
         )
 
     def warning(self, *message, prefix="[Предупреждение] "):
         """Выводит предупреждение."""
         self.message(
-            Fore.YELLOW +
-            prefix +
-            self.join_message(message) +
-            Fore.RESET,
+            Fore.YELLOW + prefix + self.join_message(message) + Fore.RESET,
             self.LEVEL_WARNING
         )
 
     def info(self, *message, prefix="[Инфо] "):
         """Выводит информацию."""
         self.message(
-            prefix +
-            self.join_message(message),
+            prefix + self.join_message(message),
             self.LEVEL_INFO
         )
 
     def debug(self, *message, prefix="[Отладка] "):
         """Выводит отладочную информацию."""
         self.message(
-            Style.BRIGHT +
-            Fore.BLACK +
-            prefix +
-            self.join_message(message) +
-            Style.RESET_ALL,
+            Style.BRIGHT + Fore.BLACK + prefix + self.join_message(
+                message
+            ) + Style.RESET_ALL,
             self.LEVEL_DEBUG
         )
 
     def slow(self, *message, prefix="[Отладка (матч)] "):
         """Выводит очень частую информацию (медленно)."""
         self.message(
-            Style.BRIGHT +
-            Fore.BLACK +
-            prefix +
-            self.join_message(message) +
-            Style.RESET_ALL,
+            Style.BRIGHT + Fore.BLACK + prefix + self.join_message(
+                message
+            ) + Style.RESET_ALL,
             self.LEVEL_SLOW
         )

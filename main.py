@@ -306,7 +306,7 @@ def tab_main(config, win):
         x=10,
         y=180,
         anchor="nw"
-        )
+    )
     win.place(
         Button,
         {"text": "Настроить", "command": lambda: tab_config(config, win)},
@@ -315,7 +315,7 @@ def tab_main(config, win):
         x=-10,
         y=180,
         anchor="ne"
-        )
+    )
     win.place(
         Label,
         {"text": "Консоль", "font": "Arial 16"},
@@ -324,7 +324,7 @@ def tab_main(config, win):
         x=10,
         y=220,
         anchor="nw"
-        )
+    )
     win.place(
         Button,
         {"text": "Перейти", "command": lambda: tab_console(config, win)},
@@ -333,7 +333,7 @@ def tab_main(config, win):
         x=-10,
         y=220,
         anchor="ne"
-        )
+    )
     win.place(
         Label,
         {"text": "Лог", "font": "Arial 16"},
@@ -342,7 +342,7 @@ def tab_main(config, win):
         x=10,
         y=260,
         anchor="nw"
-        )
+    )
     win.place(
         Button,
         {"text": "Показать", "command": lambda: tab_log(config, win)},
@@ -351,7 +351,7 @@ def tab_main(config, win):
         x=-10,
         y=260,
         anchor="ne"
-        )
+    )
     win.place(
         Label,
         {"text": "Github: https://github.com/werryxgames/Tanks-Battle-Server\
@@ -361,7 +361,7 @@ def tab_main(config, win):
         x=2,
         y=-2,
         anchor="sw"
-        )
+    )
     win.place(
         Label,
         {"text": "Вебсайт: https://werryxgames.ml", "font": "Arial 8"},
@@ -370,7 +370,7 @@ def tab_main(config, win):
         x=-2,
         y=-2,
         anchor="se"
-        )
+    )
 
     if is_active():
         win.elements[2].configure(

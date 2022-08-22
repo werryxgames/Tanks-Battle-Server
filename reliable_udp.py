@@ -23,7 +23,6 @@ class ReliableUDP:
 
     @staticmethod
     def custom_sort(item):
-        """Возвращает первый элемент массива."""
         return item[0]
 
     @staticmethod
