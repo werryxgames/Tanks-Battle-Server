@@ -6,3 +6,4 @@ dist
 *.spec
 venv
 build.bat
+test.bat
