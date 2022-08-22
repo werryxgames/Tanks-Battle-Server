@@ -138,7 +138,7 @@ class Client:
 
     def select_ingame(self, type_, args):
         """Обрабатывает запрос клиента на выбор args[0] из type_."""
-        if args[0] in self.account[type_]:
+        if args[0] in self.account[f"{type_}s"]:
             if AccountManager.set_account(
                 self.account["nick"],
                 "selected_pt",
@@ -149,7 +149,7 @@ class Client:
 
             if AccountManager.set_account(
                 self.account["nick"],
-                "selected_tank",
+                f"selected_{type_}",
                 args[0]
             ) != AccountManager.SUCCESSFUL:
                 self.send(["not_selected", 1])
@@ -223,7 +223,7 @@ class Client:
     def handle_tanks(self, com, args):
         """Обрабатывает корпуса клиента."""
         if com == "select_tank":
-            self.select_ingame("tanks", args)
+            self.select_ingame("tank", args)
             return True
 
         if com == "buy_tank":
@@ -235,7 +235,7 @@ class Client:
     def handle_guns(self, com, args):
         """Обрабатывает башни клиента."""
         if com == "select_gun":
-            self.select_ingame("guns", args)
+            self.select_ingame("gun", args)
             return True
 
         if com == "buy_gun":
@@ -247,7 +247,7 @@ class Client:
     def handle_pts(self, com, args):
         """Обрабатывает данные комплектов клиента."""
         if com == "select_pt":
-            self.select_ingame("pts", args)
+            self.select_ingame("pt", args)
             return True
 
         if com == "buy_pt":
