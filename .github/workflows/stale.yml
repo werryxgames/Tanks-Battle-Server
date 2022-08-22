@@ -1,0 +1,32 @@
+# This workflow warns and then closes issues and PRs that have had no activity for a specified amount of time.
+#
+# You can adjust the behavior by modifying this file.
+# For more information, see:
+# https://github.com/actions/stale
+name: Закрытие неактивных проблем и пул реквестов
+
+on:
+  schedule:
+  - cron: '30 1 * * *'
+
+jobs:
+  close-issues:
+
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+    - uses: actions/stale@v5
+      with:
+        days-before-issue-stale: 30
+        days-before-issue-close: 14
+        days-before-pr-stale: 30
+        days-before-pr-close: -1
+        stale-issue-label: "нет активности"
+        stale-issue-message: "Эта проблема была помечена как 'нет активности' из-за отсутствия активности в течении 30 дней."
+        close-issue-message: "Эта проблема была закрытка из-за отсутствия активности в течении 14 дней, после того, как ошибка была помечена как 'нет активности'"
+        stale-pr-label: "нет активности"
+        stale-pr-message: "Этот пул реквест был помечен как 'нет активности' из-за отсутствия активности в течении 30 дней."
+        repo-token: ${{ secrets.GITHUB_TOKEN }}
