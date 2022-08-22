@@ -1,4 +1,24 @@
 """Модуль с тестами к Tanks Battle Server."""
+from sys import path
+from os import path as path_
+
+try:
+    path.append(
+        path_.normpath(
+            path_.join(
+                path_.dirname(
+                    path_.realpath(
+                        __file__
+                    )
+                ),
+                "..",
+                "src"
+            )
+        )
+    )
+except IndexError:
+    pass
+
 import singleton
 import mjson
 import accounts
