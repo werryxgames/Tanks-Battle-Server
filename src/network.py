@@ -115,7 +115,7 @@ class NetworkedClient:
                     return
 
                 self.client.version = args[2]
-                self.handle_login(args[1], args[1])
+                self.handle_login(args[0], args[1])
                 return
 
         except BaseException:
