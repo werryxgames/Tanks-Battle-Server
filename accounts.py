@@ -115,30 +115,67 @@ class AccountManager:
         return AccountManager.FAILED_UNKNOWN
 
     @staticmethod
-    def login_account(nick, password):
-        """Проверяет верные ли данные для входа."""
-        if not isinstance(nick, str):
+    def check_login_data(data, lenfail, minlen=3, maxlen=12):
+        """Проверяет данные для входа без проверки на совпадение."""
+        if not isinstance(data, str):
             return AccountManager.FAILED_UNKNOWN
 
-        if not isinstance(password, str):
-            return AccountManager.FAILED_UNKNOWN
+        data = data.strip()
+
+        if len(data) < minlen or len(data) > maxlen:
+            return lenfail
+
+        if not AccountManager.check(data):
+            return AccountManager.FAILED_UNSAFE_CHARACTERS
+
+        return AccountManager.SUCCESSFUL
+
+    @staticmethod
+    def get_ban_status(data, account):
+        """Возвращает статус бана аккаунта."""
+        if "ban" in account:
+            aban = account["ban"]
+
+            if aban[0] != -1 and datetime.today().timestamp() \
+                    > aban[0]:
+                del account["ban"]
+                write("data.json", data)
+            else:
+                if len(aban) > 1:
+                    return [
+                        AccountManager.FAILED_BAN,
+                        aban[0],
+                        aban[1]
+                    ]
+
+                return [AccountManager.FAILED_BAN, aban[0], None]
+
+        return AccountManager.SUCCESSFUL
+
+    @staticmethod
+    def login_account(nick, password):
+        """Проверяет верные ли данные для входа."""
+        nick_check = AccountManager.check_login_data(
+            nick,
+            AccountManager.FAILED_NICK_LENGTH
+        )
+
+        if nick_check != AccountManager.SUCCESSFUL:
+            return nick_check
+
+        pass_check = AccountManager.check_login_data(
+            password,
+            AccountManager.FAILED_PASSWORD_LENGTH
+        )
+
+        if pass_check != AccountManager.SUCCESSFUL:
+            return pass_check
 
         nick = nick.strip()
         password = password.strip()
 
-        if len(nick) < 3 or len(nick) > 12:
-            return AccountManager.FAILED_NICK_LENGTH
-
-        if len(password) < 6 or len(password) > 16:
-            return AccountManager.FAILED_PASSWORD_LENGTH
-
-        if not AccountManager.check(nick):
-            return AccountManager.FAILED_UNSAFE_CHARACTERS
-
-        if not AccountManager.check(password):
-            return AccountManager.FAILED_UNSAFE_CHARACTERS
-
         data = read("data.json")
+
         if data is None:
             return AccountManager.FAILED_UNKNOWN
 
@@ -147,23 +184,9 @@ class AccountManager:
                 if account["password"] == password:
                     if "console" in account:
                         return AccountManager.FAILED_CONSOLE
-                    if "ban" in account:
-                        aban = account["ban"]
 
-                        if aban[0] != -1 and datetime.today().timestamp() \
-                                > aban[0]:
-                            del account["ban"]
-                            write("data.json", data)
-                        else:
-                            if len(aban) > 1:
-                                return [
-                                    AccountManager.FAILED_BAN,
-                                    aban[0],
-                                    aban[1]
-                                ]
+                    return AccountManager.get_ban_status(data, account)
 
-                            return [AccountManager.FAILED_BAN, aban[0], None]
-                    return AccountManager.SUCCESSFUL
                 return AccountManager.FAILED_PASSWORD_NOT_MATCH
 
         return AccountManager.FAILED_NOT_FOUND
@@ -171,26 +194,24 @@ class AccountManager:
     @staticmethod
     def add_account(nick, password):
         """Создаёт новый аккаунт."""
-        if not isinstance(nick, str):
-            return AccountManager.FAILED_UNKNOWN
+        nick_check = AccountManager.check_login_data(
+            nick,
+            AccountManager.FAILED_NICK_LENGTH
+        )
 
-        if not isinstance(password, str):
-            return AccountManager.FAILED_UNKNOWN
+        if nick_check != AccountManager.SUCCESSFUL:
+            return nick_check
+
+        pass_check = AccountManager.check_login_data(
+            password,
+            AccountManager.FAILED_PASSWORD_LENGTH
+        )
+
+        if pass_check != AccountManager.SUCCESSFUL:
+            return pass_check
 
         nick = nick.strip()
         password = password.strip()
-
-        if len(nick) < 3 or len(nick) > 12:
-            return AccountManager.FAILED_NICK_LENGTH
-
-        if len(password) < 6 or len(password) > 16:
-            return AccountManager.FAILED_PASSWORD_LENGTH
-
-        if not AccountManager.check(nick):
-            return AccountManager.FAILED_UNSAFE_CHARACTERS
-
-        if not AccountManager.check(password):
-            return AccountManager.FAILED_UNSAFE_CHARACTERS
 
         data = read("data.json")
 

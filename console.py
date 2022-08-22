@@ -45,197 +45,257 @@ class ConsoleExecutor:
             self.win.elements[2].configure(state="disabled")
 
     @staticmethod
+    def get_value(value):
+        """Возвращает значение из строки."""
+        if value[0] == "\\":
+            return value[1:]
+
+        try:
+            return int(value)
+        except ValueError:
+            return value
+
+    @staticmethod
+    def execute_ban_player(args):
+        """Выполняет команду блокировки игрока."""
+        nick = args[1]
+
+        try:
+            if args[2] == "-1":
+                tstamp = -1
+            else:
+                time = args[2].split(".")
+                tstamp = datetime(
+                    int(time[2]),
+                    int(time[1]),
+                    int(time[0])
+                ).timestamp()
+
+            reason = None
+
+            if len(args) > 3:
+                reason = " ".join(args[3:])
+
+            status = AccountManager.set_account(
+                nick,
+                "ban",
+                [tstamp, reason]
+            )
+
+            if status == AccountManager.SUCCESSFUL:
+                string = f"Аккаунт '{nick}' заблокирован "
+
+                if tstamp == -1:
+                    string += "навсегда"
+                else:
+                    string += "до " + args[2]
+
+                string += ", причина"
+
+                if reason is None:
+                    string += " не указана"
+                else:
+                    string += ": '" + reason + "'"
+
+                return string
+
+            if status == AccountManager.FAILED_NOT_FOUND:
+                return "Аккаунт не найден"
+
+            return "Не удалось выполнить команду"
+        except (ValueError, IndexError):
+            return "Неверный синтаксис команды: 'account <никнейм> \
+ban (<день>.<месяц>.<год> | -1) [причина]'"
+
+    @staticmethod
+    def execute_account_setget(args):
+        """Выполняет установку/получение значения аккаунта."""
+        nick = args[0]
+        act = args[1]
+
+        if act == "set":
+            if len(args) <= 3:
+                return "Ошибка команды"
+
+            key = args[2]
+            val = ConsoleExecutor.get_value(args[3])
+
+            status = AccountManager.set_account(nick, key, val)
+
+            if status == AccountManager.SUCCESSFUL:
+                string = f"Установлено значение '{key}' в "
+                string += str(val) if isinstance(val, int) else f"'{val}'"
+                string += f" для аккаунта '{nick}'"
+                return string
+
+            if status == AccountManager.FAILED_NOT_FOUND:
+                return "Аккаунт не найден"
+
+            return "Не удалось выполнить команду"
+
+        if act == "get":
+            status = AccountManager.get_account(nick)
+
+            if status == AccountManager.FAILED_NOT_FOUND:
+                return "Аккаунт не найден"
+
+            if status == AccountManager.FAILED_UNKNOWN:
+                return "Не удалось выполнить команду"
+
+            return status[args[2]] if len(args) > 2 else status
+
+        return None
+
+    @staticmethod
+    def execute_account_del(args):
+        """Удаляет ключ аккаунта."""
+        if len(args) <= 2:
+            return "Ошибка команды"
+
+        nick = args[0]
+        key = args[2]
+        status = AccountManager.del_account_key(nick, key)
+
+        if status == AccountManager.SUCCESSFUL:
+            return f"Удален ключ '{key}' для аккаунта '{nick}'"
+
+        if status == AccountManager.FAILED_NOT_FOUND:
+            return "Аккаунт не найден"
+
+        if status == AccountManager.FAILED_UNKNOWN:
+            return "Не удалось выполнить команду"
+
+        if status == AccountManager.FAILED_NOT_EXISTS:
+            return f"Ключ '{key}' не найден в аккаунте '{nick}'"
+
+        return "Не удалось выполнить команду"
+
+    @staticmethod
+    def execute_unban_player(args):
+        nick = args[0]
+        status = AccountManager.del_account_key(nick, "ban")
+
+        if status == AccountManager.SUCCESSFUL:
+            return f"Аккаунт '{nick}' разблокирован"
+
+        if status == AccountManager.FAILED_NOT_EXISTS:
+            return f"Аккаунт '{nick}' ещё не заблокирован"
+
+        if status == AccountManager.FAILED_NOT_FOUND:
+            return "Аккаунт не найден"
+
+        return "Не удалось выполнить команду"
+
+    @staticmethod
+    def execute_remove_account(args):
+        """Удаляет аккаунт."""
+        if len(args) != 2:
+            return "Команда 'account <никнейм> remove' не принимает \
+аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
+
+        nick = args[0]
+        status = AccountManager.del_account(nick)
+
+        if status == AccountManager.SUCCESSFUL:
+            return f"Аккаунт '{nick}' удалён"
+
+        if status == AccountManager.FAILED_NOT_FOUND:
+            return "Аккаунт не найден"
+
+        return "Не удалось выполнить команду"
+
+    @staticmethod
+    def execute_account(args):
+        """Выполняет команду аккаунта."""
+        if len(args) < 2:
+            return "Ошибка команды"
+
+        act = args[1]
+
+        sgstatus = ConsoleExecutor.execute_account_setget(args)
+
+        if sgstatus is not None:
+            return sgstatus
+
+        if act == "del":
+            return ConsoleExecutor.execute_account_del(args)
+
+        if act == "ban":
+            return ConsoleExecutor.execute_ban_player(args)
+
+        if act == "unban":
+            return ConsoleExecutor.execute_unban_player(args)
+
+        if act == "remove":
+            return ConsoleExecutor.execute_remove_account(args)
+
+        return "Неверный синтаксис команды"
+
+    @staticmethod
+    def execute_player_battle(args, battle, battles):
+        """Выполняет команду над битвой игрока."""
+        if len(args) < 3:
+            return "Ошибка команды"
+
+        act2 = args[2]
+
+        if act2 == "players":
+            pls = []
+
+            for pl in battle["players"]:
+                pls.append(pl.nick)
+
+            return pls
+
+        if act2 == "end":
+            del battles[battles.index(battle)]
+            return "Матч завершён"
+
+        return "Неверный синтаксис команды"
+
+    @staticmethod
+    def execute_player(args):
+        """Выполняет команду игрока."""
+        if len(args) < 2:
+            return "Ошибка команды"
+
+        nick = args[0]
+        act = args[1]
+
+        battle = None
+        player = None
+        battles = get_matches()
+
+        for i in battles:
+            for pl in i["players"]:
+                if pl.nick == nick:
+                    battle = i
+                    player = pl
+                    break
+
+            if player is not None:
+                break
+
+        if player is None:
+            return "Игрок не найден, или не в матче сейчас"
+
+        if act == "kick":
+            battle["messages"].append(GlobalMessage("player_leave", nick))
+            return "Игрок отключён от матча"
+
+        if act == "battle":
+            return ConsoleExecutor.execute_player_battle(args, battle, battles)
+
+        return "Неверный синтаксис команды"
+
+    @staticmethod
     def execute(com, args):
         """Выполняет команду com с аргументами args."""
         if com == "account":
-            if len(args) < 2:
-                return "Ошибка команды"
+            return ConsoleExecutor.execute_account(args)
 
-            nick = args[0]
-            act = args[1]
-
-            if act == "set":
-                if len(args) <= 3:
-                    return "Ошибка команды"
-
-                key = args[2]
-                val = args[3]
-
-                if val[0] == "\\":
-                    val = val[1:]
-                else:
-                    try:
-                        val = int(val)
-                    except ValueError:
-                        pass
-
-                status = AccountManager.set_account(nick, key, val)
-
-                if status == AccountManager.SUCCESSFUL:
-                    s = f"Установлено значение '{key}' в "
-                    if isinstance(val, int):
-                        s += str(val)
-                    else:
-                        s += f"'{val}'"
-                    s += f" для аккаунта '{nick}'"
-                    return s
-
-                if status == AccountManager.FAILED_NOT_FOUND:
-                    return "Аккаунт не найден"
-
-                if status == AccountManager.FAILED_UNKNOWN:
-                    return "Не удалось выполнить команду"
-            elif act == "get":
-                if len(args) > 2:
-                    key = args[2]
-                else:
-                    key = None
-
-                status = AccountManager.get_account(nick)
-
-                if status == AccountManager.FAILED_NOT_FOUND:
-                    return "Аккаунт не найден"
-
-                if status == AccountManager.FAILED_UNKNOWN:
-                    return "Не удалось выполнить команду"
-
-                if key is None:
-                    return status
-
-                return status[key]
-            elif act == "del":
-                if len(args) <= 2:
-                    return "Ошибка команды"
-
-                key = args[2]
-                status = AccountManager.del_account_key(nick, key)
-
-                if status == AccountManager.SUCCESSFUL:
-                    return f"Удален ключ '{key}' для аккаунта '{nick}'"
-
-                if status == AccountManager.FAILED_NOT_FOUND:
-                    return "Аккаунт не найден"
-
-                if status == AccountManager.FAILED_UNKNOWN:
-                    return "Не удалось выполнить команду"
-
-                if status == AccountManager.FAILED_NOT_EXISTS:
-                    return f"Ключ '{key}' не найден в аккаунте '{nick}'"
-            elif act == "ban":
-                try:
-                    if args[2] == "-1":
-                        ts = -1
-                    else:
-                        time = args[2].split(".")
-                        ts = datetime(
-                            int(time[2]),
-                            int(time[1]),
-                            int(time[0])
-                        ).timestamp()
-
-                    reason = None
-                    if len(args) > 3:
-                        reason = " ".join(args[3:])
-
-                    status = AccountManager.set_account(
-                        nick,
-                        "ban",
-                        [ts, reason]
-                    )
-
-                    if status == AccountManager.SUCCESSFUL:
-                        s = f"Аккаунт '{nick}' заблокирован "
-                        if ts == -1:
-                            s += "навсегда"
-                        else:
-                            s += "до " + args[2]
-                        s += ", причина"
-                        if reason is None:
-                            s += " не указана"
-                        else:
-                            s += ": '" + reason + "'"
-                        return s
-
-                    if status == AccountManager.FAILED_NOT_FOUND:
-                        return "Аккаунт не найден"
-
-                    if status == AccountManager.FAILED_UNKNOWN:
-                        return "Не удалось выполнить команду"
-                except (ValueError, IndexError):
-                    return "Неверный синтаксис команды: 'account <никнейм> \
-ban (<день>.<месяц>.<год> | -1) [причина]'"
-            elif act == "unban":
-                status = AccountManager.del_account_key(nick, "ban")
-
-                if status == AccountManager.SUCCESSFUL:
-                    return f"Аккаунт '{nick}' разблокирован"
-
-                if status == AccountManager.FAILED_NOT_EXISTS:
-                    return f"Аккаунт '{nick}' ещё не заблокирован"
-
-                if status == AccountManager.FAILED_NOT_FOUND:
-                    return "Аккаунт не найден"
-
-                if status == AccountManager.FAILED_UNKNOWN:
-                    return "Не удалось выполнить команду"
-            elif act == "remove":
-                if len(args) == 2:
-                    status = AccountManager.del_account(nick)
-
-                    if status == AccountManager.SUCCESSFUL:
-                        return f"Аккаунт '{nick}' удалён"
-
-                    if status == AccountManager.FAILED_NOT_FOUND:
-                        return "Аккаунт не найден"
-
-                    if status == AccountManager.FAILED_UNKNOWN:
-                        return "Не удалось выполнить команду"
-                else:
-                    return "Команда 'account <никнейм> remove' не принимает \
-аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
-        elif com == "player":
-            if len(args) < 2:
-                return "Ошибка команды"
-
-            nick = args[0]
-            act = args[1]
-
-            battle = None
-            player = None
-            battles = get_matches()
-
-            for i in battles:
-                for pl in i["players"]:
-                    if pl.nick == nick:
-                        battle = i
-                        player = pl
-                        break
-                if player is not None:
-                    break
-
-            if player is None:
-                return "Игрок не найден, или не в матче сейчас"
-
-            if act == "kick":
-                battle["messages"].append(GlobalMessage("player_leave", nick))
-                return "Игрок отключён от матча"
-            if act == "battle":
-                if len(args) < 3:
-                    return "Ошибка команды"
-
-                act2 = args[2]
-
-                if act2 == "players":
-                    pls = []
-
-                    for pl in battle["players"]:
-                        pls.append(pl.nick)
-
-                    return pls
-
-                if act2 == "end":
-                    del battles[battles.index(battle)]
-                    return "Матч завершён"
+        if com == "player":
+            return ConsoleExecutor.execute_player(args)
 
         return "Команда не найдена"
 

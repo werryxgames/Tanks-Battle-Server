@@ -12,7 +12,6 @@ from network import start_server
 from network import start_server_async
 from network import stop_server
 from singleton import set_data
-from tests import tests
 
 is_support_gui = True
 
@@ -423,15 +422,14 @@ def main():
 
     logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_INFO)
 
+    if "--nogui" in argv:
+        is_support_gui = False
+
     try:
         config = read("config.json")
     except JSONDecodeError:
         logger.critical("Не удалось загрузить конфигурацию. \
 Возможно файл был повреждён")
-
-        for i in argv:
-            if i.lower() == "--nogui":
-                is_support_gui = False
 
         if is_support_gui:
             root = Tk()
@@ -444,33 +442,19 @@ def main():
 
         stop(1)
 
-    check_tests = True
+    try:
+        if is_support_gui:
+            logger = Logger(Logger.LEVEL_CRITICAL, Logger.LEVEL_INFO)
+            init_window(config, logger)
+            return
 
-    for i in argv:
-        if i.lower() == "--notests":
-            check_tests = False
-            break
-
-    if not check_tests or tests.main(True):
-        try:
-            for i in argv:
-                if i.lower() == "--nogui":
-                    is_support_gui = False
-                    break
-
-            if is_support_gui:
-                logger = Logger(Logger.LEVEL_CRITICAL, Logger.LEVEL_INFO)
-                init_window(config, logger)
-            else:
-                set_data(config, logger)
-                start_server(config, logger)
-        except KeyboardInterrupt:
-            logger.info("Сервер остановлен")
-            stop(0)
-        except BaseException:
-            logger.log_error_data(logger.critical)
-    else:
-        logger.critical("Один из тестов провален")
+        set_data(config, logger)
+        start_server(config, logger)
+    except KeyboardInterrupt:
+        logger.info("Сервер остановлен")
+        stop(0)
+    except BaseException:
+        logger.log_error_data(logger.critical)
 
 
 if __name__ == '__main__':

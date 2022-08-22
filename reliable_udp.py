@@ -65,6 +65,34 @@ class ReliableUDP:
             message
         )
 
+    def new_jdt(self, jdt, packet_id):
+        """Вызывается при получении нового пакета."""
+        matches = 0
+        last_i = 0
+        check = True
+
+        self.received.append(jdt)
+        self.received.sort(key=self.custom_sort)
+
+        for i in self.received:
+            if i[0] == packet_id:
+                matches += 1
+
+                if matches >= 2:
+                    return None
+
+            if check and i[0] == last_i:
+                last_i += 1
+            elif check:
+                check = False
+
+        last_i -= 1
+
+        if packet_id <= last_i:
+            return jdt[1]
+
+        return None
+
     def receive(self, data):
         """Обрабатывает и декодирует Reliable данные клиента."""
         try:
@@ -87,33 +115,11 @@ class ReliableUDP:
 
             self.sock.sendto(dumps([-2, packet_id]).encode("utf8"), self.addr)
 
-            matches = 0
-            last_i = 0
-            check = True
-
             if jdt not in self.received:
-                self.received.append(jdt)
-                self.received.sort(key=self.custom_sort)
-
-                for i in self.received:
-                    if i[0] == packet_id:
-                        matches += 1
-
-                        if matches >= 2:
-                            return None
-                    if check and i[0] == last_i:
-                        last_i += 1
-                    elif check:
-                        check = False
-
-                last_i -= 1
-
-                if packet_id <= last_i:
-                    return jdt[1]
+                return self.new_jdt(jdt, packet_id)
 
         except BaseException:
             self.logger.log_error_data()
-
             return False
 
         return None

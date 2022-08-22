@@ -1,4 +1,5 @@
 # Tanks Battle Server
+[![CodeQL](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/codeql.yml)
 
 Официальный сервер для многопользовательской игры "Tanks Battle"
 

@@ -53,6 +53,77 @@ class NetworkedClient:
         """Отправляет Reliable UDP данные клиенту."""
         self.rudp.send(*args, **kwargs)
 
+    def handle_register(self, login, password):
+        """Обрабатывает рагистрацию клиента."""
+        res = AccountManager.add_account(login, password)
+
+        if res == AccountManager.SUCCESSFUL:
+            self.send([
+                "register_successful",
+                login,
+                password
+            ])
+            self.client.set_login_data(login, password)
+            self.send_client = True
+            return
+
+        self.send(["register_fail", res])
+        return
+
+    def handle_login(self, login, password):
+        """Обрабатывает вход клиента в аккаунт."""
+        res = AccountManager.login_account(login, password)
+
+        if res == AccountManager.SUCCESSFUL:
+            self.send(["login_successful", login, password])
+            self.client.set_login_data(login, password)
+            self.send_client = True
+            return
+
+        if res == AccountManager.FAILED_CONSOLE:
+            self.send(["login_fail", res, login, password])
+            self.console = Console(
+                self.sock,
+                self.addr,
+                self.rudp
+            )
+            return
+
+        if isinstance(res, list):
+            if res[0] == AccountManager.FAILED_BAN:
+                self.send(["login_fail", *res])
+                return
+
+        self.send(["login_fail", res])
+        return
+
+    def handle(self, com, args):
+        """Обрабатывает данные от клиента."""
+        try:
+            if com == "register":
+                if args[2] not in self.config["accept_client_versions"]:
+                    self.send(["version_not_accepted"])
+                    return
+
+                self.client.version = args[2]
+                self.handle_register(args[0], args[1])
+                return
+
+            if com == "login":
+                if args[2] not in self.config["accept_client_versions"]:
+                    self.send(["version_not_accepted"])
+                    return
+
+                self.client.version = args[2]
+                self.handle_login(args[1], args[1])
+                return
+
+        except BaseException:
+            self.logger.log_error_data()
+            self.close()
+
+            return
+
     def receive(self, data):
         """Обрабатывает данные от клиента."""
         rudp = self.rudp.receive(data)
@@ -75,72 +146,15 @@ class NetworkedClient:
 
         if self.console is not None:
             self.console.receive(pdata)
-        elif self.send_client:
+            return
+
+        if self.send_client:
             self.client.receive(pdata)
-        else:
-            try:
-                com = pdata[0]
-                args = pdata[1:]
+            return
 
-                if com == "register":
-                    if args[2] not in self.config["accept_client_versions"]:
-                        self.send(["version_not_accepted"])
-                    else:
-                        self.client.version = args[2]
-
-                        res = AccountManager.add_account(args[0], args[1])
-
-                        if res == AccountManager.SUCCESSFUL:
-                            self.send([
-                                "register_successful",
-                                args[0],
-                                args[1]
-                            ])
-                            self.client.set_login_data(args[0], args[1])
-                            self.send_client = True
-
-                            return
-
-                        self.send(["register_fail", res])
-
-                elif com == "login":
-                    if args[2] not in self.config["accept_client_versions"]:
-                        self.send(["version_not_accepted"])
-                    else:
-                        self.client.version = args[2]
-
-                        res = AccountManager.login_account(args[0], args[1])
-
-                        if res == AccountManager.SUCCESSFUL:
-                            self.send(["login_successful", args[0], args[1]])
-                            self.client.set_login_data(args[0], args[1])
-                            self.send_client = True
-
-                            return
-
-                        if res == AccountManager.FAILED_CONSOLE:
-                            self.send(["login_fail", res, args[0], args[1]])
-                            self.console = Console(
-                                self.sock,
-                                self.addr,
-                                self.rudp
-                            )
-
-                            return
-
-                        if isinstance(res, list):
-                            if res[0] == AccountManager.FAILED_BAN:
-                                self.send(["login_fail", *res])
-
-                                return
-
-                        self.send(["login_fail", res])
-
-            except BaseException:
-                self.logger.log_error_data()
-                self.close()
-
-                return
+        com = pdata[0]
+        args = pdata[1:]
+        self.handle(com, args)
 
     def check_is_first(self, data):
         """Проверяет является ли data нормальной для первого receive()."""
@@ -200,6 +214,20 @@ def start_server_async():
             gui.elements[3].configure(text="Остановить", command=stop_server)
 
 
+def on_new_client(logger, sock_, addr, data):
+    """Функция, вызываемая при подключении клиента."""
+    if addr not in clients.keys():
+        clients[addr] = NetworkedClient(sock_, addr)
+
+        if clients[addr].check_is_first(data):
+            logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
+        else:
+            del clients[addr]
+            return True
+
+    return False
+
+
 def start_server(config, logger):
     """Синхронно запускает сервер."""
     set_data(config, logger)
@@ -219,14 +247,8 @@ def start_server(config, logger):
         data = adrdata[0]
         addr = adrdata[1]
 
-        if addr not in clients.keys():
-            clients[addr] = NetworkedClient(sock_, addr)
-
-            if clients[addr].check_is_first(data):
-                logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
-            else:
-                del clients[addr]
-                continue
+        if on_new_client(logger, sock_, addr, data):
+            continue
 
         try:
             tdata = loads(data.decode('utf8'))
