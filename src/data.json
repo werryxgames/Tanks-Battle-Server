@@ -1,5 +1,60 @@
 {
-    "accounts": [],
+    "accounts": [
+        {
+            "nick": "Werryx",
+            "password": "123456",
+            "xp": 0,
+            "crystals": 0,
+            "tanks": [
+                1
+            ],
+            "guns": [
+                0
+            ],
+            "pts": [],
+            "selected_tank": 1,
+            "selected_gun": 0,
+            "selected_pt": -1,
+            "settings": [
+                false,
+                true,
+                500
+            ]
+        },
+        {
+            "nick": "Werryx2",
+            "password": "123456",
+            "xp": 0,
+            "crystals": 999994881,
+            "tanks": [
+                1,
+                0,
+                2,
+                3
+            ],
+            "guns": [
+                0,
+                1
+            ],
+            "pts": [
+                0,
+                1,
+                2,
+                3
+            ],
+            "selected_tank": 0,
+            "selected_gun": 0,
+            "selected_pt": -1,
+            "settings": [
+                false,
+                true,
+                500
+            ],
+            "selected_tanks": 3,
+            "selected_guns": 1,
+            "selected_pts": 3
+        }
+    ],
     "tanks": [
         {
             "name": "Light",
@@ -9,6 +64,11 @@
             "speed": 40000000,
             "gravity": 30000000,
             "rotation_speed": 80000000,
+            "gun_position": [
+                2.4,
+                2.7,
+                0
+            ],
             "price": 75
         },
         {
@@ -19,6 +79,11 @@
             "speed": 40000000,
             "gravity": 30000000,
             "rotation_speed": 60000000,
+            "gun_position": [
+                2.4,
+                2.7,
+                0
+            ],
             "price": 0
         },
         {
@@ -29,6 +94,11 @@
             "speed": 40000000,
             "gravity": 30000000,
             "rotation_speed": 30000000,
+            "gun_position": [
+                2.4,
+                2.7,
+                0
+            ],
             "price": 115
         },
         {
@@ -39,6 +109,11 @@
             "speed": 40000000,
             "gravity": 30000000,
             "rotation_speed": 40000000,
+            "gun_position": [
+                1.9,
+                2.7,
+                0
+            ],
             "price": 130
         }
     ],
@@ -57,7 +132,7 @@
             "name": "Thunder",
             "description": "Грозная башня. Большой урон, но и перезарядка больше",
             "damage": 150,
-            "rotation_speed": 40,
+            "rotation_speed": 0,
             "shot_speed": 200,
             "recoil": 6000000,
             "recharge": 2.5,
@@ -67,13 +142,18 @@
     "pts": [
         {
             "name": "ЛТ-21 \"Хомяк\"",
-            "description": "Первый комплект",
+            "description": "Достаточно быстрый комплект со слабой башней",
             "tank": {
                 "durability": 450,
                 "mass": 12000,
                 "speed": 36000000,
                 "gravity": 30000000,
-                "rotation_speed": 75000000
+                "rotation_speed": 75000000,
+                "gun_position": [
+                    3.3,
+                    2,
+                    0.2
+                ]
             },
             "gun": {
                 "damage": 100,
@@ -92,7 +172,12 @@
                 "mass": 25000,
                 "speed": 45000000,
                 "gravity": 40000000,
-                "rotation_speed": 40000000
+                "rotation_speed": 40000000,
+                "gun_position": [
+                    -1.8,
+                    1,
+                    -0.3
+                ]
             },
             "gun": {
                 "damage": 590,
@@ -111,7 +196,12 @@
                 "mass": 20000,
                 "speed": 46000000,
                 "gravity": 30000000,
-                "rotation_speed": 81000000
+                "rotation_speed": 81000000,
+                "gun_position": [
+                    -1.5,
+                    1.7,
+                    -0.4
+                ]
             },
             "gun": {
                 "damage": 120,
@@ -130,7 +220,12 @@
                 "mass": 28000,
                 "speed": 45000000,
                 "gravity": 40000000,
-                "rotation_speed": 41000000
+                "rotation_speed": 41000000,
+                "gun_position": [
+                    -1.1,
+                    2.9,
+                    0
+                ]
             },
             "gun": {
                 "damage": 300,

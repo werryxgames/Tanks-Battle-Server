@@ -49,7 +49,7 @@ class BattlePlayer:
                 "speed",
                 "gravity",
                 "rotation_speed",
-                "gun_rotation_speed"
+                "gun_position"
             ]:
                 res_data[key] = value
 
