@@ -193,3 +193,35 @@ def test_accounts_del_account_key(nick, key, data, result):
 def test_accounts_set_account(nick, key, value, data, result):
     """Тесты AccountManager.set_account()."""
     assert AccountManager.set_account_(nick, key, value, data) == result
+
+
+@pytest.mark.parametrize("data, lenfail, result", (
+    (
+        "test",
+        AccountManager.FAILED_NICK_LENGTH,
+        AccountManager.SUCCESSFUL
+    ),
+    (
+        "<incorrect>",
+        AccountManager.FAILED_NICK_LENGTH,
+        AccountManager.FAILED_UNSAFE_CHARACTERS
+    ),
+    (
+        -1,
+        AccountManager.FAILED_NICK_LENGTH,
+        AccountManager.FAILED_UNKNOWN
+    ),
+    (
+        "",
+        AccountManager.FAILED_NICK_LENGTH,
+        AccountManager.FAILED_NICK_LENGTH
+    ),
+    (
+        "12345678901234567890",
+        AccountManager.FAILED_PASSWORD_LENGTH,
+        AccountManager.FAILED_PASSWORD_LENGTH
+    )
+))
+def test_accounts_check_login_data(data, lenfail, result):
+    """Тесты AccountManager.check_login_data()."""
+    assert AccountManager.check_login_data(data, lenfail) == result
