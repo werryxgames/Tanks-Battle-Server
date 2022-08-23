@@ -1,48 +1,5 @@
 {
-    "accounts": [
-        {
-            "nick": "Werryx2",
-            "password": "16086210e635c4ecb87b55b635beff8c",
-            "xp": 0,
-            "crystals": 0,
-            "tanks": [
-                1
-            ],
-            "guns": [
-                0
-            ],
-            "pts": [],
-            "selected_tank": 1,
-            "selected_gun": 0,
-            "selected_pt": -1,
-            "settings": [
-                false,
-                true,
-                500
-            ]
-        },
-        {
-            "nick": "Werryx",
-            "password": "d330c1712246f1d5b9216c2bd64a51a1",
-            "xp": 0,
-            "crystals": 0,
-            "tanks": [
-                1
-            ],
-            "guns": [
-                0
-            ],
-            "pts": [],
-            "selected_tank": 1,
-            "selected_gun": 0,
-            "selected_pt": -1,
-            "settings": [
-                false,
-                true,
-                500
-            ]
-        }
-    ],
+    "accounts": [],
     "tanks": [
         {
             "name": "Light",

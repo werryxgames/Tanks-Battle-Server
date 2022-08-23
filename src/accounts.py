@@ -123,7 +123,7 @@ class AccountManager:
 
         data = data.strip()
 
-        if len(data) < minlen or len(data) > maxlen:
+        if len(data) < minlen or (maxlen != -1 and len(data) > maxlen):
             return lenfail
 
         if not AccountManager.check(data):
@@ -166,7 +166,9 @@ class AccountManager:
 
         pass_check = AccountManager.check_login_data(
             password,
-            AccountManager.FAILED_PASSWORD_LENGTH
+            AccountManager.FAILED_PASSWORD_LENGTH,
+            6,
+            -1
         )
 
         if pass_check != AccountManager.SUCCESSFUL:
@@ -218,7 +220,9 @@ class AccountManager:
 
         pass_check = AccountManager.check_login_data(
             password,
-            AccountManager.FAILED_PASSWORD_LENGTH
+            AccountManager.FAILED_PASSWORD_LENGTH,
+            6,
+            -1
         )
 
         if pass_check != AccountManager.SUCCESSFUL:
