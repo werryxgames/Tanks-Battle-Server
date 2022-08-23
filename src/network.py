@@ -150,7 +150,7 @@ def is_active():
 
 def stop_server():
     """Останавливает сервер."""
-    global sock, thr
+    global thr
 
     thr.terminate()
 
@@ -190,7 +190,7 @@ def start_server_async():
 
 def on_new_client(logger, sock_, addr, data):
     """Функция, вызываемая при подключении клиента."""
-    if addr not in clients.keys():
+    if addr not in clients:
         clients[addr] = NetworkedClient(sock_, addr)
 
         if clients[addr].check_is_first(data):

@@ -3,31 +3,25 @@ from copy import deepcopy
 
 from accounts import AccountManager
 from mjson import read
+from netclasses import NetUser
 from player import Player
 from singleton import add_match
 from singleton import get_clients
-from singleton import get_data
 from singleton import get_matches
 
 clients = get_clients()
 
 
-class Client:
+class Client(NetUser):
     """Класс клиента в игре."""
 
     def __init__(self, sock, addr, rudp):
         self.sock = sock
         self.addr = addr
-        self.rudp = rudp
 
-        data = get_data()
-        self.config = data[0]
-        self.logger = data[1]
+        super().__init__(rudp)
 
         self.version = None
-        self.login = None
-        self.password = None
-        self.account = None
         self.player = None
         self.send_player = False
 
@@ -41,34 +35,6 @@ class Client:
 {self.addr[1]}') отключён")
         except OSError:
             pass
-
-    def set_login_data(self, login, password):
-        """Устанавливает данные для авторизации."""
-        self.login = login
-        self.password = password
-        self.account = AccountManager.get_account(login)
-
-        if self.account == AccountManager.FAILED_UNKNOWN or \
-                self.account == AccountManager.FAILED_NOT_FOUND or \
-                self.account["password"] != password:
-            return False
-
-        return True
-
-    def refresh_account(self):
-        """Перезагружает аккаунт и проверяет доступен ли он."""
-        self.account = AccountManager.get_account(self.login)
-
-        if self.account == AccountManager.FAILED_UNKNOWN or \
-                self.account == AccountManager.FAILED_NOT_FOUND or \
-                self.account["password"] != self.password:
-            return False
-
-        return True
-
-    def send(self, *args, **kwargs):
-        """Отправляет Reliable UDP пакет клиенту."""
-        self.rudp.send(*args, **kwargs)
 
     def redirect_player(self, jdt):
         """Перенаправляет пакет на Player, если возможно."""

@@ -23,6 +23,7 @@ class ReliableUDP:
 
     @staticmethod
     def custom_sort(item):
+        """Возвращет первый элемент списка item."""
         return item[0]
 
     @staticmethod
@@ -105,7 +106,7 @@ class ReliableUDP:
             if packet_id == -2:
                 arg = jdt[1]
 
-                if arg in self.sender_threads.keys():
+                if arg in self.sender_threads:
                     thr = self.sender_threads[arg]
                     del self.sender_threads[arg]
                     thr.join()
