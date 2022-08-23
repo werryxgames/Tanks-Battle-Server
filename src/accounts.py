@@ -1,10 +1,11 @@
 """Модуль управления аккаунтами."""
 from datetime import datetime
+from hashlib import sha3_256
+
 from mjson import append
 from mjson import read
 from mjson import write
 from singleton import get_data
-from hashlib import md5
 
 
 class AccountManager:
@@ -204,7 +205,7 @@ class AccountManager:
 
         data = data.encode("utf8")
         salt = salt.encode("utf8")
-        hashed_data = md5(data + salt).hexdigest()
+        hashed_data = sha3_256(data + salt).hexdigest()
         return hashed_data
 
     @staticmethod
