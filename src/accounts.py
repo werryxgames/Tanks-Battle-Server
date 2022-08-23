@@ -1,11 +1,45 @@
 """Модуль управления аккаунтами."""
 from datetime import datetime
-from hashlib import sha3_256
 
 from mjson import append
 from mjson import read
 from mjson import write
 from singleton import get_data
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
+
+
+class Hasher:
+    """Класс хеширования паролей."""
+
+    def __init__(self):
+        self.phasher = PasswordHasher()
+
+    @staticmethod
+    def rehash_password(nick, new_hash):
+        """Устанавливает новый хеш в data.json."""
+        return AccountManager.set_account(nick, "password", new_hash)
+
+    def hash(self, password, nick):
+        """Хеширует пароль."""
+        result = self.phasher.hash(password + nick)
+        return result
+
+    def verify(self, hash_, password, nick):
+        """Проверяет является ли hash_ хешом data."""
+        try:
+            self.phasher.verify(hash_, password + nick)
+        except VerifyMismatchError:
+            return False
+
+        if self.phasher.check_needs_rehash(hash_):
+            new_hash = self.hash(password, nick)
+            self.rehash_password(nick, new_hash)
+
+        return True
+
+
+hasher = Hasher()
 
 
 class AccountManager:
@@ -183,11 +217,9 @@ class AccountManager:
         if data is None:
             return AccountManager.FAILED_UNKNOWN
 
-        hashed_password = AccountManager.hash(password, nick)
-
         for account in data["accounts"]:
             if account["nick"] == nick:
-                if account["password"] == hashed_password:
+                if hasher.verify(account["password"], password, nick):
                     if "console" in account:
                         return AccountManager.FAILED_CONSOLE
 
@@ -196,17 +228,6 @@ class AccountManager:
                 return AccountManager.FAILED_PASSWORD_NOT_MATCH
 
         return AccountManager.FAILED_NOT_FOUND
-
-    @staticmethod
-    def hash(data, salt=None):
-        """Преобразует data в md5 хеш."""
-        if salt is None:
-            salt = ""
-
-        data = data.encode("utf8")
-        salt = salt.encode("utf8")
-        hashed_data = sha3_256(data + salt).hexdigest()
-        return hashed_data
 
     @staticmethod
     def add_account(nick, password):
@@ -241,7 +262,7 @@ class AccountManager:
             if account["nick"] == nick:
                 return AccountManager.FAILED_NICK_ALREADY_USED
 
-        hashed_password = AccountManager.hash(password, nick)
+        hashed_password = hasher.hash(password, nick)
 
         acc = {
             "nick": nick,
