@@ -18,7 +18,7 @@ class Hasher:
 
     @staticmethod
     def rehash_password(nick, new_hash):
-        """Устанавливает новый хеш в data.json."""
+        """Устанавливает новый хеш в accounts.json."""
         return AccountManager.set_account(nick, "password", new_hash)
 
     def hash(self, password, nick):
@@ -67,12 +67,9 @@ class AccountManager:
     @staticmethod
     def get_account(nick):
         """Возвращает аккаунт с логином nick."""
-        data = read("data.json")
+        data = read("accounts.json", [])
 
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
-
-        for account in data["accounts"]:
+        for account in data:
             if account["nick"] == nick:
                 return account
 
@@ -89,15 +86,12 @@ class AccountManager:
         ):
             return acc
 
-        data = read("data.json")
-
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
+        data = read("accounts.json", [])
 
         try:
-            del data["accounts"][data["accounts"].index(acc)][key]
+            del data.index(acc)[key]
 
-            if write("data.json", data):
+            if write("accounts.json", data):
                 return AccountManager.SUCCESSFUL
 
             return AccountManager.FAILED_UNKNOWN
@@ -115,13 +109,11 @@ class AccountManager:
         ):
             return acc
 
-        data = read("data.json")
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
+        data = read("accounts.json", [])
 
-        del data["accounts"][data["accounts"].index(acc)]
+        del data[data.index(acc)]
 
-        if write("data.json", data):
+        if write("accounts.json", data):
             return AccountManager.SUCCESSFUL
 
         return AccountManager.FAILED_UNKNOWN
@@ -137,16 +129,11 @@ class AccountManager:
         ):
             return acc
 
-        data = read("data.json")
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
+        data = read("accounts.json", [])
 
-        try:
-            data["accounts"][data["accounts"].index(acc)][key] = value
-        except (ValueError, IndexError):
-            data[key] = [value]
+        data[data.index(acc)][key] = value
 
-        if write("data.json", data):
+        if write("accounts.json", data):
             return AccountManager.SUCCESSFUL
 
         return AccountManager.FAILED_UNKNOWN
@@ -176,7 +163,7 @@ class AccountManager:
             if aban[0] != -1 and datetime.today().timestamp() \
                     > aban[0]:
                 del account["ban"]
-                write("data.json", data)
+                write("accounts.json", data)
             else:
                 if len(aban) > 1:
                     return [
@@ -239,13 +226,9 @@ class AccountManager:
         nick = nick.strip()
         password = password.strip()
 
-        data = read("data.json")
+        data = read("accounts.json", [])
 
-        if data is None:
-            client.send(["login_fail"], AccountManager.FAILED_UNKNOWN)
-            return
-
-        for account in data["accounts"]:
+        for account in data:
             if account["nick"] == nick:
                 if hasher.verify(account["password"], password, nick):
                     if "console" in account:
@@ -322,13 +305,9 @@ class AccountManager:
         nick = nick.strip()
         password = password.strip()
 
-        data = read("data.json")
+        data = read("accounts.json", [])
 
-        if data is None:
-            client.send(["register_fail", AccountManager.FAILED_UNKNOWN])
-            return
-
-        for account in data["accounts"]:
+        for account in data:
             if account["nick"] == nick:
                 client.send([
                     "register_fail",
@@ -352,7 +331,7 @@ class AccountManager:
             "settings": get_data()[0]["default_settings"]
         }
 
-        if append("data.json", "accounts", acc):
+        if append("accounts.json", None, acc, []):
             client.send(["register_successful", nick, password])
             client.client.set_login_data(nick, password)
             client.send_client = True

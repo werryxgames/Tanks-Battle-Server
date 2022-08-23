@@ -5,12 +5,15 @@ from json import loads
 from absolute import to_absolute
 
 
-def read(name):
+def read(name, default=None):
     """Возвращает данные из *.json файла."""
     data = None
 
-    with open(to_absolute(name), encoding="utf8") as file:
-        data = loads(file.read())
+    try:
+        with open(to_absolute(name), encoding="utf8") as file:
+            data = loads(file.read())
+    except FileNotFoundError:
+        return default
 
     return data
 
@@ -23,16 +26,22 @@ def write(name, data):
     return True
 
 
-def append(name, key, value):
+def append(name, key=None, value=None, default=None):
     """Добавляет value к key файла name."""
-    data = read(name)
+    data = read(name, default)
 
     if data is None:
         return None
 
-    try:
-        data[key].append(value)
-    except (ValueError, IndexError):
-        data[key] = [value]
+    if key is None:
+        try:
+            data.append(value)
+        except (ValueError, IndexError):
+            data = [value]
+    else:
+        try:
+            data[key].append(value)
+        except (ValueError, IndexError):
+            data[key] = [value]
 
     return write(name, data)

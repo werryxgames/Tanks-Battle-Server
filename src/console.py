@@ -172,6 +172,7 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
 
     @staticmethod
     def execute_unban_player(args):
+        """Разблокирует аккаунт игрока."""
         nick = args[0]
         status = AccountManager.del_account_key(nick, "ban")
 

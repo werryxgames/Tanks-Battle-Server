@@ -8,13 +8,13 @@ from accounts import AccountManager
 from battle_player import BattlePlayer
 from message import GlobalMessage
 from mjson import read
+from netclasses import NetUser
 from singleton import get_clients
-from singleton import get_data
 
 clients = get_clients()
 
 
-class Player:
+class Player(NetUser):
     """Класс игрока."""
     BACK_TO_MENU = 1
 
@@ -22,22 +22,17 @@ class Player:
         self.sock = sock
         self.addr = addr
         self.bdata = battle_data
-        self.rudp = rudp
 
-        data = get_data()
-        self.config = data[0]
-        self.logger = data[1]
+        super().__init__(rudp)
 
         self.version = None
-        self.login = None
-        self.password = None
-        self.account = None
         self.bp = None
         self.msg = len(battle_data["messages"])
         self.last_request = -1
         self.still_check_time = True
         self.map = None
         self.respawn_id = 0
+        self.qr_sended = False
 
     def close(self):
         """Закрывает соединение с клиентом."""
@@ -52,34 +47,6 @@ class Player:
             )
         except OSError:
             pass
-
-    def set_login_data(self, login, password):
-        """Устанавливает данные для авторизации."""
-        self.login = login
-        self.password = password
-        self.account = AccountManager.get_account(login)
-
-        if self.account == AccountManager.FAILED_UNKNOWN or \
-                self.account == AccountManager.FAILED_NOT_FOUND or \
-                self.account["password"] != password:
-            return False
-
-        return True
-
-    def refresh_account(self):
-        """Перезагружает аккаунт."""
-        self.account = AccountManager.get_account(self.login)
-
-        if self.account == AccountManager.FAILED_UNKNOWN or \
-                self.account == AccountManager.FAILED_NOT_FOUND or \
-                self.account["password"] != self.password:
-            return False
-
-        return True
-
-    def send(self, *args, **kwargs):
-        """Отправляет Reliable UDP данные клиенту."""
-        self.rudp.send(*args, **kwargs)
 
     def send_unreliable(self, *args, **kwargs):
         """Отправляет Unreliable UDP данные клиенту."""
@@ -148,7 +115,7 @@ class Player:
 
             sleep(1)
 
-    def receive_get_batte_data(self, args):
+    def receive_get_batte_data(self):
         """Получает данные битвы."""
         self.refresh_account()
 
@@ -194,7 +161,6 @@ class Player:
         ))
 
         Thread(target=self.check_time).start()
-        return None
 
     def receive_request_tanks_data(self, args):
         """Получает запрошенные данные танков."""
@@ -215,15 +181,18 @@ class Player:
                 self.send_unreliable(["tanks_data", res])
                 return None
 
-            self.send([
-                "respawn",
-                self.randpoint(),
-                BattlePlayer.st_get_tank(
-                    self.account["selected_tank"],
-                    self.account["selected_pt"]
-                )["durability"],
-                self.respawn_id
-            ])
+            if not self.qr_sended:
+                self.send([
+                    "respawn",
+                    self.randpoint(),
+                    BattlePlayer.st_get_tank(
+                        self.account["selected_tank"],
+                        self.account["selected_pt"]
+                    )["durability"],
+                    self.respawn_id
+                ])
+                self.qr_sended = True
+
             return None
 
         if self.bp.last_damage is not None:
@@ -248,15 +217,20 @@ class Player:
                     killer["xp"] + self.config["kill_reward_xp"]
                 )
 
-        self.send([
-            "respawn",
-            self.randpoint(),
-            BattlePlayer.st_get_tank(
-                self.account["selected_tank"],
-                self.account["selected_pt"]
-            )["durability"],
-            self.respawn_id
-        ])
+            self.bp.last_damage = None
+
+        if not self.qr_sended:
+            self.send([
+                "respawn",
+                self.randpoint(),
+                BattlePlayer.st_get_tank(
+                    self.account["selected_tank"],
+                    self.account["selected_pt"]
+                )["durability"],
+                self.respawn_id
+            ])
+            self.qr_sended = True
+
         return None
 
     def try_handle_messages(self):
@@ -274,7 +248,7 @@ class Player:
             args = jdt[1:]
 
             if com == "get_battle_data":
-                self.receive_get_batte_data(args)
+                self.receive_get_batte_data()
                 return None
 
             if com == "request_tanks_data":
@@ -312,6 +286,7 @@ class Player:
 
             if com == "respawned":
                 self.respawn_id = args[0] + 1
+                self.qr_sended = False
                 return None
 
         except BaseException:

@@ -3,10 +3,11 @@ from datetime import datetime
 from re import sub
 from traceback import format_exc
 
-from absolute import to_absolute
 from colorama import Fore
 from colorama import Style
 from colorama import init
+
+from absolute import to_absolute
 
 
 class Logger:
