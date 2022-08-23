@@ -25,6 +25,8 @@ clients = get_clients()
 class NetworkedClient:
     """Класс клиента."""
 
+    CONSOLE = Console
+
     def __init__(self, sock_, addr):
         self.sock = sock_
         self.addr = addr
@@ -55,47 +57,19 @@ class NetworkedClient:
 
     def handle_register(self, login, password):
         """Обрабатывает рагистрацию клиента."""
-        res = AccountManager.add_account(login, password)
-
-        if res == AccountManager.SUCCESSFUL:
-            self.send([
-                "register_successful",
-                login,
-                password
-            ])
-            self.client.set_login_data(login, password)
-            self.send_client = True
-            return
-
-        self.send(["register_fail", res])
-        return
+        AccountManager.add_account_async(
+            login,
+            password,
+            self
+        )
 
     def handle_login(self, login, password):
         """Обрабатывает вход клиента в аккаунт."""
-        res = AccountManager.login_account(login, password)
-
-        if res == AccountManager.SUCCESSFUL:
-            self.send(["login_successful", login, password])
-            self.client.set_login_data(login, password)
-            self.send_client = True
-            return
-
-        if res == AccountManager.FAILED_CONSOLE:
-            self.send(["login_fail", res, login, password])
-            self.console = Console(
-                self.sock,
-                self.addr,
-                self.rudp
-            )
-            return
-
-        if isinstance(res, list):
-            if res[0] == AccountManager.FAILED_BAN:
-                self.send(["login_fail", *res])
-                return
-
-        self.send(["login_fail", res])
-        return
+        AccountManager.login_account_async(
+            login,
+            password,
+            self
+        )
 
     def handle(self, com, args):
         """Обрабатывает данные от клиента."""
