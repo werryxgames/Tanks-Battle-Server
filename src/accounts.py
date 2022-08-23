@@ -4,6 +4,7 @@ from mjson import append
 from mjson import read
 from mjson import write
 from singleton import get_data
+from hashlib import md5
 
 
 class AccountManager:
@@ -179,9 +180,11 @@ class AccountManager:
         if data is None:
             return AccountManager.FAILED_UNKNOWN
 
+        hashed_password = AccountManager.hash(password, nick)
+
         for account in data["accounts"]:
             if account["nick"] == nick:
-                if account["password"] == password:
+                if account["password"] == hashed_password:
                     if "console" in account:
                         return AccountManager.FAILED_CONSOLE
 
@@ -190,6 +193,17 @@ class AccountManager:
                 return AccountManager.FAILED_PASSWORD_NOT_MATCH
 
         return AccountManager.FAILED_NOT_FOUND
+
+    @staticmethod
+    def hash(data, salt=None):
+        """Преобразует data в md5 хеш."""
+        if salt is None:
+            salt = ""
+
+        data = data.encode("utf8")
+        salt = salt.encode("utf8")
+        hashed_data = md5(data + salt).hexdigest()
+        return hashed_data
 
     @staticmethod
     def add_account(nick, password):
@@ -222,9 +236,11 @@ class AccountManager:
             if account["nick"] == nick:
                 return AccountManager.FAILED_NICK_ALREADY_USED
 
+        hashed_password = AccountManager.hash(password, nick)
+
         acc = {
             "nick": nick,
-            "password": password,
+            "password": hashed_password,
             "xp": 0,
             "crystals": 0,
             "tanks": [1],
