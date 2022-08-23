@@ -1,9 +1,46 @@
 """Модуль управления аккаунтами."""
 from datetime import datetime
+from threading import Thread
+
+from argon2 import PasswordHasher
+from argon2.exceptions import VerifyMismatchError
 from mjson import append
 from mjson import read
 from mjson import write
 from singleton import get_data
+
+
+class Hasher:
+    """Класс хеширования паролей."""
+
+    def __init__(self):
+        self.phasher = PasswordHasher()
+
+    @staticmethod
+    def rehash_password(nick, new_hash):
+        """Устанавливает новый хеш в data.json."""
+        return AccountManager.set_account(nick, "password", new_hash)
+
+    def hash(self, password, nick):
+        """Хеширует пароль."""
+        result = self.phasher.hash(password + nick)
+        return result
+
+    def verify(self, hash_, password, nick):
+        """Проверяет является ли hash_ хешом data."""
+        try:
+            self.phasher.verify(hash_, password + nick)
+        except VerifyMismatchError:
+            return False
+
+        if self.phasher.check_needs_rehash(hash_):
+            new_hash = self.hash(password, nick)
+            self.rehash_password(nick, new_hash)
+
+        return True
+
+
+hasher = Hasher()
 
 
 class AccountManager:
@@ -122,7 +159,7 @@ class AccountManager:
 
         data = data.strip()
 
-        if len(data) < minlen or len(data) > maxlen:
+        if len(data) < minlen or (maxlen != -1 and len(data) > maxlen):
             return lenfail
 
         if not AccountManager.check(data):
@@ -153,23 +190,51 @@ class AccountManager:
         return AccountManager.SUCCESSFUL
 
     @staticmethod
-    def login_account(nick, password):
-        """Проверяет верные ли данные для входа."""
+    def login_account(nick, password, client):
+        """Проверяет верные ли данные для входа синхронно."""
+        # res = AccountManager.login_account(login, password)
+
+        # if res == AccountManager.SUCCESSFUL:
+        #     self.send(["login_successful", login, password])
+        #     self.client.set_login_data(login, password)
+        #     self.send_client = True
+        #     return
+
+        # if res == AccountManager.FAILED_CONSOLE:
+        #     self.send(["login_fail", res, login, password])
+        #     self.console = Console(
+        #         self.sock,
+        #         self.addr,
+        #         self.rudp
+        #     )
+        #     return
+
+        # if isinstance(res, list):
+        #     if res[0] == AccountManager.FAILED_BAN:
+        #         self.send(["login_fail", *res])
+        #         return
+
+        # self.send(["login_fail", res])
+        # return
         nick_check = AccountManager.check_login_data(
             nick,
             AccountManager.FAILED_NICK_LENGTH
         )
 
         if nick_check != AccountManager.SUCCESSFUL:
-            return nick_check
+            client.send(["login_fail", nick_check])
+            return
 
         pass_check = AccountManager.check_login_data(
             password,
-            AccountManager.FAILED_PASSWORD_LENGTH
+            AccountManager.FAILED_PASSWORD_LENGTH,
+            6,
+            -1
         )
 
         if pass_check != AccountManager.SUCCESSFUL:
-            return pass_check
+            client.send(["login_fail", pass_check])
+            return
 
         nick = nick.strip()
         password = password.strip()
@@ -177,38 +242,82 @@ class AccountManager:
         data = read("data.json")
 
         if data is None:
-            return AccountManager.FAILED_UNKNOWN
+            client.send(["login_fail"], AccountManager.FAILED_UNKNOWN)
+            return
 
         for account in data["accounts"]:
             if account["nick"] == nick:
-                if account["password"] == password:
+                if hasher.verify(account["password"], password, nick):
                     if "console" in account:
-                        return AccountManager.FAILED_CONSOLE
+                        client.send([
+                            "login_fail",
+                            AccountManager.FAILED_CONSOLE,
+                            nick,
+                            password
+                        ])
+                        client.console = client.CONSOLE(
+                            client.sock,
+                            client.addr,
+                            client.rudp
+                        )
+                        return
 
-                    return AccountManager.get_ban_status(data, account)
+                    ban_status = AccountManager.get_ban_status(data, account)
 
-                return AccountManager.FAILED_PASSWORD_NOT_MATCH
+                    if isinstance(
+                        ban_status,
+                        list
+                    ) and ban_status[0] == AccountManager.FAILED_BAN:
+                        client.send(["login_fail", *ban_status])
+                        return
 
-        return AccountManager.FAILED_NOT_FOUND
+                    if ban_status == AccountManager.SUCCESSFUL:
+                        client.send(["login_successful", nick, password])
+                        client.client.set_login_data(nick, password)
+                        client.send_client = True
+                        return
+
+                    client.send(["login_fail", ban_status])
+
+                client.send([
+                    "login_fail",
+                    AccountManager.FAILED_PASSWORD_NOT_MATCH
+                ])
+                return
+
+        client.send(["login_fail", AccountManager.FAILED_NOT_FOUND])
 
     @staticmethod
-    def add_account(nick, password):
-        """Создаёт новый аккаунт."""
+    def login_account_async(nick, password, client):
+        """Проверяет верные ли данные для входа асинхронно."""
+        thread = Thread(
+            target=AccountManager.login_account,
+            args=(nick, password, client)
+        )
+        thread.start()
+
+    @staticmethod
+    def add_account(nick, password, client):
+        """Создаёт новый аккаунт синхронно."""
         nick_check = AccountManager.check_login_data(
             nick,
             AccountManager.FAILED_NICK_LENGTH
         )
 
         if nick_check != AccountManager.SUCCESSFUL:
-            return nick_check
+            client.send(["register_fail", nick_check])
+            return
 
         pass_check = AccountManager.check_login_data(
             password,
-            AccountManager.FAILED_PASSWORD_LENGTH
+            AccountManager.FAILED_PASSWORD_LENGTH,
+            6,
+            -1
         )
 
         if pass_check != AccountManager.SUCCESSFUL:
-            return pass_check
+            client.send(["register_fail", pass_check])
+            return
 
         nick = nick.strip()
         password = password.strip()
@@ -216,15 +325,22 @@ class AccountManager:
         data = read("data.json")
 
         if data is None:
-            return AccountManager.FAILED_UNKNOWN
+            client.send(["register_fail", AccountManager.FAILED_UNKNOWN])
+            return
 
         for account in data["accounts"]:
             if account["nick"] == nick:
-                return AccountManager.FAILED_NICK_ALREADY_USED
+                client.send([
+                    "register_fail",
+                    AccountManager.FAILED_NICK_ALREADY_USED
+                ])
+                return
+
+        hashed_password = hasher.hash(password, nick)
 
         acc = {
             "nick": nick,
-            "password": password,
+            "password": hashed_password,
             "xp": 0,
             "crystals": 0,
             "tanks": [1],
@@ -237,6 +353,19 @@ class AccountManager:
         }
 
         if append("data.json", "accounts", acc):
-            return AccountManager.SUCCESSFUL
+            client.send(["register_successful", nick, password])
+            client.client.set_login_data(nick, password)
+            client.send_client = True
+            return
 
-        return AccountManager.FAILED_UNKNOWN
+        client.send(["register_fail", AccountManager.FAILED_UNKNOWN])
+        return
+
+    @staticmethod
+    def add_account_async(nick, password, client):
+        """Создаёт новый аккаунт асинхронно."""
+        thread = Thread(
+            target=AccountManager.add_account,
+            args=(nick, password, client)
+        )
+        thread.start()
