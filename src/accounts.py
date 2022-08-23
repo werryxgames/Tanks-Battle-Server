@@ -28,10 +28,8 @@ class AccountManager:
         return set(string.lower()) <= set(allowed)
 
     @staticmethod
-    def get_account(nick):
-        """Возвращает аккаунт с логином nick."""
-        data = read("data.json")
-
+    def get_account_(nick, data):
+        """Возвращает аккаунт с логином nick из data."""
         if data is None:
             return AccountManager.FAILED_UNKNOWN
 
@@ -42,45 +40,63 @@ class AccountManager:
         return AccountManager.FAILED_NOT_FOUND
 
     @staticmethod
-    def del_account_key(nick, key):
-        """Удаляет key у аккаунта с логином nick."""
-        acc = AccountManager.get_account(nick)
+    def get_account(nick):
+        """Возвращает аккаунт с логином nick."""
+        data = read("data.json")
+
+        return AccountManager.get_account_(nick, data)
+
+    @staticmethod
+    def del_account_key_(nick, key, data):
+        """Удаляет key у аккаунта с логином nick из data."""
+        acc = AccountManager.get_account_(nick, data)
 
         if acc in (
             AccountManager.FAILED_UNKNOWN,
             AccountManager.FAILED_NOT_FOUND
         ):
             return acc
-
-        data = read("data.json")
-
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
 
         try:
             del data["accounts"][data["accounts"].index(acc)][key]
 
-            if write("data.json", data):
-                return AccountManager.SUCCESSFUL
-
-            return AccountManager.FAILED_UNKNOWN
+            return data
         except KeyError:
             return AccountManager.FAILED_NOT_EXISTS
 
     @staticmethod
-    def del_account(nick):
-        """Удаляет аккаунт с логином nick."""
-        acc = AccountManager.get_account(nick)
+    def call_method(method, *args):
+        """Вызывает method."""
+        data = read("data.json")
+        result = method(*args, data)
+
+        if isinstance(result, int):
+            return result
+
+        if write("data.json", result):
+            return AccountManager.SUCCESSFUL
+
+        return AccountManager.FAILED_UNKNOWN
+
+    @staticmethod
+    def del_account_key(nick, key):
+        """Удаляет key у аккаунта с логином nick."""
+        return AccountManager.call_method(
+            AccountManager.del_account_key_,
+            nick,
+            key
+        )
+
+    @staticmethod
+    def del_account_(nick, data):
+        """Удаляет аккаунт с логином nick из data."""
+        acc = AccountManager.get_account_(nick, data)
 
         if acc in (
             AccountManager.FAILED_UNKNOWN,
             AccountManager.FAILED_NOT_FOUND
         ):
             return acc
-
-        data = read("data.json")
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
 
         del data["accounts"][data["accounts"].index(acc)]
 
@@ -90,9 +106,17 @@ class AccountManager:
         return AccountManager.FAILED_UNKNOWN
 
     @staticmethod
-    def set_account(nick, key, value):
+    def del_account(nick):
+        """Удаляет аккаунт с логином nick."""
+        return AccountManager.call_method(
+            AccountManager.del_account_,
+            nick
+        )
+
+    @staticmethod
+    def set_account_(nick, key, value, data):
         """Устанавливает значение key в value для аккаунта с логином nick."""
-        acc = AccountManager.get_account(nick)
+        acc = AccountManager.get_account_(nick, data)
 
         if acc in (
             AccountManager.FAILED_UNKNOWN,
@@ -100,19 +124,23 @@ class AccountManager:
         ):
             return acc
 
-        data = read("data.json")
-        if data is None:
-            return AccountManager.FAILED_UNKNOWN
-
         try:
-            data["accounts"][data["accounts"].index(acc)][key] = value
+            accounts = data["accounts"]
+            accounts[accounts.index(acc)][key] = value
         except (ValueError, IndexError):
             data[key] = [value]
 
-        if write("data.json", data):
-            return AccountManager.SUCCESSFUL
+        return data
 
-        return AccountManager.FAILED_UNKNOWN
+    @staticmethod
+    def set_account(nick, key, value):
+        """Устанавливает значение для аккаунта."""
+        return AccountManager.call_method(
+            AccountManager.set_account_,
+            nick,
+            key,
+            value
+        )
 
     @staticmethod
     def check_login_data(data, lenfail, minlen=3, maxlen=12):
