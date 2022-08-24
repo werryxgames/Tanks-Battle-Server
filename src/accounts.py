@@ -65,10 +65,8 @@ class AccountManager:
         return set(string.lower()) <= set(allowed)
 
     @staticmethod
-    def get_account(nick):
-        """Возвращает аккаунт с логином nick."""
-        data = read("accounts.json", [])
-
+    def get_account_(nick, data):
+        """Возвращает аккаунт с логином nick из data."""
         for account in data:
             if account["nick"] == nick:
                 return account
@@ -76,40 +74,57 @@ class AccountManager:
         return AccountManager.FAILED_NOT_FOUND
 
     @staticmethod
-    def del_account_key(nick, key):
-        """Удаляет key у аккаунта с логином nick."""
-        acc = AccountManager.get_account(nick)
-
-        if acc in (
-            AccountManager.FAILED_UNKNOWN,
-            AccountManager.FAILED_NOT_FOUND
-        ):
-            return acc
-
+    def get_account(nick):
+        """Возвращает аккаунт с логином nick."""
         data = read("accounts.json", [])
 
+        return AccountManager.get_account_(nick, data)
+
+    @staticmethod
+    def del_account_key_(nick, key, data):
+        """Удаляет key у аккаунта с логином nick из data."""
+        acc = AccountManager.get_account_(nick, data)
+
+        if acc == AccountManager.FAILED_NOT_FOUND:
+            return acc
+
         try:
-            del data.index(acc)[key]
+            del data[data.index(acc)][key]
 
-            if write("accounts.json", data):
-                return AccountManager.SUCCESSFUL
-
-            return AccountManager.FAILED_UNKNOWN
+            return data
         except KeyError:
             return AccountManager.FAILED_NOT_EXISTS
 
     @staticmethod
-    def del_account(nick):
-        """Удаляет аккаунт с логином nick."""
-        acc = AccountManager.get_account(nick)
-
-        if acc in (
-            AccountManager.FAILED_UNKNOWN,
-            AccountManager.FAILED_NOT_FOUND
-        ):
-            return acc
-
+    def call_method(method, *args):
+        """Вызывает method."""
         data = read("accounts.json", [])
+        result = method(*args, data)
+
+        if isinstance(result, int):
+            return result
+
+        if write("accounts.json", result):
+            return AccountManager.SUCCESSFUL
+
+        return AccountManager.FAILED_UNKNOWN
+
+    @staticmethod
+    def del_account_key(nick, key):
+        """Удаляет key у аккаунта с логином nick."""
+        return AccountManager.call_method(
+            AccountManager.del_account_key_,
+            nick,
+            key
+        )
+
+    @staticmethod
+    def del_account_(nick, data):
+        """Удаляет аккаунт с логином nick из data."""
+        acc = AccountManager.get_account_(nick, data)
+
+        if acc == AccountManager.FAILED_NOT_FOUND:
+            return acc
 
         del data[data.index(acc)]
 
@@ -119,24 +134,37 @@ class AccountManager:
         return AccountManager.FAILED_UNKNOWN
 
     @staticmethod
-    def set_account(nick, key, value):
-        """Устанавливает значение key в value для аккаунта с логином nick."""
-        acc = AccountManager.get_account(nick)
+    def del_account(nick):
+        """Удаляет аккаунт с логином nick."""
+        return AccountManager.call_method(
+            AccountManager.del_account_,
+            nick
+        )
 
-        if acc in (
-            AccountManager.FAILED_UNKNOWN,
-            AccountManager.FAILED_NOT_FOUND
-        ):
+    @staticmethod
+    def set_account_(nick, key, value, data):
+        """Устанавливает значение key в value для аккаунта с логином nick."""
+        acc = AccountManager.get_account_(nick, data)
+
+        if acc == AccountManager.FAILED_NOT_FOUND:
             return acc
 
-        data = read("accounts.json", [])
+        try:
+            data[data.index(acc)][key] = value
+        except (ValueError, IndexError):
+            data[key] = [value]
 
-        data[data.index(acc)][key] = value
+        return data
 
-        if write("accounts.json", data):
-            return AccountManager.SUCCESSFUL
-
-        return AccountManager.FAILED_UNKNOWN
+    @staticmethod
+    def set_account(nick, key, value):
+        """Устанавливает значение для аккаунта."""
+        return AccountManager.call_method(
+            AccountManager.set_account_,
+            nick,
+            key,
+            value
+        )
 
     @staticmethod
     def check_login_data(data, lenfail, minlen=3, maxlen=12):
@@ -179,30 +207,6 @@ class AccountManager:
     @staticmethod
     def login_account(nick, password, client):
         """Проверяет верные ли данные для входа синхронно."""
-        # res = AccountManager.login_account(login, password)
-
-        # if res == AccountManager.SUCCESSFUL:
-        #     self.send(["login_successful", login, password])
-        #     self.client.set_login_data(login, password)
-        #     self.send_client = True
-        #     return
-
-        # if res == AccountManager.FAILED_CONSOLE:
-        #     self.send(["login_fail", res, login, password])
-        #     self.console = Console(
-        #         self.sock,
-        #         self.addr,
-        #         self.rudp
-        #     )
-        #     return
-
-        # if isinstance(res, list):
-        #     if res[0] == AccountManager.FAILED_BAN:
-        #         self.send(["login_fail", *res])
-        #         return
-
-        # self.send(["login_fail", res])
-        # return
         nick_check = AccountManager.check_login_data(
             nick,
             AccountManager.FAILED_NICK_LENGTH
