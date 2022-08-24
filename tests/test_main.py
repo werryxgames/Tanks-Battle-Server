@@ -215,3 +215,35 @@ def test_accounts_set_account(nick, key, value, data, result):
 def test_accounts_check_login_data(data, lenfail, result):
     """Тесты AccountManager.check_login_data()."""
     assert AccountManager.check_login_data(data, lenfail) == result
+
+
+@pytest.mark.parametrize("data, account, result", (
+    (
+        [{}],
+        {},
+        AccountManager.SUCCESSFUL
+    ),
+    (
+        [{"ban": [0]}],
+        {"ban": [0]},
+        [{}]
+    ),
+    (
+        [{"ban": [0, "Тест"]}],
+        {"ban": [0, "Тест"]},
+        [{}]
+    ),
+    (
+        [{"ban": [-1, "Test"]}],
+        {"ban": [-1, "Test"]},
+        [AccountManager.FAILED_BAN, -1, "Test"]
+    ),
+    (
+        [{"ban": [-1]}],
+        {"ban": [-1]},
+        [AccountManager.FAILED_BAN, -1, None]
+    )
+))
+def test_accounts_get_ban_status(data, account, result):
+    """Тесты AccountManager.get_ban_status()."""
+    assert AccountManager.get_ban_status_(data, account) == result

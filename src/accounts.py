@@ -183,25 +183,36 @@ class AccountManager:
         return AccountManager.SUCCESSFUL
 
     @staticmethod
-    def get_ban_status(data, account):
-        """Возвращает статус бана аккаунта."""
+    def get_ban_status_(data, account):
+        """Возвращает статус бана аккаунта account."""
         if "ban" in account:
             aban = account["ban"]
 
             if aban[0] != -1 and datetime.today().timestamp() \
                     > aban[0]:
-                del account["ban"]
-                write("accounts.json", data)
-            else:
-                if len(aban) > 1:
-                    return [
-                        AccountManager.FAILED_BAN,
-                        aban[0],
-                        aban[1]
-                    ]
+                del data[data.index(account)]["ban"]
+                return data
 
-                return [AccountManager.FAILED_BAN, aban[0], None]
+            if len(aban) > 1:
+                return [
+                    AccountManager.FAILED_BAN,
+                    aban[0],
+                    aban[1]
+                ]
 
+            return [AccountManager.FAILED_BAN, aban[0], None]
+
+        return AccountManager.SUCCESSFUL
+
+    @staticmethod
+    def get_ban_status(data, account):
+        """Возвращает статус бана аккаунта."""
+        result = AccountManager.get_ban_status_(data, account)
+
+        if isinstance(result, int):
+            return result
+
+        write("accounts.json", data)
         return AccountManager.SUCCESSFUL
 
     @staticmethod
