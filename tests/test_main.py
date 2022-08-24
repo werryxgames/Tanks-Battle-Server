@@ -1,6 +1,6 @@
 """Модуль с тестами к Tanks Battle Server."""
-from sys import path
 from os import path as path_
+from sys import path
 
 try:
     path.append(
@@ -19,10 +19,12 @@ try:
 except IndexError:
     pass
 
-import singleton
 import mjson
-from accounts import AccountManager
 import pytest
+import singleton
+
+from accounts import AccountManager
+from message import GlobalMessage
 
 
 @pytest.mark.parametrize("config", [{}, "123", 456, True, False])
@@ -247,3 +249,14 @@ def test_accounts_check_login_data(data, lenfail, result):
 def test_accounts_get_ban_status(data, account, result):
     """Тесты AccountManager.get_ban_status()."""
     assert AccountManager.get_ban_status_(data, account) == result
+
+
+@pytest.mark.parametrize("type_, text", (
+    ("respawn", ["respawned"]),
+    ("respawn", {"position": (1, 2, 3)}),
+    ("test", "Test GlobalMessage"),
+    ("тест", "Тест GlobalMessage")
+))
+def test_global_message(type_, text):
+    """Тесты GlobalMessage."""
+    assert GlobalMessage(type_, text).get() == (type_, text)
