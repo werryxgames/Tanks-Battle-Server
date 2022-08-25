@@ -10,7 +10,7 @@
 ## Linux
 Используйте команду
 ```bash
-cd ~ && sudo apt-get update -y && sudo apt-get install git python -y && git clone https://github.com/werryxgames/Tanks-Battle-Server.git && cd Tanks-Battle-Server && python main.py
+cd ~ && sudo apt-get update -y && sudo apt-get install git python -y && git clone https://github.com/werryxgames/Tanks-Battle-Server.git && cd Tanks-Battle-Server && pip install --upgrade pip && pip install -r requirements.txt && python src/main.py
 ```
 чтобы установить все зависимости и запустить сервер
 
@@ -18,7 +18,7 @@ cd ~ && sudo apt-get update -y && sudo apt-get install git python -y && git clon
 
 Для последующего запсука используйте
 ```bash
-python ~/Tanks-Battle-Server/main.py
+python ~/Tanks-Battle-Server/src/main.py
 ```
 
 ## Запуск на Windows
@@ -33,14 +33,14 @@ python ~/Tanks-Battle-Server/main.py
 Введите
 ```bash
 cd распакованная_папка
-python main.py
+python src/main.py
 ```
 
 Добавьте ` --nogui` в конец, чтобы запустить сервер без графического интерфейса
 
 Для последующего запуска используйте
 ```bash
-python распакованная_папка/main.py
+python распакованная_папка/src/main.py
 ```
 
 ## Запуск на Android
@@ -51,7 +51,7 @@ python распакованная_папка/main.py
 
 Установите Pydroid из Play Marketа
 
-Откройте Pydroid, нажмите `Open` и выберите файл `main.py` в распакованной папке
+Откройте Pydroid, нажмите `Open` и выберите файл `main.py` в `src` в распакованной папке
 
 Запустите код
 
@@ -60,14 +60,14 @@ python распакованная_папка/main.py
 
 Запустите Termux и введите
 ```bash
-termux-setup-storage && cd /sdcard && apt-get update -y && apt-get install git python -y && cd Tanks-Battle-Server && python main.py
+termux-setup-storage && cd /sdcard && apt-get update -y && apt-get install git python -y && git clone https://github.com/werryxgames/Tanks-Battle-Server && cd Tanks-Battle-Server && pip install --upgrade pip && pip install -r requirements.txt && python src/main.py
 ```
 
 Вы можете добавить `--nogui` в конец, но ничего не изменится, так как Termux по умолчанию не поддерживает графический интерфейс
 
 Для последующего запуска используйте
 ```bash
-python /sdcard/Tanks-Battle-Server/main.py
+python /sdcard/Tanks-Battle-Server/src/main.py
 ```
 
 # Обновление сервера
