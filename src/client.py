@@ -397,7 +397,8 @@ ers_in_game"]:
                         nsets
                     ) != AccountManager.SUCCESSFUL:
                         self.send(["failed", 1])
-                        return True
+
+                    return True
 
                 self.send(["failed", 2])
             except ValueError:
