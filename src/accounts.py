@@ -41,6 +41,7 @@ class Hasher:
 
 
 hasher = Hasher()
+queued_logins = []
 
 
 class AccountManager:
@@ -217,6 +218,12 @@ class AccountManager:
 
     @staticmethod
     def login_account(nick, password, client):
+        """Проверяет верные ли данные для входа и убирает nick из списка."""
+        AccountManager.login_account_(nick, password, client)
+        queued_logins.remove(nick)
+
+    @staticmethod
+    def login_account_(nick, password, client):
         """Проверяет верные ли данные для входа синхронно."""
         nick_check = AccountManager.check_login_data(
             nick,
@@ -288,14 +295,25 @@ class AccountManager:
     @staticmethod
     def login_account_async(nick, password, client):
         """Проверяет верные ли данные для входа асинхронно."""
+        if nick in queued_logins:
+            return False
+
+        queued_logins.append(nick)
         thread = Thread(
             target=AccountManager.login_account,
             args=(nick, password, client)
         )
         thread.start()
+        return True
 
     @staticmethod
     def add_account(nick, password, client):
+        """Создаёт новый аккаунт и убирает nick из списка."""
+        AccountManager.add_account_(nick, password, client)
+        queued_logins.remove(nick)
+
+    @staticmethod
+    def add_account_(nick, password, client):
         """Создаёт новый аккаунт синхронно."""
         nick_check = AccountManager.check_login_data(
             nick,
@@ -358,8 +376,13 @@ class AccountManager:
     @staticmethod
     def add_account_async(nick, password, client):
         """Создаёт новый аккаунт асинхронно."""
+        if nick in queued_logins:
+            return False
+
+        queued_logins.append(nick)
         thread = Thread(
             target=AccountManager.add_account,
             args=(nick, password, client)
         )
         thread.start()
+        return True

@@ -57,19 +57,21 @@ class NetworkedClient:
 
     def handle_register(self, login, password):
         """Обрабатывает рагистрацию клиента."""
-        AccountManager.add_account_async(
+        if not AccountManager.add_account_async(
             login,
             password,
             self
-        )
+        ):
+            clients.pop(self.addr)
 
     def handle_login(self, login, password):
         """Обрабатывает вход клиента в аккаунт."""
-        AccountManager.login_account_async(
+        if not AccountManager.login_account_async(
             login,
             password,
             self
-        )
+        ):
+            clients.pop(self.addr)
 
     def handle(self, com, args):
         """Обрабатывает данные от клиента."""
