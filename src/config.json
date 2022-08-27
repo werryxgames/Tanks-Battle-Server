@@ -4,7 +4,7 @@
     "accept_client_versions": ["13.0", "1.14.0", "1.15.0"],
     "max_players_in_game": 10,
     "maps": 1,
-    "default_settings": [false, true, 500],
+    "default_settings": [true, true, 1500],
     "kill_reward_crystals": 2,
     "kill_reward_xp": 5,
     "max_player_noresponse_time": 10,
