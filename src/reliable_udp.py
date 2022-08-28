@@ -67,31 +67,21 @@ class ReliableUDP:
 
     def new_jdt(self, jdt, packet_id):
         """Вызывается при получении нового пакета."""
-        matches = 0
-        last_i = 0
-        check = True
+        if packet_id in self.received:
+            return None
 
-        self.received.append(jdt)
-        self.received.sort(key=self.custom_sort)
+        max_packets = self.config["udp_reliable_max_packets"]
 
-        for i in self.received:
-            if i[0] == packet_id:
-                matches += 1
+        for i in range(max(packet_id - max_packets, 0), packet_id):
+            if i not in self.received:
+                return None
 
-                if matches >= 2:
-                    return None
+        self.received.append(packet_id)
 
-            if check and i[0] == last_i:
-                last_i += 1
-            elif check:
-                check = False
+        if len(self.received) > max_packets:
+            self.received = self.received[len(self.received) - max_packets:]
 
-        last_i -= 1
-
-        if packet_id <= last_i:
-            return jdt[1]
-
-        return None
+        return jdt[1]
 
     def receive(self, data):
         """Обрабатывает и декодирует Reliable данные клиента."""
@@ -115,8 +105,7 @@ class ReliableUDP:
 
             self.sock.sendto(dumps([-2, packet_id]).encode("utf8"), self.addr)
 
-            if jdt not in self.received:
-                return self.new_jdt(jdt, packet_id)
+            return self.new_jdt(jdt, packet_id)
 
         except BaseException:
             self.logger.log_error_data()

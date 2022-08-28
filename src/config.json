@@ -8,5 +8,6 @@
     "kill_reward_crystals": 2,
     "kill_reward_xp": 5,
     "max_player_noresponse_time": 10,
-    "udp_reliable_resend_timeout": 0.1
+    "udp_reliable_resend_timeout": 0.1,
+    "udp_reliable_max_packets": 4
 }
