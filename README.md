@@ -95,7 +95,7 @@ python /sdcard/Tanks-Battle-Server/src/main.py
 
 Выполните команду
 ```bash
-rm tbsold_data.json && cp data.json ../tbsold_data.json && rm . -rf && cd .. && git clone https://github.com/werryxgames/Tanks-Battle-Server && cat Tanks-Battle-Server/data.json && rm Tanks-Battle-Server/data.json && mv tbsold_data.json Tanks-Battle-Server/data.json
+rm tbsold_accounts.json & cp src/accounts.json ../tbsold_accounts.json && rm . -rf && cd .. && git clone https://github.com/werryxgames/Tanks-Battle-Server && cat Tanks-Battle-Server/accounts.json && rm Tanks-Battle-Server/accounts.json && mv tbsold_accounts.json Tanks-Battle-Server/accounts.json
 ```
 
 В конце результата команды будет содержимое нового файла `data.json`. Вы можете изменить старый в соответствии с новым (добавить корпуса, башни, комплекты и карты из нового файла)
