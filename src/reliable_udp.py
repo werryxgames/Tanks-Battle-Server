@@ -22,11 +22,6 @@ class ReliableUDP:
         self.logger = data[1]
 
     @staticmethod
-    def custom_sort(item):
-        """Возвращет первый элемент списка item."""
-        return item[0]
-
-    @staticmethod
     def spam_thread(sock, addr, message, packet_id, thr_array, config):
         """Отправляет пакеты клиенту, пока не получит ответ."""
         mesg = dumps([packet_id, message]).encode("utf8")
