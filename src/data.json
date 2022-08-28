@@ -75,8 +75,8 @@
         {
             "name": "Thunder",
             "description": "Грозная башня. Большой урон, но и перезарядка больше",
-            "damage": 150,
-            "rotation_speed": 0,
+            "damage": 200,
+            "rotation_speed": 30,
             "shot_speed": 200,
             "recoil": 6000000,
             "recharge": 2.5,
@@ -138,7 +138,7 @@
             "tank": {
                 "durability": 400,
                 "mass": 20000,
-                "speed": 46000000,
+                "speed": 66000000,
                 "gravity": 30000000,
                 "rotation_speed": 81000000,
                 "gun_position": [
