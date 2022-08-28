@@ -7,6 +7,53 @@ from time import sleep
 from singleton import get_data
 
 
+class ByteTranslator:
+    """Класс для преобразования байтов в данные и наоборот."""
+
+    COM_BYTE_TRANSLATIONS = {
+        "something_wrong": (0, 0),
+        "register": (0, 1),
+        "login": (0, 2),
+        "get_account_data": (0, 3),
+        "client_disconnected": (0, 4),
+        "console_command": (0, 5)
+    }
+
+    @classmethod
+    def get_com_bytes(cls, com):
+        """Возвращает bytearray из com-строки."""
+        try:
+            return bytearray(cls.COM_BYTE_TRANSLATIONS[com])
+        except KeyError:
+            return bytearray(0, 0)
+
+    @staticmethod
+    def to_bytes(data):
+        """Преобразует data в байты."""
+        com = data[0]
+        barr = ByteTranslator.get_com_bytes(com)
+
+        for arg in data[1]:
+            barr.append(type(arg))
+
+            if isinstance(arg, str):
+                for byte in arg.encode("utf8"):
+                    barr.append(byte)
+
+                barr.append(0)
+            elif isinstance(arg, int):
+                hexarg = hex(arg)[2:6]
+
+                for byte in bytes.fromhex((4 - len(hexarg)) * "00" + hexarg):
+                    barr.append(byte)
+
+        return barr
+
+    @staticmethod
+    def to_data(bytes_):
+        """Преобразует bytes_ в данные."""
+
+
 class ReliableUDP:
     """Класс гарантированной доставки UDP пакетов."""
 
