@@ -26,6 +26,35 @@ class Logger:
         self.loglevel = loglevel
 
     @staticmethod
+    def string2level(string, default=None):
+        """Возвращает уровень логгера из string или default."""
+        if default is None:
+            default = Logger.LEVEL_INFO
+
+        if string in ["n", "6", "none"]:
+            return Logger.LEVEL_NONE
+
+        if string in ["c", "5", "critical"]:
+            return Logger.LEVEL_CRITICAL
+
+        if string in ["e", "4", "error"]:
+            return Logger.LEVEL_ERROR
+
+        if string in ["w", "3", "warning"]:
+            return Logger.LEVEL_WARNING
+
+        if string in ["i", "2", "info"]:
+            return Logger.LEVEL_INFO
+
+        if string in ["d", "1", "debug"]:
+            return Logger.LEVEL_DEBUG
+
+        if string in ["s", "0", "slow"]:
+            return Logger.LEVEL_SLOW
+
+        return default
+
+    @staticmethod
     def date():
         """Возвращает текущую дату."""
         dt = datetime.today()

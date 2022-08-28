@@ -416,14 +416,40 @@ def init_window(config, logger):
     win.mainloop()
 
 
+def serve(config, logger):
+    """Включает сервер/запускает графический интерфейс."""
+    try:
+        if is_support_gui:
+            init_window(config, logger)
+            return
+
+        set_data(config, logger)
+        start_server(config, logger)
+    except KeyboardInterrupt:
+        logger.info("Сервер остановлен")
+        stop(0)
+    except BaseException:
+        logger.log_error_data(logger.critical)
+
+
 def main():
     """Функция, вызываемая при запуске скрипта."""
     global is_support_gui
 
-    logger = Logger(Logger.LEVEL_DEBUG, Logger.LEVEL_INFO)
+    log_print_level = Logger.LEVEL_DEBUG
+    log_file_level = Logger.LEVEL_INFO
 
-    if "--nogui" in argv:
-        is_support_gui = False
+    for arg in argv:
+        if arg == "--nogui":
+            is_support_gui = False
+        elif arg.startswith("-l"):
+            string = arg[2:].lower()
+            log_print_level = Logger.string2level(string, Logger.LEVEL_DEBUG)
+        elif arg.startswith("-L"):
+            string = arg[2:].lower()
+            log_file_level = Logger.string2level(string)
+
+    logger = Logger(log_print_level, log_file_level)
 
     try:
         config = read("config.json")
@@ -442,19 +468,7 @@ def main():
 
         stop(1)
 
-    try:
-        if is_support_gui:
-            logger = Logger(Logger.LEVEL_CRITICAL, Logger.LEVEL_INFO)
-            init_window(config, logger)
-            return
-
-        set_data(config, logger)
-        start_server(config, logger)
-    except KeyboardInterrupt:
-        logger.info("Сервер остановлен")
-        stop(0)
-    except BaseException:
-        logger.log_error_data(logger.critical)
+    serve(config, logger)
 
 
 if __name__ == '__main__':
