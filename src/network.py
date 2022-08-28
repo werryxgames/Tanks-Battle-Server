@@ -62,6 +62,7 @@ class NetworkedClient:
             password,
             self
         ):
+            self.send(["already_queued"])
             clients.pop(self.addr)
 
     def handle_login(self, login, password):
@@ -71,6 +72,7 @@ class NetworkedClient:
             password,
             self
         ):
+            self.send(["already_queued"])
             clients.pop(self.addr)
 
     def handle(self, com, args):
