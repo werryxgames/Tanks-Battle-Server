@@ -24,8 +24,11 @@ except ImportError:
     is_support_gui = False
 
 try:
-    Tk().destroy()
-except TclError:
+    try:
+        Tk().destroy()
+    except TclError:
+        is_support_gui = False
+except NameError:
     is_support_gui = False
 
 
