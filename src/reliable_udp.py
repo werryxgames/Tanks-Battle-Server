@@ -1,9 +1,9 @@
 """Модуль гарантированной доставки UDP пакетов."""
 from json import dumps
 from json import loads
+from struct import pack
 from threading import Thread
 from time import sleep
-from struct import pack
 
 from singleton import get_data
 
@@ -29,7 +29,9 @@ class ByteTranslator:
         float: 3,
         list: 4,
         tuple: 4,
-        dict: 5
+        dict: 5,
+        type(None): 6,
+        bool: 7
     }
 
     @classmethod
@@ -130,38 +132,46 @@ class ByteTranslator:
         raise ByteTranslatorException("Длина словаря больше максимальной")
 
     @staticmethod
+    def bool_to_bytes(data):
+        """Преобразует булевое значение в байты."""
+        return bytearray([1]) if data else bytearray([0])
+
+    @staticmethod
     def to_bytes(data):
         """Преобразует data в байты."""
         barr = bytearray()
 
         for arg in data:
-            barr.append(ByteTranslator.get_datatype(arg))
+            dtype = ByteTranslator.get_datatype(arg)
+            barr.append(dtype)
 
-            if isinstance(arg, str):
-                ByteTranslator.bappend(
-                    barr,
-                    ByteTranslator.str_to_bytes(arg)
-                )
-            elif isinstance(arg, int):
+            if dtype == 1:
                 ByteTranslator.bappend(
                     barr,
                     ByteTranslator.int_to_bytes(arg)
                 )
-            elif isinstance(arg, float):
+            elif dtype == 2:
+                ByteTranslator.bappend(
+                    barr,
+                    ByteTranslator.str_to_bytes(arg)
+                )
+            elif dtype == 3:
                 ByteTranslator.bappend(
                     barr,
                     ByteTranslator.float_to_bytes(arg)
                 )
-            elif isinstance(arg, (list, tuple)):
+            elif dtype == 4:
                 ByteTranslator.bappend(
                     barr,
                     ByteTranslator.array_to_bytes(arg)
                 )
-            elif isinstance(arg, dict):
+            elif dtype == 5:
                 ByteTranslator.bappend(
                     barr,
                     ByteTranslator.dict_to_bytes(arg)
                 )
+            elif dtype == 7:
+                barr.append(1 if arg else 0)
 
         return barr
 
