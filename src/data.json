@@ -86,7 +86,7 @@
     "pts": [
         {
             "name": "ЛТ-21 \"Хомяк\"",
-            "description": "Достаточно быстрый комплект со слабой башней",
+            "description": "Лёгкий танк, но башня расположена сзади",
             "tank": {
                 "durability": 450,
                 "mass": 12000,
@@ -100,13 +100,15 @@
                 ]
             },
             "gun": {
-                "damage": 100,
+                "damage": 300,
                 "rotation_speed": 90,
                 "shot_speed": 180,
                 "recoil": 4000000,
-                "recharge": 1.8
+                "recharge": 4,
+                "limits": [60, 20],
+                "default_rotation": 180
             },
-            "price": 210
+            "price": 1190
         },
         {
             "name": "WZ-Kj. 90",
@@ -128,7 +130,8 @@
                 "rotation_speed": 0,
                 "shot_speed": 360,
                 "recoil": 20000000,
-                "recharge": 3
+                "recharge": 7,
+                "limits": [0, 0]
             },
             "price": 1949
         },
@@ -148,11 +151,12 @@
                 ]
             },
             "gun": {
-                "damage": 120,
+                "damage": 100,
                 "rotation_speed": 112,
                 "shot_speed": 190,
                 "recoil": 6000000,
-                "recharge": 1
+                "recharge": 2,
+                "limits": [180, 1]
             },
             "price": 990
         },
@@ -176,7 +180,8 @@
                 "rotation_speed": 75,
                 "shot_speed": 220,
                 "recoil": 9000000,
-                "recharge": 3
+                "recharge": 6,
+                "limits": [180, 4]
             },
             "price": 1500
         }

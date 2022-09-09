@@ -59,17 +59,18 @@ class BattlePlayer:
         """Возвращает текущий танк игрока."""
         return self.st_get_tank(self.tank, self.tank_pt)
 
-    def get_gun(self):
-        """Возвращает текущую башню игрока."""
+    @staticmethod
+    def st_get_gun(gun, tank_pt):
+        """Возвращает башню игрока."""
         data = read("data.json")
 
         if data is None:
             return None
 
-        if self.tank_pt == -1:
-            gun_data = data["guns"][self.gun]
+        if tank_pt == -1:
+            gun_data = data["guns"][gun]
         else:
-            gun_data = data["pts"][self.tank_pt]["gun"]
+            gun_data = data["pts"][tank_pt]["gun"]
 
         res_data = {}
 
@@ -80,11 +81,17 @@ class BattlePlayer:
                 "shot_speed",
                 "damage",
                 "recoil",
-                "recharge"
+                "recharge",
+                "limits",
+                "default_rotation"
             ]:
                 res_data[key] = value
 
         return res_data
+
+    def get_gun(self):
+        """Возвращает текущую башню игрока."""
+        return self.st_get_gun(self.gun, self.tank_pt)
 
     def json(self):
         """Возвращает данные в формате, для преобразования в JSON."""

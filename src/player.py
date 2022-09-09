@@ -118,15 +118,21 @@ class Player(NetUser):
     def receive_get_batte_data(self):
         """Получает данные битвы."""
         self.refresh_account()
-
         self.map = read("data.json")["maps"][self.bdata["map"]]
-
+        gun = BattlePlayer.st_get_gun(
+            self.account["selected_gun"],
+            self.account["selected_pt"]
+        )
         self.bp = BattlePlayer(
             self.account["nick"],
             self.randpoint(),
             (0, 0, 0),
             self.account["selected_tank"],
-            (0, 0, 0),
+            (
+                0,
+                gun["default_rotation"],
+                0
+            ) if "default_rotation" in gun else (0, 0, 0),
             self.account["selected_gun"],
             BattlePlayer.st_get_tank(
                 self.account["selected_tank"],
@@ -134,9 +140,7 @@ class Player(NetUser):
             )["durability"],
             self.account["selected_pt"]
         )
-
         self.bdata["players"].append(self.bp)
-
         pls = []
 
         for bp in self.bdata["players"]:
