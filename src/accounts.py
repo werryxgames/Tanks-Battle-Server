@@ -14,6 +14,7 @@ class Hasher:
     """Класс хеширования паролей."""
 
     def __init__(self):
+        """Инициализация хешера паролей."""
         self.phasher = PasswordHasher()
 
     @staticmethod
@@ -46,6 +47,7 @@ queued_logins = []
 
 class AccountManager:
     """Управляет аккаунтами."""
+
     SUCCESSFUL = 0
     FAILED_NICK_LENGTH = 1
     FAILED_UNKNOWN = 2
@@ -355,12 +357,8 @@ class AccountManager:
             "password": hashed_password,
             "xp": 0,
             "crystals": 0,
-            "tanks": [1],
-            "guns": [0],
-            "pts": [],
-            "selected_tank": 1,
-            "selected_gun": 0,
-            "selected_pt": -1,
+            "tanks": [0],
+            "selected_tank": 0,
             "settings": get_data()[0]["default_settings"]
         }
 

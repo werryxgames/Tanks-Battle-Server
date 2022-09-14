@@ -11,6 +11,7 @@ class Window(Tk):
     STATE_CONFIG = 3
 
     def __init__(self, *args, **kwargs):
+        """Инициализация окна."""
         super().__init__(*args, **kwargs)
         self.state = self.STATE_MAIN
         self.elements = []

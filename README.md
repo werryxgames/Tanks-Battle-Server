@@ -102,6 +102,66 @@ rm tbsold_accounts.json & cp src/accounts.json ../tbsold_accounts.json & rm ../T
 
 Теперь вы можете запустить новую версию сервера как обычно
 
+# Обновление
+## Обновление аккаунтов
+Для обновления аккаунтов используйте `update/accounts.py`:
+`python update/accounts.py <файл_к_старому_accounts.json>`
+
+После выполнения этой команды без ошибок, содержимое указанного файла обновится до новейшего формата
+
+Пример:
+```json
+[
+    {
+        "nick": "Werryx",
+        "password": "...",
+        "xp": 1234,
+        "crystals": 567,
+        "tanks": [
+            1,
+            2
+        ],
+        "guns": [
+            0
+        ],
+        "pts": [
+            1
+        ],
+        "selected_tank": 0,
+        "selected_gun": 0,
+        "selected_pt": -1,
+        "settings": [
+            true,
+            true,
+            1500
+        ]
+    }
+]
+```
+заменится на
+```json
+[
+    {
+        "nick": "Werryx",
+        "password": "...",
+        "xp": 1234,
+        "crystals": 567,
+        "tanks": [
+            0,
+            1
+        ],
+        "selected_tank": 0,
+        "settings": [
+            true,
+            true,
+            1500
+        ]
+    }
+]
+```
+
+Появился танк с ID *0*, так как он даётся всем по умолчанию и так как **комплект** не был выбран (*-1*), `selected_tank` изменилось на *0*
+
 # Версии
 Статусы поддержки версий:
 

@@ -12,6 +12,7 @@ from absolute import to_absolute
 
 class Logger:
     """Класс для логгирования сообщений."""
+
     LEVEL_NONE = 6
     LEVEL_CRITICAL = 5
     LEVEL_ERROR = 4
@@ -21,6 +22,7 @@ class Logger:
     LEVEL_SLOW = 0
 
     def __init__(self, level, loglevel):
+        """Инициализация логгера."""
         init()
         self.level = level
         self.loglevel = loglevel

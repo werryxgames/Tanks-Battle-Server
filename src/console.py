@@ -21,6 +21,7 @@ class ConsoleExecutor:
         win=None,
         rudp=None
     ):
+        """Инициализация исполнителя консольных команд."""
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
@@ -340,6 +341,7 @@ class Console:
     """Класс консоли команд."""
 
     def __init__(self, sock, addr, rudp):
+        """Инициализация консоли команд."""
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
@@ -374,7 +376,7 @@ class Console:
             pass
 
     def receive(self, jdt):
-        """Обрабатывает данные, полученные от клиента"""
+        """Обрабатывает данные, полученные от клиента."""
         try:
             com = jdt[0]
             args = jdt[1:]
