@@ -6,6 +6,7 @@ from mjson import read
 
 class Singleton:
     """Класс синглтона."""
+
     config = None
     logger = None
     win = None
@@ -13,6 +14,7 @@ class Singleton:
     clients = {}
 
     def __new__(cls):
+        """Возвращает instance синглтона."""
         if not hasattr(cls, "instance"):
             cls.instance = super(Singleton, cls).__new__(cls)
 
