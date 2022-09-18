@@ -14,7 +14,7 @@
                 "rotation_speed": 90,
                 "shot_speed": 180,
                 "recoil": 4000000,
-                "recharge": 4,
+                "recharge": 5,
                 "limits": [60, 20],
                 "default_rotation": 180
             },
@@ -53,11 +53,11 @@
                 "rotation_speed": 81000000
             },
             "gun": {
-                "damage": 100,
+                "damage": 90,
                 "rotation_speed": 112,
                 "shot_speed": 190,
                 "recoil": 6000000,
-                "recharge": 2,
+                "recharge": 1.2,
                 "limits": [180, 1]
             },
             "price": 990,
@@ -74,11 +74,11 @@
                 "rotation_speed": 41000000
             },
             "gun": {
-                "damage": 300,
-                "rotation_speed": 75,
+                "damage": 600,
+                "rotation_speed": 50,
                 "shot_speed": 220,
                 "recoil": 9000000,
-                "recharge": 6,
+                "recharge": 5.5,
                 "limits": [180, 4]
             },
             "price": 1500,
