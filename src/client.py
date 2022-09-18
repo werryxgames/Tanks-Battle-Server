@@ -7,6 +7,7 @@ from netclasses import NetUser
 from player import Player
 from singleton import add_match
 from singleton import get_clients
+from singleton import get_data
 from singleton import get_matches
 
 clients = get_clients()
@@ -19,6 +20,7 @@ class Client(NetUser):
         """Инициализация клиента."""
         self.sock = sock
         self.addr = addr
+        self.config = get_data()[0]
 
         super().__init__(rudp)
 
@@ -54,6 +56,7 @@ class Client(NetUser):
             self.refresh_account()
             self.send([
                 "account_data",
+                self.config["ranks"],
                 self.account["xp"],
                 self.account["crystals"]
             ])
