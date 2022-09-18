@@ -231,6 +231,8 @@ class Player(NetUser):
             ])
             self.qr_sended = True
 
+        self.bp.durability = -1
+
         return None
 
     def try_handle_messages(self):

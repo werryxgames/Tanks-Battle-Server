@@ -15,8 +15,7 @@
                 "shot_speed": 180,
                 "recoil": 4000000,
                 "recharge": 5,
-                "limits": [180, 20],
-                "default_rotation": 180
+                "limits": [180, 20]
             },
             "price": 0,
             "position": [0, 1],
@@ -88,6 +87,7 @@
     ],
     "maps": [
         {
+            "name": "Зелёная площадка",
             "spawn_points": [
                 [
                     -100,
@@ -123,6 +123,7 @@
             "kill_y": -30
         },
         {
+            "name": "Наклонный полигон",
             "spawn_points": [
                 [
                     -55,

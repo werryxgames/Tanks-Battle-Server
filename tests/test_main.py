@@ -42,19 +42,17 @@ def test_signleton_matches():
     singleton.set_data(config)
 
     assert singleton.get_matches() == []
-    battle = singleton.add_match("Test name", 10, "Test creator")
-    assert battle.pop("map", False) is not False
+    battle = singleton.add_match(0, 10)
     exp_battle = {
-        "name": "Test name",
         "max_players": 10,
-        "creator": "Test creator",
         "players": [],
+        "map": 0,
         "messages": []
     }
     assert battle == exp_battle
     assert singleton.get_matches() == [exp_battle]
-    assert singleton.remove_match(exp_battle["name"])
-    assert singleton.get_matches() == []
+    assert singleton.remove_match(0)
+    assert singleton.get_matches() == [None]
 
 
 def test_signleton_clients():

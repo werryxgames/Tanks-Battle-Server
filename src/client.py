@@ -7,6 +7,7 @@ from netclasses import NetUser
 from player import Player
 from singleton import add_match
 from singleton import get_clients
+from singleton import get_const_params
 from singleton import get_data
 from singleton import get_matches
 
@@ -58,7 +59,8 @@ class Client(NetUser):
                 "account_data",
                 self.config["ranks"],
                 self.account["xp"],
-                self.account["crystals"]
+                self.account["crystals"],
+                get_const_params()
             ])
             return True
 
@@ -195,7 +197,7 @@ class Client(NetUser):
         """Обрабатывает создание матча от клиента."""
         self.refresh_account()
 
-        if not isinstance(args[0], str):
+        if not isinstance(args[0], int):
             self.send(["game_create_failed", 1])
             return
 
@@ -203,46 +205,32 @@ class Client(NetUser):
             self.send(["game_create_failed", 1])
             return
 
-        name = args[0].strip()
+        map_id = args[0]
+
+        if map_id < 0 or map_id >= len(read("data.json")["maps"]):
+            self.send(["game_create_failed", 1])
+            return
+
         max_players = args[1].strip()
 
-        if len(name) < 3 or len(name) > 20:
-            self.send(["game_create_failed", 0])
-            return
-
-        if len(max_players) < 1 or len(max_players) > 2:
-            self.send(["game_create_failed", 0])
-            return
-
-        if not AccountManager.check(
-            name,
-            AccountManager.DEFAULT_ALLOWED + " "
-        ):
-            self.send(["game_create_failed", 3])
+        if len(max_players) < 1:
+            self.send(["game_create_failed", 2])
             return
 
         if not AccountManager.check(max_players, "0123456789"):
-            self.send(["game_create_failed", 3])
+            self.send(["game_create_failed", 2])
             return
 
         max_players = int(max_players)
 
         if max_players < 1 or max_players > self.config["max_play\
 ers_in_game"]:
-            self.send(["game_create_failed", 4])
+            self.send(["game_create_failed", 0])
             return
 
-        matches = get_matches()
-
-        for match_ in matches:
-            if match_["name"] == name:
-                self.send(["game_create_failed", 2])
-                return
-
         match_ = add_match(
-            name,
-            int(max_players),
-            self.account["nick"]
+            map_id,
+            max_players
         )
 
         self.send(["game_created"])
@@ -263,8 +251,8 @@ ers_in_game"]:
         matches = get_matches()
         player_match = None
 
-        for match_ in matches:
-            if match_["name"] == args[0]:
+        for match_id, match_ in enumerate(matches):
+            if match_id == args[0]:
                 if len(
                     match_["players"]
                 ) < match_["max_players"]:
