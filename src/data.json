@@ -15,7 +15,7 @@
                 "shot_speed": 180,
                 "recoil": 4000000,
                 "recharge": 5,
-                "limits": [60, 20],
+                "limits": [180, 20],
                 "default_rotation": 180
             },
             "price": 0,
@@ -58,7 +58,7 @@
                 "shot_speed": 190,
                 "recoil": 6000000,
                 "recharge": 1.2,
-                "limits": [180, 1]
+                "limits": [180, 20]
             },
             "price": 990,
             "position": [1, 1],
@@ -79,7 +79,7 @@
                 "shot_speed": 220,
                 "recoil": 9000000,
                 "recharge": 5.5,
-                "limits": [180, 4]
+                "limits": [180, 15]
             },
             "price": 1500,
             "position": [2, 1],
