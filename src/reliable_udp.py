@@ -184,6 +184,7 @@ class ReliableUDP:
     """Класс гарантированной доставки UDP пакетов."""
 
     def __init__(self, sock, addr):
+        """Инициализация Reliable UDP."""
         self.sender_packet_id = 0
         self.sender_threads = {}
         self.received = []

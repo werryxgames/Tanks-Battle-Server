@@ -7,6 +7,7 @@ class NetUser:
     """Класс пользователя."""
 
     def __init__(self, rudp):
+        """Инициализация пользователя."""
         self.rudp = rudp
 
         self.login = None

@@ -7,6 +7,8 @@ from netclasses import NetUser
 from player import Player
 from singleton import add_match
 from singleton import get_clients
+from singleton import get_const_params
+from singleton import get_data
 from singleton import get_matches
 
 clients = get_clients()
@@ -16,8 +18,10 @@ class Client(NetUser):
     """Класс клиента в игре."""
 
     def __init__(self, sock, addr, rudp):
+        """Инициализация клиента."""
         self.sock = sock
         self.addr = addr
+        self.config = get_data()[0]
 
         super().__init__(rudp)
 
@@ -53,8 +57,10 @@ class Client(NetUser):
             self.refresh_account()
             self.send([
                 "account_data",
+                self.config["ranks"],
                 self.account["xp"],
-                self.account["crystals"]
+                self.account["crystals"],
+                get_const_params()
             ])
             return True
 
@@ -71,8 +77,6 @@ class Client(NetUser):
         self.refresh_account()
 
         tanks = []
-        guns = []
-        pts = []
 
         for i, tank_ in enumerate(data["tanks"]):
             tanks.append({
@@ -80,42 +84,19 @@ class Client(NetUser):
                 "have": i in self.account["tanks"]
             })
 
-        for i, gun in enumerate(data["guns"]):
-            guns.append({
-                **gun,
-                "have": i in self.account["guns"]
-            })
-
-        for i, pt in enumerate(data["pts"]):
-            pts.append({
-                **pt,
-                "have": i in self.account["pts"]
-            })
-
         self.send([
             "garage_data",
             tanks,
             self.account["selected_tank"],
-            guns,
-            self.account["selected_gun"],
-            pts,
-            self.account["selected_pt"]
+            self.account["crystals"]
         ])
 
-    def select_ingame(self, type_, args):
+    def select_tank(self, args):
         """Обрабатывает запрос клиента на выбор args[0] из type_."""
-        if args[0] in self.account[f"{type_}s"]:
+        if args[0] in self.account["tanks"]:
             if AccountManager.set_account(
                 self.account["nick"],
-                "selected_pt",
-                -1
-            ) != AccountManager.SUCCESSFUL:
-                self.send(["not_selected", 1])
-                return
-
-            if AccountManager.set_account(
-                self.account["nick"],
-                f"selected_{type_}",
+                "selected_tank",
                 args[0]
             ) != AccountManager.SUCCESSFUL:
                 self.send(["not_selected", 1])
@@ -127,43 +108,35 @@ class Client(NetUser):
         self.send(["not_selected", 0])
         return
 
-    def buy_ingame_data(self, type_, ingame_id, data):
-        """Обрабатывает запрос на покупку с указанными данными."""
-        if ingame_id not in self.account[type_] and len(
-            data[type_]
-        ) > ingame_id:
-            ingame = data[type_][ingame_id]
+    def buy_tank_data(self, tank_id, data):
+        """Обрабатывает запрос на покупку танка с указанными данными."""
+        if tank_id not in self.account["tanks"] and len(
+            data["tanks"]
+        ) > tank_id:
+            tank = data["tanks"][tank_id]
             self.refresh_account()
 
-            if self.account["crystals"] >= ingame["price"]:
+            if self.account["crystals"] >= tank["price"]:
                 if AccountManager.set_account(
                     self.account["nick"],
                     "crystals",
-                    self.account["crystals"] - ingame["price"]
+                    self.account["crystals"] - tank["price"]
                 ) != AccountManager.SUCCESSFUL:
                     self.send(["not_selected", 1])
                     return
 
                 if AccountManager.set_account(
                     self.account["nick"],
-                    type_,
-                    [*self.account[type_], ingame_id]
+                    "tanks",
+                    [*self.account["tanks"], tank_id]
                 ) != AccountManager.SUCCESSFUL:
                     self.send(["not_selected", 1])
                     return
 
                 if AccountManager.set_account(
                     self.account["nick"],
-                    "selected_pt",
-                    -1
-                ) != AccountManager.SUCCESSFUL:
-                    self.send(["not_selected", 1])
-                    return
-
-                if AccountManager.set_account(
-                    self.account["nick"],
-                    f"selected_{type_}",
-                    ingame_id
+                    "selected_tank",
+                    tank_id
                 ) != AccountManager.SUCCESSFUL:
                     self.send(["not_selected", 1])
                     return
@@ -176,48 +149,24 @@ class Client(NetUser):
 
         self.send(["not_selected", 0])
 
-    def buy_ingame(self, type_, args):
-        """Обрабатывает запрос на покупку с чтением данных."""
+    def buy_tank(self, args):
+        """Обрабатывает запрос на покупку танка с чтением данных."""
         data = read("data.json")
 
         if data is None:
             self.send(["not_selected", 2])
             return
 
-        self.buy_ingame_data(type_, args[0], data)
+        self.buy_tank_data(args[0], data)
 
     def handle_tanks(self, com, args):
-        """Обрабатывает корпуса клиента."""
+        """Обрабатывает танки клиента."""
         if com == "select_tank":
-            self.select_ingame("tank", args)
+            self.select_tank(args)
             return True
 
         if com == "buy_tank":
-            self.buy_ingame("tanks", args)
-            return True
-
-        return False
-
-    def handle_guns(self, com, args):
-        """Обрабатывает башни клиента."""
-        if com == "select_gun":
-            self.select_ingame("gun", args)
-            return True
-
-        if com == "buy_gun":
-            self.buy_ingame("guns", args)
-            return True
-
-        return False
-
-    def handle_pts(self, com, args):
-        """Обрабатывает данные комплектов клиента."""
-        if com == "select_pt":
-            self.select_ingame("pt", args)
-            return True
-
-        if com == "buy_pt":
-            self.buy_ingame("pts", args)
+            self.buy_tank(args)
             return True
 
         return False
@@ -229,12 +178,6 @@ class Client(NetUser):
             return True
 
         if self.handle_tanks(com, args):
-            return True
-
-        if self.handle_guns(com, args):
-            return True
-
-        if self.handle_pts(com, args):
             return True
 
         return False
@@ -254,7 +197,7 @@ class Client(NetUser):
         """Обрабатывает создание матча от клиента."""
         self.refresh_account()
 
-        if not isinstance(args[0], str):
+        if not isinstance(args[0], int):
             self.send(["game_create_failed", 1])
             return
 
@@ -262,46 +205,32 @@ class Client(NetUser):
             self.send(["game_create_failed", 1])
             return
 
-        name = args[0].strip()
+        map_id = args[0]
+
+        if map_id < 0 or map_id >= len(read("data.json")["maps"]):
+            self.send(["game_create_failed", 1])
+            return
+
         max_players = args[1].strip()
 
-        if len(name) < 3 or len(name) > 20:
-            self.send(["game_create_failed", 0])
-            return
-
-        if len(max_players) < 1 or len(max_players) > 2:
-            self.send(["game_create_failed", 0])
-            return
-
-        if not AccountManager.check(
-            name,
-            AccountManager.DEFAULT_ALLOWED + " "
-        ):
-            self.send(["game_create_failed", 3])
+        if len(max_players) < 1:
+            self.send(["game_create_failed", 2])
             return
 
         if not AccountManager.check(max_players, "0123456789"):
-            self.send(["game_create_failed", 3])
+            self.send(["game_create_failed", 2])
             return
 
         max_players = int(max_players)
 
         if max_players < 1 or max_players > self.config["max_play\
 ers_in_game"]:
-            self.send(["game_create_failed", 4])
+            self.send(["game_create_failed", 0])
             return
 
-        matches = get_matches()
-
-        for match_ in matches:
-            if match_["name"] == name:
-                self.send(["game_create_failed", 2])
-                return
-
         match_ = add_match(
-            name,
-            int(max_players),
-            self.account["nick"]
+            map_id,
+            max_players
         )
 
         self.send(["game_created"])
@@ -322,8 +251,8 @@ ers_in_game"]:
         matches = get_matches()
         player_match = None
 
-        for match_ in matches:
-            if match_["name"] == args[0]:
+        for match_id, match_ in enumerate(matches):
+            if match_id == args[0]:
                 if len(
                     match_["players"]
                 ) < match_["max_players"]:

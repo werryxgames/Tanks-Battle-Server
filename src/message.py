@@ -5,6 +5,7 @@ class GlobalMessage:
     """Класс глобального сообщения."""
 
     def __init__(self, type_, text):
+        """Инициализация глобального сообщения."""
         self.type = type_
         self.text = text
 

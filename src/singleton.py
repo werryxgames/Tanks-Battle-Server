@@ -1,11 +1,10 @@
 """Модуль синглтона."""
-from random import randint
-
 from mjson import read
 
 
 class Singleton:
     """Класс синглтона."""
+
     config = None
     logger = None
     win = None
@@ -13,6 +12,7 @@ class Singleton:
     clients = {}
 
     def __new__(cls):
+        """Возвращает instance синглтона."""
         if not hasattr(cls, "instance"):
             cls.instance = super(Singleton, cls).__new__(cls)
 
@@ -36,33 +36,18 @@ def set_data(config=None, logger=None, win=None):
 
 def get_data():
     """Получает данные из синглтона."""
-    data = []
-
-    if st.config is not None:
-        data.append(st.config)
-    if st.config is not None:
-        data.append(st.logger)
-    if st.win is not None:
-        data.append(st.win)
-
-    return data
+    return [st.config, st.logger, st.win]
 
 
-def add_match(name, max_players, creator):
+def add_match(map_id, max_players):
     """Добавляет матч."""
-    maps = read("data.json")["maps"]
-
     battle = {
-        "name": name,
         "max_players": max_players,
-        "creator": creator,
         "players": [],
-        "map": randint(0, len(maps) - 1),
+        "map": map_id,
         "messages": []
     }
-
     st.matches.append(battle)
-
     return battle
 
 
@@ -74,17 +59,21 @@ def get_matches():
 def remove_match(name):
     """Удаляет матч."""
     try:
-        for battle in st.matches:
-            if battle["name"] == name:
-                st.matches.remove(battle)
+        st.matches[name] = None
+    except IndexError:
+        return False
 
-                return True
-    except (AttributeError, IndexError):
-        pass
-
-    return False
+    return True
 
 
 def get_clients():
     """Возвращает список всех клиентов."""
     return st.clients
+
+
+def get_const_params():
+    """Возвращает все константные параметры."""
+    params = st.config["constant_params"]
+    maps = read("data.json")["maps"]
+    params["maps"] = [map_["name"] for map_ in maps]
+    return params

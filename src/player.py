@@ -16,9 +16,11 @@ clients = get_clients()
 
 class Player(NetUser):
     """Класс игрока."""
+
     BACK_TO_MENU = 1
 
     def __init__(self, sock, addr, battle_data, rudp):
+        """Инициализация игрока в матче."""
         self.sock = sock
         self.addr = addr
         self.bdata = battle_data
@@ -118,25 +120,25 @@ class Player(NetUser):
     def receive_get_batte_data(self):
         """Получает данные битвы."""
         self.refresh_account()
-
         self.map = read("data.json")["maps"][self.bdata["map"]]
-
+        gun = BattlePlayer.st_get_gun(
+            self.account["selected_tank"]
+        )
         self.bp = BattlePlayer(
             self.account["nick"],
             self.randpoint(),
             (0, 0, 0),
             self.account["selected_tank"],
-            (0, 0, 0),
-            self.account["selected_gun"],
+            (
+                0,
+                gun["default_rotation"],
+                0
+            ) if "default_rotation" in gun else (0, 0, 0),
             BattlePlayer.st_get_tank(
-                self.account["selected_tank"],
-                self.account["selected_pt"]
-            )["durability"],
-            self.account["selected_pt"]
+                self.account["selected_tank"]
+            )["durability"]
         )
-
         self.bdata["players"].append(self.bp)
-
         pls = []
 
         for bp in self.bdata["players"]:
@@ -186,8 +188,7 @@ class Player(NetUser):
                     "respawn",
                     self.randpoint(),
                     BattlePlayer.st_get_tank(
-                        self.account["selected_tank"],
-                        self.account["selected_pt"]
+                        self.account["selected_tank"]
                     )["durability"],
                     self.respawn_id
                 ])
@@ -224,12 +225,13 @@ class Player(NetUser):
                 "respawn",
                 self.randpoint(),
                 BattlePlayer.st_get_tank(
-                    self.account["selected_tank"],
-                    self.account["selected_pt"]
+                    self.account["selected_tank"]
                 )["durability"],
                 self.respawn_id
             ])
             self.qr_sended = True
+
+        self.bp.durability = -1
 
         return None
 

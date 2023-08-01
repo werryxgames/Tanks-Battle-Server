@@ -28,6 +28,7 @@ class NetworkedClient:
     CONSOLE = Console
 
     def __init__(self, sock_, addr):
+        """Инициализация клиента."""
         self.sock = sock_
         self.addr = addr
         self.rudp = ReliableUDP(sock_, addr)

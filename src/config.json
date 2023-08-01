@@ -1,7 +1,7 @@
 {
     "host": "0.0.0.0",
     "port": 7490,
-    "accept_client_versions": ["13.0", "1.14.0", "1.15.0"],
+    "accept_client_versions": ["2.0"],
     "max_players_in_game": 10,
     "maps": 1,
     "default_settings": [true, true, 1500],
@@ -9,5 +9,58 @@
     "kill_reward_xp": 5,
     "max_player_noresponse_time": 10,
     "udp_reliable_resend_timeout": 0.1,
-    "udp_reliable_max_packets": 4
+    "udp_reliable_max_packets": 4,
+    "ranks": [
+        {
+            "name": "Рядовой",
+            "texture": false,
+            "max_xp": 10
+        },
+        {
+            "name": "Ефрейтор",
+            "texture": "corporal",
+            "max_xp": 30
+        },
+        {
+            "name": "Младший сержант",
+            "texture": "lance_sergeant",
+            "max_xp": 75
+        },
+        {
+            "name": "Сержант",
+            "texture": "sergeant",
+            "max_xp": 200
+        },
+        {
+            "name": "Старший сержант",
+            "texture": "staff_sergeant",
+            "max_xp": 500
+        },
+        {
+            "name": "Младший лейтенант",
+            "texture": "ensign",
+            "max_xp": 1000
+        },
+        {
+            "name": "Лейтенант",
+            "texture": "lieutenant",
+            "max_xp": 2500
+        },
+        {
+            "name": "Старший лейтенант",
+            "texture": "senior_lieutenant",
+            "max_xp": 5000
+        },
+        {
+            "name": "Капитан",
+            "texture": "captain",
+            "max_xp": 10000
+        },
+        {
+            "name": "Генерал",
+            "texture": "general",
+            "max_xp": false
+        }
+    ],
+    "constant_params": {}
 }
