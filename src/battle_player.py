@@ -27,7 +27,7 @@ class BattlePlayer:
     @staticmethod
     def st_get_tank(tank):
         """Возвращает корпус."""
-        data = read(to_absolute("data.json"))
+        data = read(to_absolute("../data.json"))
 
         if data is None:
             return None
@@ -42,7 +42,7 @@ class BattlePlayer:
     @staticmethod
     def st_get_gun(tank):
         """Возвращает башню игрока."""
-        data = read(to_absolute("data.json"))
+        data = read(to_absolute("../data.json"))
 
         if data is None:
             return None

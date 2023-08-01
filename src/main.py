@@ -38,7 +38,7 @@ def current_clear(win):
         elem = win.elements[2]
     elif win.state == Window.STATE_LOG:
         elem = win.elements[1]
-        with open(to_absolute("server.log"), "wb"):
+        with open(to_absolute("../server.log"), "wb"):
             pass
     else:
         return
@@ -64,7 +64,7 @@ def save_config(win):
     """Сохраняет текущую конфигурацию."""
     if win.state == Window.STATE_CONFIG:
         text = win.elements[1].get("1.0", "end")[:-1]
-        with open(to_absolute("config.json"), "w", encoding="utf8") as file:
+        with open(to_absolute("../config.json"), "w", encoding="utf8") as file:
             file.write(text)
 
 
@@ -120,7 +120,7 @@ def tab_config(config, win):
         anchor="se"
     )
 
-    with open(to_absolute("config.json"), encoding="utf8") as file:
+    with open(to_absolute("../config.json"), encoding="utf8") as file:
         win.elements[1].insert("end", file.read())
 
 
@@ -258,7 +258,7 @@ def tab_log(config, win):
         anchor="se"
     )
 
-    with open(to_absolute("server.log"), encoding="utf8") as file:
+    with open(to_absolute("../server.log"), encoding="utf8") as file:
         win.elements[1].insert("end", file.read())
         win.elements[1].configure(state="disabled")
 
@@ -391,7 +391,7 @@ def init_window(config, logger):
         "wm",
         "iconphoto",
         win,
-        PhotoImage(file=to_absolute("icon.png", temp=True))
+        PhotoImage(file=to_absolute("../icon.png", temp=True))
     )
     win.configure(background="#444")
     win.protocol("WM_DELETE_WINDOW", lambda: stop(0))
@@ -455,7 +455,7 @@ def main():
     logger = Logger(log_print_level, log_file_level)
 
     try:
-        config = read("config.json")
+        config = read("../config.json")
     except JSONDecodeError:
         logger.critical("Не удалось загрузить конфигурацию. \
 Возможно файл был повреждён")

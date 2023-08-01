@@ -74,6 +74,6 @@ def get_clients():
 def get_const_params():
     """Возвращает все константные параметры."""
     params = st.config["constant_params"]
-    maps = read("data.json")["maps"]
+    maps = read("../data.json")["maps"]
     params["maps"] = [map_["name"] for map_ in maps]
     return params

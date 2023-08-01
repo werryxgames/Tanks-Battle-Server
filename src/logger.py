@@ -96,7 +96,7 @@ class Logger:
             print(msg)
 
         if self.loglevel <= level:
-            with open(to_absolute("server.log"), "a", encoding="utf8") as f:
+            with open(to_absolute("../server.log"), "a", encoding="utf8") as f:
                 dt = self.date()
                 f.write(
                     "{" + f"{dt[2]}.{dt[1]}.{dt[0]} {dt[3]}:{dt[4]}:\

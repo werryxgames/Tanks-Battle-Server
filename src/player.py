@@ -120,7 +120,7 @@ class Player(NetUser):
     def receive_get_batte_data(self):
         """Получает данные битвы."""
         self.refresh_account()
-        self.map = read("data.json")["maps"][self.bdata["map"]]
+        self.map = read("../data.json")["maps"][self.bdata["map"]]
         gun = BattlePlayer.st_get_gun(
             self.account["selected_tank"]
         )

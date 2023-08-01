@@ -68,7 +68,7 @@ class Client(NetUser):
 
     def update_client_data(self, fail_data):
         """Обновляет данные клиента."""
-        data = read("data.json")
+        data = read("../data.json")
 
         if data is None:
             self.send(fail_data)
@@ -151,7 +151,7 @@ class Client(NetUser):
 
     def buy_tank(self, args):
         """Обрабатывает запрос на покупку танка с чтением данных."""
-        data = read("data.json")
+        data = read("../data.json")
 
         if data is None:
             self.send(["not_selected", 2])
@@ -207,7 +207,7 @@ class Client(NetUser):
 
         map_id = args[0]
 
-        if map_id < 0 or map_id >= len(read("data.json")["maps"]):
+        if map_id < 0 or map_id >= len(read("../data.json")["maps"]):
             self.send(["game_create_failed", 1])
             return
 

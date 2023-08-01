@@ -39,7 +39,7 @@ def test_signleton_setget_data(config, logger, win):
 
 def test_signleton_matches():
     """Тесты матчей синглтона."""
-    config = mjson.read("config.json")
+    config = mjson.read("../config.json")
     singleton.set_data(config)
 
     assert singleton.get_matches() == []
