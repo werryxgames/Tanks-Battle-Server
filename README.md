@@ -4,7 +4,7 @@
 
 Официальный сервер для многопользовательской игры "Tanks Battle"
 
-Скачать "Tanks Battle" можно по ссылке **[Werryx Games](https://werryxgames.ml/games/#tanks_battle)**
+Скачать "Tanks Battle" можно по ссылке **[WX_BY_0](http://185.6.27.126/)**
 
 # Установка
 ## Linux
