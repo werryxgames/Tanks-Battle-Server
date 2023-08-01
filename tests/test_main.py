@@ -25,7 +25,7 @@ import singleton
 
 from accounts import AccountManager
 from message import GlobalMessage
-from reliable_udp import ByteTranslator, ByteTranslatorException
+from serializer import ByteTranslator, ByteTranslatorException
 
 
 @pytest.mark.parametrize("config", [{}, "123", 456, True, False])
