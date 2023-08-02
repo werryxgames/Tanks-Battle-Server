@@ -1,4 +1,4 @@
-"""Модуль игрока."""
+"""Module for player."""
 from datetime import datetime
 from random import choice
 from threading import Thread
@@ -15,12 +15,12 @@ clients = get_clients()
 
 
 class Player(NetUser):
-    """Класс игрока."""
+    """Class for player."""
 
     BACK_TO_MENU = 1
 
     def __init__(self, sock, addr, battle_data, rudp):
-        """Инициализация игрока в матче."""
+        """Player in match initialization."""
         self.sock = sock
         self.addr = addr
         self.bdata = battle_data
@@ -37,25 +37,25 @@ class Player(NetUser):
         self.qr_sended = False
 
     def close(self):
-        """Закрывает соединение с клиентом."""
+        """Closes connection with client."""
         self.still_check_time = False
 
         try:
             self.send(["something_wrong"])
             clients.pop(self.addr)
             self.logger.info(
-                f"Клиент '{self.bp.nick}' ('{self.addr[0]}:{self.addr[1]}') \
-отключён"
+                f"Client '{self.bp.nick}' ('{self.addr[0]}:{self.addr[1]}') \
+disconnected"
             )
         except OSError:
             pass
 
     def send_unreliable(self, *args, **kwargs):
-        """Отправляет Unreliable UDP данные клиенту."""
+        """Sends Unreliable UDP data to client."""
         self.rudp.send_unreliable(*args, **kwargs)
 
     def on_player_shoot(self, msg):
-        """Обрабатывает сообщение стрельбы другого игрока."""
+        """Handles shoot message from player."""
         player = None
 
         for pl in self.bdata["players"]:
@@ -75,7 +75,7 @@ class Player(NetUser):
             ])
 
     def handle_messages(self):
-        """Обрабатывает глобальные сообщения."""
+        """Handles global messages."""
         mesgs = self.bdata["messages"]
 
         if len(mesgs) > self.msg:
@@ -94,11 +94,11 @@ class Player(NetUser):
             self.msg += 1
 
     def randpoint(self):
-        """Возвращает случайную точку появления."""
+        """Handles random spawn point."""
         return choice(self.map["spawn_points"])
 
     def check_time(self):
-        """Проверяет время неактивности игрока."""
+        """Checks inactive time of player."""
         while self.still_check_time:
             if datetime.today().timestamp() - \
                     self.config["max_player_noresponse_time"] > \
@@ -112,13 +112,13 @@ class Player(NetUser):
                 self.close()
 
                 self.logger.debug(
-                    f"Игрок '{self.bp.nick}' отключён из-за неактивности"
+                    f"Player '{self.bp.nick}' kicked due to inactivity"
                 )
 
             sleep(1)
 
     def receive_get_batte_data(self):
-        """Получает данные битвы."""
+        """Receives battle data."""
         self.refresh_account()
         self.map = read("data.json")["maps"][self.bdata["map"]]
         gun = BattlePlayer.st_get_gun(
@@ -165,7 +165,7 @@ class Player(NetUser):
         Thread(target=self.check_time).start()
 
     def receive_request_tanks_data(self, args):
-        """Получает запрошенные данные танков."""
+        """Receives requested data of tanks."""
         if args[3] > 0:
             if args[0][1] > self.map["kill_y"]:
                 self.bp.position = args[0]
@@ -236,12 +236,12 @@ class Player(NetUser):
         return None
 
     def try_handle_messages(self):
-        """Обрабатывает сообщения, если имеются."""
+        """Handles messages."""
         if self.bp is not None:
             self.handle_messages()
 
     def receive(self, jdt):
-        """Обрабатывает данные клиента."""
+        """Handles client data."""
         try:
             self.try_handle_messages()
             self.last_request = datetime.today().timestamp()

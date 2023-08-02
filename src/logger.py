@@ -1,4 +1,4 @@
-"""Модуль для логгирования сообщений."""
+"""Module for message logging."""
 from datetime import datetime
 from re import sub
 from traceback import format_exc
@@ -11,7 +11,7 @@ from absolute import to_absolute
 
 
 class Logger:
-    """Класс для логгирования сообщений."""
+    """Class for message logging."""
 
     LEVEL_NONE = 6
     LEVEL_CRITICAL = 5
@@ -22,14 +22,14 @@ class Logger:
     LEVEL_SLOW = 0
 
     def __init__(self, level, loglevel):
-        """Инициализация логгера."""
+        """Constructor for Logger."""
         init()
         self.level = level
         self.loglevel = loglevel
 
     @staticmethod
     def string2level(string, default=None):
-        """Возвращает уровень логгера из string или default."""
+        """Returns level of logger from string or default."""
         if default is None:
             default = Logger.LEVEL_INFO
 
@@ -58,7 +58,7 @@ class Logger:
 
     @staticmethod
     def date():
-        """Возвращает текущую дату."""
+        """Returns current date."""
         dt = datetime.today()
 
         res = [str(dt.year)]
@@ -91,7 +91,7 @@ class Logger:
         return res
 
     def message(self, msg, level=LEVEL_INFO):
-        """Записывает и выводит на экран сообщение."""
+        """Writes and prints message to screen and file."""
         if self.level <= level:
             print(msg)
 
@@ -104,7 +104,7 @@ class Logger:
                 )
 
     def log_error_data(self, func=None):
-        """Вызывает func с Tracebackом."""
+        """Calls func with last Traceback."""
         traceback = format_exc()[:-1]
 
         if "\nSystemExit: " not in traceback:
@@ -115,7 +115,7 @@ class Logger:
 
     @staticmethod
     def join_message(message):
-        """Соединяет сообщение в строку."""
+        """Joins message to string."""
         msg = []
 
         for i in message:
@@ -123,15 +123,15 @@ class Logger:
 
         return " ".join(msg)
 
-    def critical(self, *message, prefix="[Критическая ошибка] "):
-        """Выводит критическую ошибку."""
+    def critical(self, *message, prefix="[Critical error] "):
+        """Prints critical error."""
         self.message(
             Fore.RED + prefix + self.join_message(message) + Fore.RESET,
             self.LEVEL_CRITICAL
         )
 
-    def error(self, *message, prefix="[Ошибка] "):
-        """Выводит ошибку."""
+    def error(self, *message, prefix="[Error] "):
+        """Prints error."""
         self.message(
             Style.BRIGHT + Fore.RED + prefix + self.join_message(
                 message
@@ -139,22 +139,22 @@ class Logger:
             self.LEVEL_ERROR
         )
 
-    def warning(self, *message, prefix="[Предупреждение] "):
-        """Выводит предупреждение."""
+    def warning(self, *message, prefix="[Warning] "):
+        """Prints warning."""
         self.message(
             Fore.YELLOW + prefix + self.join_message(message) + Fore.RESET,
             self.LEVEL_WARNING
         )
 
-    def info(self, *message, prefix="[Инфо] "):
-        """Выводит информацию."""
+    def info(self, *message, prefix="[Info] "):
+        """Prints informational message."""
         self.message(
             prefix + self.join_message(message),
             self.LEVEL_INFO
         )
 
-    def debug(self, *message, prefix="[Отладка] "):
-        """Выводит отладочную информацию."""
+    def debug(self, *message, prefix="[Debug] "):
+        """Prints debug message."""
         self.message(
             Style.BRIGHT + Fore.BLACK + prefix + self.join_message(
                 message
@@ -162,8 +162,8 @@ class Logger:
             self.LEVEL_DEBUG
         )
 
-    def slow(self, *message, prefix="[Отладка (матч)] "):
-        """Выводит очень частую информацию (медленно)."""
+    def slow(self, *message, prefix="[Debug (game)] "):
+        """Prints very verbose information (slow)."""
         self.message(
             Style.BRIGHT + Fore.BLACK + prefix + self.join_message(
                 message

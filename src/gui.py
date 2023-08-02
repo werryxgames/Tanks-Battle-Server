@@ -1,9 +1,9 @@
-"""Модуль графического интерфейса."""
+"""GUI module."""
 from tkinter import Tk
 
 
 class Window(Tk):
-    """Окно Tkinter."""
+    """Tkinter's window."""
 
     STATE_MAIN = 0
     STATE_CONSOLE = 1
@@ -11,20 +11,20 @@ class Window(Tk):
     STATE_CONFIG = 3
 
     def __init__(self, *args, **kwargs):
-        """Инициализация окна."""
+        """Window initialization."""
         super().__init__(*args, **kwargs)
         self.state = self.STATE_MAIN
         self.elements = []
 
     def place(self, el, el_params, **place_params):
-        """Размещает элемент."""
+        """Places element."""
         elem = el(self, **el_params)
         elem.place(**place_params)
 
         self.elements.append(elem)
 
     def clear(self, state):
-        """Очищает все элементы."""
+        """Clears all elements."""
         for i in self.elements:
             i.destroy()
 

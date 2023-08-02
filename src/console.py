@@ -1,4 +1,4 @@
-"""Модуль консоли."""
+"""Console module."""
 from datetime import datetime
 from json import dumps
 from shlex import split as spl
@@ -10,7 +10,7 @@ from singleton import get_matches
 
 
 class ConsoleExecutor:
-    """Выполняет консольные команды."""
+    """Runs console commands."""
 
     def __init__(
         self,
