@@ -1,115 +1,97 @@
 # Tanks Battle Server
 [![CodeQL](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/codeql.yml/badge.svg?branch=master)](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/codeql.yml)
-[![Тесты кода](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/tests.yml)
+[![Code tests](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/tests.yml/badge.svg?branch=master)](https://github.com/werryxgames/Tanks-Battle-Server/actions/workflows/tests.yml)
 
-Официальный сервер для многопользовательской игры "Tanks Battle"
+Official server for multiplayer game «Tanks Battle»
 
-Скачать "Tanks Battle" можно по ссылке **[Werryx Games](https://werryxgames.ml/games/#tanks_battle)**
+You can download «Tanks Battle» from **[WX\_BY\_0 server](http://185.6.27.126)**
 
-# Установка
+# Installation
 ## Linux
-Используйте команду
+Run command
 ```bash
 cd ~ && sudo apt-get update -y && sudo apt-get install git python -y && git clone https://github.com/werryxgames/Tanks-Battle-Server.git && cd Tanks-Battle-Server && pip install --upgrade pip && pip install -r requirements.txt && python src/main.py
 ```
-чтобы установить все зависимости и запустить сервер
+to install all dependencies and start server
 
-Добавьте ` --nogui` в конец, чтобы запустить сервер без графического интерфейса
+Add ` --nogui` to the end, to start server without GUI
 
-Для последующего запсука используйте
+To start server after first run, simply write
 ```bash
 python ~/Tanks-Battle-Server/src/main.py
 ```
 
-## Запуск на Windows
-Скачайте код этого репозитория
+## Windows
+Download code of this repository
 
-Распакуйте скачанный архив в папку
+Unzip downloaded file to folder
 
-Установите [Python](https://python.org/download)
+Install [Python](https://python.org/download)
 
-Откройте терминал (Нажмите Win + R и напишите `cmd.exe`)
+Open terminal (Press Win + R, write `cmd.exe` and press `Enter`)
 
-Введите
+Run
 ```bash
-cd распакованная_папка
+cd <Extracted server path>
 python src/main.py
 ```
 
-Добавьте ` --nogui` в конец, чтобы запустить сервер без графического интерфейса
+Add ` --nogui` to the end, to start server without GUI
 
-Для последующего запуска используйте
+To start server after first run, simply write
 ```bash
-python распакованная_папка/src/main.py
+python <Extracted server path>/src/main.py
 ```
 
-## Запуск на Android
-### С графическим интерфейсом
-Скачайте код этого репозитория
+## Android
+Download Termux from F-Droid
 
-Распакуйте скачанный архив в папку
-
-Установите Pydroid из Play Marketа
-
-Откройте Pydroid, нажмите `Open` и выберите файл `main.py` в `src` в распакованной папке
-
-Запустите код
-
-### Без графического интерфейса, новейшая версия Python
-Скачайте Termux из Play Marketа
-
-Запустите Termux и введите
+Run Termux and write
 ```bash
 termux-setup-storage && cd /sdcard && apt-get update -y && apt-get install git python -y && git clone https://github.com/werryxgames/Tanks-Battle-Server && cd Tanks-Battle-Server && pip install --upgrade pip && pip install -r requirements.txt && python src/main.py
 ```
 
-Вы можете добавить `--nogui` в конец, но ничего не изменится, так как Termux по умолчанию не поддерживает графический интерфейс
+You can add ` --nogui` to the end, but Termux haven't GUI by default
 
-Для последующего запуска используйте
+To start server after first run, simply write
 ```bash
 python /sdcard/Tanks-Battle-Server/src/main.py
 ```
 
-# Обновление сервера
-## Графический интерфейс
-Отключите сервер, если он включён
+# Updating server
+## GUI
+Stop server
 
-Перейдите в директорию с **Tanks Battle Server**
+Go to directory with **Tanks Battle Server**
 
-Скопируйте файл `data.json` в надёжное место
+Copy file `accounts.json` to directory, outside of server
 
-Удалите **Tanks Battle Server**
+Delete **Tanks Battle Server**
 
-Выполните этап [Установка](установка)
+Follow [Installation](installation) steps
 
-Замените новый файл `data.json` на старый
+Move `accounts.json` to new server directory
 
-**Только данные игроков, корпусов, башен, комплектов и карт сохранятся**, а также не добавятся новые корпуса, башни, комплекты и карты. Вы можете добавить их вручную
+**Note! Only player data will save**, all configuration and tanks characteristics will be updated
 
-## Терминал Linux (Termux)
-Отключите сервер, если он включён
+## Linux (Termux)
+Stop server
 
-Откройте терминал
+Go to directory with **Tanks Battle Server** (using `cd`)
 
-Перейдите в директорию с **Tanks Battle Server** (`cd`)
-
-Выполните команду
+Run command
 ```bash
-rm tbsold_accounts.json & cp src/accounts.json ../tbsold_accounts.json & rm ../Tanks-Battle-Server -rf && cd .. && git clone https://github.com/werryxgames/Tanks-Battle-Server && mv tbsold_accounts.json Tanks-Battle-Server/accounts.json
+rm tbsold_accounts.json; cp src/accounts.json ../tbsold_accounts.json; rm ../Tanks-Battle-Server -rf && cd .. && git clone https://github.com/werryxgames/Tanks-Battle-Server && mv tbsold_accounts.json Tanks-Battle-Server/accounts.json
 ```
 
-В конце результата команды будет содержимое нового файла `data.json`. Вы можете изменить старый в соответствии с новым (добавить корпуса, башни, комплекты и карты из нового файла)
+# Updating
+## Updating accounts
+To update accounts, use `update/accounts.py`:
+`python update/accounts.py <path to old accounts.json>`
 
-Теперь вы можете запустить новую версию сервера как обычно
+It will update content of file to newest format
 
-# Обновление
-## Обновление аккаунтов
-Для обновления аккаунтов используйте `update/accounts.py`:
-`python update/accounts.py <файл_к_старому_accounts.json>`
-
-После выполнения этой команды без ошибок, содержимое указанного файла обновится до новейшего формата
-
-Пример:
+Example:
 ```json
 [
     {
@@ -138,7 +120,7 @@ rm tbsold_accounts.json & cp src/accounts.json ../tbsold_accounts.json & rm ../T
     }
 ]
 ```
-заменится на
+will be replaced by
 ```json
 [
     {
@@ -160,23 +142,21 @@ rm tbsold_accounts.json & cp src/accounts.json ../tbsold_accounts.json & rm ../T
 ]
 ```
 
-Появился танк с ID *0*, так как он даётся всем по умолчанию и так как **комплект** не был выбран (*-1*), `selected_tank` изменилось на *0*
+Added tank with ID *0*, it's given by default; pt wasn't selected (*-1*), so `selected_tank` changed to *0*
 
-# Версии
-Статусы поддержки версий:
+# Versions
+Version support statuses:
 
-**full** - Полная поддержка, исправление ошибок и уязвимостей
+**full** - Bug-fixing and security improvements
+**security** - Only security fixes
+**none** - Unsupported
 
-**security** - Только исправление уязвимостей
-
-**none** - Не поддерживается
-
-| Версия  | Статус поддержки   | Примерная дата смены статуса |
-| ------- | ------------------ | ---------------------------- |
-| 2.0     | **full**           | 18.01.2023                   |
-| 1.5.0   | **full**           | 24.12.2022                   |
-| 1.4.0   | **full**           | 24.11.2022                   |
-| 1.3.0   | **full**           | 24.09.2022                   |
-| 1.2.0   | **security**       | 30.06.2023                   |
-| 1.1.0   | **security**       | 30.06.2023                   |
-| 1.0.0   | **none**           |                              |
+| Version | Support status     | Approzimate change status date |
+| ------- | ------------------ | ------------------------------ |
+| 2.0     | **full**           | 18.01.2023                     |
+| 1.5.0   | **full**           | 24.12.2022                     |
+| 1.4.0   | **full**           | 24.11.2022                     |
+| 1.3.0   | **full**           | 24.09.2022                     |
+| 1.2.0   | **security**       | 30.06.2023                     |
+| 1.1.0   | **security**       | 30.06.2023                     |
+| 1.0.0   | **none**           |                                |

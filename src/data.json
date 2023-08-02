@@ -1,7 +1,7 @@
 {
     "tanks": [
         {
-            "name": "ЛТ-21 \"Хомяк\"",
+            "name": "LT-21 \"Hamster\"",
             "tank": {
                 "durability": 450,
                 "mass": 12000,
@@ -87,7 +87,7 @@
     ],
     "maps": [
         {
-            "name": "Зелёная площадка",
+            "name": "Green field",
             "spawn_points": [
                 [
                     -100,
@@ -123,7 +123,7 @@
             "kill_y": -30
         },
         {
-            "name": "Наклонный полигон",
+            "name": "Sloping polygon",
             "spawn_points": [
                 [
                     -55,

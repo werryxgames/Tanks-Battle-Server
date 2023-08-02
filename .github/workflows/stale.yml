@@ -3,7 +3,7 @@
 # You can adjust the behavior by modifying this file.
 # For more information, see:
 # https://github.com/actions/stale
-name: Закрытие неактивных проблем и пул реквестов
+name: Closing inactive issues and pull requests
 
 on:
   schedule:
@@ -24,9 +24,9 @@ jobs:
         days-before-issue-close: 14
         days-before-pr-stale: 30
         days-before-pr-close: -1
-        stale-issue-label: "нет активности"
-        stale-issue-message: "Эта проблема была помечена как 'нет активности' из-за отсутствия активности в течении 30 дней."
-        close-issue-message: "Эта проблема была закрытка из-за отсутствия активности в течении 14 дней, после того, как ошибка была помечена как 'нет активности'"
-        stale-pr-label: "нет активности"
-        stale-pr-message: "Этот пул реквест был помечен как 'нет активности' из-за отсутствия активности в течении 30 дней."
+        stale-issue-label: "no activity"
+        stale-issue-message: "This issue was labelled as 'no activity', because there were no activity in last 30 days."
+        close-issue-message: "This issue was closed, because there were no activity in last 14 days.'"
+        stale-pr-label: "no activity"
+        stale-pr-message: "This pull request was labelled as 'no activity', because there were no activity in last 30 days."
         repo-token: ${{ secrets.GITHUB_TOKEN }}

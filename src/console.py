@@ -105,7 +105,7 @@ class ConsoleExecutor:
 
             return "Failed to run command"
         except (ValueError, IndexError):
-            return "Invalid command syntax: 'account <никнейм> \
+            return "Invalid command syntax: 'account <login> \
 ban (<day>.<month>.<year> | -1) [reason]'"
 
     @staticmethod
@@ -181,7 +181,7 @@ ban (<day>.<month>.<year> | -1) [reason]'"
             return f"Account '{nick}' unblocked"
 
         if status == AccountManager.FAILED_NOT_EXISTS:
-            return f"Аккаунт '{nick}' isn't blocked"
+            return f"Account '{nick}' isn't blocked"
 
         if status == AccountManager.FAILED_NOT_FOUND:
             return "Account not found"
@@ -192,8 +192,8 @@ ban (<day>.<month>.<year> | -1) [reason]'"
     def execute_remove_account(args):
         """Deletes account."""
         if len(args) != 2:
-            return "Command 'account <никнейм> remove' doesn't accept \
-any arguments. Maybe you mean 'account <никнейм> del'?"
+            return "Command 'account <login> remove' doesn't accept \
+any arguments. Maybe you mean 'account <login> del'?"
 
         nick = args[0]
         status = AccountManager.del_account(nick)
