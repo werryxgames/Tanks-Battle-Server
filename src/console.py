@@ -21,7 +21,7 @@ class ConsoleExecutor:
         win=None,
         rudp=None
     ):
-        """Инициализация исполнителя консольных команд."""
+        """Initialization of console commands runner."""
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
@@ -31,13 +31,13 @@ class ConsoleExecutor:
         self.vars = {}
 
     def send(self, message):
-        """Отправляет Reliable UDP сообщение клиенту."""
+        """Sends Reliable UDP message to client."""
         if self.sock is not None:
             self.rudp.send(["console_result", message])
 
         if self.logger is not None:
             if self.addr is not None:
-                self.logger.debug(f"Результат команды отправлен клиенту '\
+                self.logger.debug(f"Results of command sent to player '\
 {self.addr[0]}:{self.addr[1]}':", message)
         elif self.sock is None and self.win is not None and \
                 self.win.state == self.win.STATE_CONSOLE:
@@ -47,7 +47,7 @@ class ConsoleExecutor:
 
     @staticmethod
     def get_value(value):
-        """Возвращает значение из строки."""
+        """Returns value from string."""
         if value[0] == "\\":
             return value[1:]
 
@@ -58,7 +58,7 @@ class ConsoleExecutor:
 
     @staticmethod
     def execute_ban_player(args):
-        """Выполняет команду блокировки игрока."""
+        """Runs command to block player."""
         nick = args[1]
 
         try:
@@ -84,39 +84,39 @@ class ConsoleExecutor:
             )
 
             if status == AccountManager.SUCCESSFUL:
-                string = f"Аккаунт '{nick}' заблокирован "
+                string = f"Account '{nick}' is blocked "
 
                 if tstamp == -1:
-                    string += "навсегда"
+                    string += "forever"
                 else:
-                    string += "до " + args[2]
+                    string += "until " + args[2]
 
-                string += ", причина"
+                string += ", reason"
 
                 if reason is None:
-                    string += " не указана"
+                    string += " not specified"
                 else:
                     string += ": '" + reason + "'"
 
                 return string
 
             if status == AccountManager.FAILED_NOT_FOUND:
-                return "Аккаунт не найден"
+                return "Account not found"
 
-            return "Не удалось выполнить команду"
+            return "Failed to run command"
         except (ValueError, IndexError):
-            return "Неверный синтаксис команды: 'account <никнейм> \
-ban (<день>.<месяц>.<год> | -1) [причина]'"
+            return "Invalid command syntax: 'account <никнейм> \
+ban (<day>.<month>.<year> | -1) [reason]'"
 
     @staticmethod
     def execute_account_setget(args):
-        """Выполняет установку/получение значения аккаунта."""
+        """Sets/gets value of account."""
         nick = args[0]
         act = args[1]
 
         if act == "set":
             if len(args) <= 3:
-                return "Ошибка команды"
+                return "Invalid usage"
 
             key = args[2]
             val = ConsoleExecutor.get_value(args[3])
@@ -124,24 +124,24 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
             status = AccountManager.set_account(nick, key, val)
 
             if status == AccountManager.SUCCESSFUL:
-                string = f"Установлено значение '{key}' в "
+                string = f"Set value for '{key}' to "
                 string += str(val) if isinstance(val, int) else f"'{val}'"
-                string += f" для аккаунта '{nick}'"
+                string += f" for account '{nick}'"
                 return string
 
             if status == AccountManager.FAILED_NOT_FOUND:
-                return "Аккаунт не найден"
+                return "Account not found"
 
-            return "Не удалось выполнить команду"
+            return "Failed to run command"
 
         if act == "get":
             status = AccountManager.get_account(nick)
 
             if status == AccountManager.FAILED_NOT_FOUND:
-                return "Аккаунт не найден"
+                return "Account not found"
 
             if status == AccountManager.FAILED_UNKNOWN:
-                return "Не удалось выполнить команду"
+                return "Failed to run command"
 
             return status[args[2]] if len(args) > 2 else status
 
@@ -149,68 +149,68 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
 
     @staticmethod
     def execute_account_del(args):
-        """Удаляет ключ аккаунта."""
+        """Deletes account key."""
         if len(args) <= 2:
-            return "Ошибка команды"
+            return "Invalid usage"
 
         nick = args[0]
         key = args[2]
         status = AccountManager.del_account_key(nick, key)
 
         if status == AccountManager.SUCCESSFUL:
-            return f"Удален ключ '{key}' для аккаунта '{nick}'"
+            return f"Key '{key}' deleted for account '{nick}'"
 
         if status == AccountManager.FAILED_NOT_FOUND:
-            return "Аккаунт не найден"
+            return "Account not found"
 
         if status == AccountManager.FAILED_UNKNOWN:
-            return "Не удалось выполнить команду"
+            return "Failed to run command"
 
         if status == AccountManager.FAILED_NOT_EXISTS:
-            return f"Ключ '{key}' не найден в аккаунте '{nick}'"
+            return f"Key '{key}' not found in account '{nick}'"
 
-        return "Не удалось выполнить команду"
+        return "Failed to run command"
 
     @staticmethod
     def execute_unban_player(args):
-        """Разблокирует аккаунт игрока."""
+        """Unblocks player's account."""
         nick = args[0]
         status = AccountManager.del_account_key(nick, "ban")
 
         if status == AccountManager.SUCCESSFUL:
-            return f"Аккаунт '{nick}' разблокирован"
+            return f"Account '{nick}' unblocked"
 
         if status == AccountManager.FAILED_NOT_EXISTS:
-            return f"Аккаунт '{nick}' ещё не заблокирован"
+            return f"Аккаунт '{nick}' isn't blocked"
 
         if status == AccountManager.FAILED_NOT_FOUND:
-            return "Аккаунт не найден"
+            return "Account not found"
 
-        return "Не удалось выполнить команду"
+        return "Failed to run command"
 
     @staticmethod
     def execute_remove_account(args):
-        """Удаляет аккаунт."""
+        """Deletes account."""
         if len(args) != 2:
-            return "Команда 'account <никнейм> remove' не принимает \
-аргументов. Возможно вы имели ввиду 'account <никнейм> del'"
+            return "Command 'account <никнейм> remove' doesn't accept \
+any arguments. Maybe you mean 'account <никнейм> del'?"
 
         nick = args[0]
         status = AccountManager.del_account(nick)
 
         if status == AccountManager.SUCCESSFUL:
-            return f"Аккаунт '{nick}' удалён"
+            return f"Account '{nick}' deleted"
 
         if status == AccountManager.FAILED_NOT_FOUND:
-            return "Аккаунт не найден"
+            return "Account not found"
 
-        return "Не удалось выполнить команду"
+        return "Failed to run command"
 
     @staticmethod
     def execute_account(args):
-        """Выполняет команду аккаунта."""
+        """Runs account command."""
         if len(args) < 2:
-            return "Ошибка команды"
+            return "Invalid usage"
 
         act = args[1]
 
@@ -231,13 +231,13 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
         if act == "remove":
             return ConsoleExecutor.execute_remove_account(args)
 
-        return "Неверный синтаксис команды"
+        return "Unknown sub-command"
 
     @staticmethod
     def execute_player_battle(args, battle, battles):
-        """Выполняет команду над битвой игрока."""
+        """Runs commmand for battle."""
         if len(args) < 3:
-            return "Ошибка команды"
+            return "Invalid syntax"
 
         act2 = args[2]
 
@@ -251,15 +251,15 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
 
         if act2 == "end":
             del battles[battles.index(battle)]
-            return "Матч завершён"
+            return "Battle ended"
 
-        return "Неверный синтаксис команды"
+        return "Unknown sub-command"
 
     @staticmethod
     def execute_player(args):
-        """Выполняет команду игрока."""
+        """Runs player command."""
         if len(args) < 2:
-            return "Ошибка команды"
+            return "Invalid usage"
 
         nick = args[0]
         act = args[1]
@@ -279,30 +279,30 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
                 break
 
         if player is None:
-            return "Игрок не найден, или не в матче сейчас"
+            return "Player not found or not in battle now"
 
         if act == "kick":
             battle["messages"].append(GlobalMessage("player_leave", nick))
-            return "Игрок отключён от матча"
+            return "Player disconnected"
 
         if act == "battle":
             return ConsoleExecutor.execute_player_battle(args, battle, battles)
 
-        return "Неверный синтаксис команды"
+        return "Unknown sub-command"
 
     @staticmethod
     def execute(com, args):
-        """Выполняет команду com с аргументами args."""
+        """Runs command com with arguments args."""
         if com == "account":
             return ConsoleExecutor.execute_account(args)
 
         if com == "player":
             return ConsoleExecutor.execute_player(args)
 
-        return "Команда не найдена"
+        return "Command not found"
 
     def execute_text(self, text, main=True):
-        """Выполняет команду как текст."""
+        """Runs command as text."""
         try:
             splt = spl(text)
 
@@ -338,10 +338,10 @@ ban (<день>.<месяц>.<год> | -1) [причина]'"
 
 
 class Console:
-    """Класс консоли команд."""
+    """Claas for commands console."""
 
     def __init__(self, sock, addr, rudp):
-        """Инициализация консоли команд."""
+        """Initialization of console."""
         self.sock = sock
         self.addr = addr
         self.rudp = rudp
@@ -359,24 +359,24 @@ class Console:
         )
 
     def send(self, message):
-        """Отправляет сообщение клиенту."""
+        """Sends message to client."""
         self.sock.sendto(dumps(message).encode("utf8"), self.addr)
         self.logger.debug(
-            f"Сообщение отправлено клиенту '{self.addr[0]}:{self.addr[1]}':",
+            f"Message sent to client '{self.addr[0]}:{self.addr[1]}':",
             message
         )
 
     def close(self):
-        """Закрывает соединение с клиентом."""
+        """Closes connection with client."""
         try:
             self.send(["something_wrong"])
-            self.logger.info(f"Клиент '{self.addr[0]}:{self.addr[1]}' вызвал \
-ошибку на сервере")
+            self.logger.info(f"Client '{self.addr[0]}:{self.addr[1]}' called \
+server error")
         except OSError:
             pass
 
     def receive(self, jdt):
-        """Обрабатывает данные, полученные от клиента."""
+        """Handles data, received from client."""
         try:
             com = jdt[0]
             args = jdt[1:]
@@ -387,5 +387,5 @@ class Console:
         except BaseException:
             self.logger.log_error_data()
             self.close()
-
             return
+
