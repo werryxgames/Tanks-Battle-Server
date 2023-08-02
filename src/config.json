@@ -11,52 +11,52 @@
     "udp_reliable_resend_timeout": 0.1,
     "ranks": [
         {
-            "name": "Рядовой",
+            "name": "Private",
             "texture": false,
             "max_xp": 10
         },
         {
-            "name": "Ефрейтор",
+            "name": "Corporal",
             "texture": "corporal",
             "max_xp": 30
         },
         {
-            "name": "Младший сержант",
+            "name": "Lance sergeant",
             "texture": "lance_sergeant",
             "max_xp": 75
         },
         {
-            "name": "Сержант",
+            "name": "Sergeant",
             "texture": "sergeant",
             "max_xp": 200
         },
         {
-            "name": "Старший сержант",
+            "name": "Staff sergeant",
             "texture": "staff_sergeant",
             "max_xp": 500
         },
         {
-            "name": "Младший лейтенант",
+            "name": "Ensign",
             "texture": "ensign",
             "max_xp": 1000
         },
         {
-            "name": "Лейтенант",
+            "name": "Lieutenant",
             "texture": "lieutenant",
             "max_xp": 2500
         },
         {
-            "name": "Старший лейтенант",
+            "name": "Senior lieutenant",
             "texture": "senior_lieutenant",
             "max_xp": 5000
         },
         {
-            "name": "Капитан",
+            "name": "Captain",
             "texture": "captain",
             "max_xp": 10000
         },
         {
-            "name": "Генерал",
+            "name": "General",
             "texture": "general",
             "max_xp": false
         }

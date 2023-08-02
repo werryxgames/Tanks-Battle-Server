@@ -22,7 +22,7 @@ on:
 
 jobs:
   analyze:
-    name: Анализ
+    name: Analysis
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -55,7 +55,7 @@ jobs:
         
     # Autobuild attempts to build any compiled languages  (C/C++, C#, or Java).
     # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Автобилд
+    - name: Autobuild
       uses: github/codeql-action/autobuild@v2
 
     # ℹ️ Command-line programs to run using the OS shell.
@@ -68,5 +68,5 @@ jobs:
     #   echo "Run, Build Application using script"
     #   ./location_of_script_within_repo/buildscript.sh
 
-    - name: CodeQL Анализ
+    - name: CodeQL analyze
       uses: github/codeql-action/analyze@v2

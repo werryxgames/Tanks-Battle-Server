@@ -1,16 +1,16 @@
-"""Обновляет файл account.json с сохранением данных."""
+"""Updates file accounts.json, saving all the data."""
 from json import dumps
 from json import loads
 from sys import argv
 
 VERSION = 1
-USAGE = "python update/accounts.py <путь_к_accounts.json>"
+USAGE = "python update/accounts.py <path to accounts.json>"
 
 
 def main(args):
-    """Основная функция."""
+    """Programm entry point."""
     if len(args) != 1:
-        raise ValueError(f"Использование: {USAGE}")
+        raise ValueError(f"Usage: {USAGE}")
 
     data = None
 
