@@ -1,4 +1,4 @@
-"""Модуль управления аккаунтами."""
+"""Accounts module."""
 from datetime import datetime
 from threading import Thread
 
@@ -11,24 +11,24 @@ from singleton import get_data
 
 
 class Hasher:
-    """Класс хеширования паролей."""
+    """Class for password hashing."""
 
     def __init__(self):
-        """Инициализация хешера паролей."""
+        """Password hasher initialization."""
         self.phasher = PasswordHasher()
 
     @staticmethod
     def rehash_password(nick, new_hash):
-        """Устанавливает новый хеш в accounts.json."""
+        """Sets new hash in accounts.json."""
         return AccountManager.set_account(nick, "password", new_hash)
 
     def hash(self, password, nick):
-        """Хеширует пароль."""
+        """Hashes password."""
         result = self.phasher.hash(password + nick)
         return result
 
     def verify(self, hash_, password, nick):
-        """Проверяет является ли hash_ хешом data."""
+        """Checks if hash_ is hash of data."""
         try:
             self.phasher.verify(hash_, password + nick)
         except VerifyMismatchError:
@@ -46,7 +46,7 @@ queued_logins = []
 
 
 class AccountManager:
-    """Управляет аккаунтами."""
+    """Manages accounts."""
 
     SUCCESSFUL = 0
     FAILED_NICK_LENGTH = 1
@@ -60,16 +60,16 @@ class AccountManager:
     FAILED_CONSOLE = 9
     FAILED_NOT_EXISTS = 10
     DEFAULT_ALLOWED = "qwertyuiopasdfghjklzxcvbnm1234567890_ -=+*/[]:;.,\\|&%\
-#@!$^()йцукенгшщзхъфывапролджэячсмитьбюё"
+#@!$^()йцукенгшщзхъфывапролджэячсмитьбюёў"
 
     @staticmethod
     def check(string, allowed=DEFAULT_ALLOWED):
-        """Проверяет состоит ли string только из allowed."""
+        """Checks if string consists only of allowed."""
         return set(string.lower()) <= set(allowed)
 
     @staticmethod
     def get_account_(nick, data):
-        """Возвращает аккаунт с логином nick из data."""
+        """Returns account with login nick from data."""
         for account in data:
             if account["nick"] == nick:
                 return account
@@ -78,14 +78,14 @@ class AccountManager:
 
     @staticmethod
     def get_account(nick):
-        """Возвращает аккаунт с логином nick."""
+        """Returns account with login nick."""
         data = read("accounts.json", [])
 
         return AccountManager.get_account_(nick, data)
 
     @staticmethod
     def del_account_key_(nick, key, data):
-        """Удаляет key у аккаунта с логином nick из data."""
+        """Deleted key from account with login nick from data."""
         acc = AccountManager.get_account_(nick, data)
 
         if acc == AccountManager.FAILED_NOT_FOUND:
@@ -100,7 +100,7 @@ class AccountManager:
 
     @staticmethod
     def call_method(method, *args):
-        """Вызывает method."""
+        """Calls method."""
         data = read("accounts.json", [])
         result = method(*args, data)
 
@@ -114,7 +114,7 @@ class AccountManager:
 
     @staticmethod
     def del_account_key(nick, key):
-        """Удаляет key у аккаунта с логином nick."""
+        """Deletes key from account with login nick."""
         return AccountManager.call_method(
             AccountManager.del_account_key_,
             nick,
@@ -123,7 +123,7 @@ class AccountManager:
 
     @staticmethod
     def del_account_(nick, data):
-        """Удаляет аккаунт с логином nick из data."""
+        """Deletes account with login nick from data."""
         acc = AccountManager.get_account_(nick, data)
 
         if acc == AccountManager.FAILED_NOT_FOUND:
@@ -138,7 +138,7 @@ class AccountManager:
 
     @staticmethod
     def del_account(nick):
-        """Удаляет аккаунт с логином nick."""
+        """Deletes account with login nick."""
         return AccountManager.call_method(
             AccountManager.del_account_,
             nick
@@ -146,7 +146,7 @@ class AccountManager:
 
     @staticmethod
     def set_account_(nick, key, value, data):
-        """Устанавливает значение key в value для аккаунта с логином nick."""
+        """Sets value of key to value for account with login nick."""
         acc = AccountManager.get_account_(nick, data)
 
         if acc == AccountManager.FAILED_NOT_FOUND:
@@ -161,7 +161,7 @@ class AccountManager:
 
     @staticmethod
     def set_account(nick, key, value):
-        """Устанавливает значение для аккаунта."""
+        """Sets value for account."""
         return AccountManager.call_method(
             AccountManager.set_account_,
             nick,
@@ -171,7 +171,7 @@ class AccountManager:
 
     @staticmethod
     def check_login_data(data, lenfail, minlen=3, maxlen=12):
-        """Проверяет данные для входа без проверки на совпадение."""
+        """Checks login data without match check."""
         if not isinstance(data, str):
             return AccountManager.FAILED_UNKNOWN
 
@@ -187,7 +187,7 @@ class AccountManager:
 
     @staticmethod
     def get_ban_status_(data, account):
-        """Возвращает статус бана аккаунта account."""
+        """Returns ban (block) status in account."""
         if "ban" in account:
             aban = account["ban"]
 
@@ -209,7 +209,7 @@ class AccountManager:
 
     @staticmethod
     def get_ban_status(data, account):
-        """Возвращает статус бана аккаунта."""
+        """Returns ban (block) status in account."""
         result = AccountManager.get_ban_status_(data, account)
 
         if isinstance(result, int):
@@ -220,13 +220,13 @@ class AccountManager:
 
     @staticmethod
     def login_account(nick, password, client):
-        """Проверяет верные ли данные для входа и убирает nick из списка."""
+        """Checks is login data correct and removes nick from list."""
         AccountManager.login_account_(nick, password, client)
         queued_logins.remove(nick)
 
     @staticmethod
     def login_account_(nick, password, client):
-        """Проверяет верные ли данные для входа синхронно."""
+        """Checks is login data correct synchronously."""
         nick_check = AccountManager.check_login_data(
             nick,
             AccountManager.FAILED_NICK_LENGTH
@@ -296,7 +296,7 @@ class AccountManager:
 
     @staticmethod
     def login_account_async(nick, password, client):
-        """Проверяет верные ли данные для входа асинхронно."""
+        """Chekcs is login data correct asynchronously."""
         if nick in queued_logins:
             return False
 
@@ -310,13 +310,13 @@ class AccountManager:
 
     @staticmethod
     def add_account(nick, password, client):
-        """Создаёт новый аккаунт и убирает nick из списка."""
+        """Creates new account and removes nick from list."""
         AccountManager.add_account_(nick, password, client)
         queued_logins.remove(nick)
 
     @staticmethod
     def add_account_(nick, password, client):
-        """Создаёт новый аккаунт синхронно."""
+        """Creates new account synchronously."""
         nick_check = AccountManager.check_login_data(
             nick,
             AccountManager.FAILED_NICK_LENGTH
@@ -373,7 +373,7 @@ class AccountManager:
 
     @staticmethod
     def add_account_async(nick, password, client):
-        """Создаёт новый аккаунт асинхронно."""
+        """Creates new account asynchronously."""
         if nick in queued_logins:
             return False
 

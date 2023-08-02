@@ -1,4 +1,4 @@
-"""Модуль JSON."""
+"""JSON module."""
 from json import dumps
 from json import loads
 
@@ -6,7 +6,7 @@ from absolute import to_absolute
 
 
 def read(name, default=None):
-    """Возвращает данные из *.json файла."""
+    """Returns data from *.json file."""
     data = None
 
     try:
@@ -19,7 +19,7 @@ def read(name, default=None):
 
 
 def write(name, data):
-    """Записывает данные в *.json файл."""
+    """Writes data to *.json file."""
     with open(to_absolute(name), "w", encoding="utf8") as file:
         file.write(dumps(data, indent=4, ensure_ascii=False))
 
@@ -27,7 +27,7 @@ def write(name, data):
 
 
 def append(name, key=None, value=None, default=None):
-    """Добавляет value к key файла name."""
+    """Adds value to key in file name."""
     data = read(name, default)
 
     if data is None:

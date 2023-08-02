@@ -1,14 +1,14 @@
-"""Модуль с сообщениями."""
+"""Module with messages."""
 
 
 class GlobalMessage:
-    """Класс глобального сообщения."""
+    """Class for global message."""
 
     def __init__(self, type_, text):
-        """Инициализация глобального сообщения."""
+        """Initialization of global message."""
         self.type = type_
         self.text = text
 
     def get(self):
-        """Возвращает содержимое сообщения."""
+        """Returns message content."""
         return (self.type, self.text)
