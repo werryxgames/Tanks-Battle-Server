@@ -388,4 +388,3 @@ server error")
             self.logger.log_error_data()
             self.close()
             return
-
