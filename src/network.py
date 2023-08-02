@@ -1,7 +1,5 @@
 """Модуль управления сетью."""
-from json import JSONDecodeError
 from json import dumps
-from json import loads
 from multiprocessing import Process
 from multiprocessing import freeze_support
 from socket import AF_INET
@@ -16,6 +14,8 @@ from reliable_udp import ReliableUDP
 from singleton import get_clients
 from singleton import get_data
 from singleton import set_data
+from serializer import ByteBuffer
+from serializer import ByteBufferException
 
 thr = None
 sock = None
@@ -76,31 +76,38 @@ class NetworkedClient:
             self.send(["already_queued"])
             clients.pop(self.addr)
 
-    def handle(self, com, args):
+    def handle(self, code, data):
         """Обрабатывает данные от клиента."""
         try:
-            if com == "register":
-                if args[2] not in self.config["accept_client_versions"]:
-                    self.send(["version_not_accepted"])
+            if code == 0:
+                login = data.get_string()
+                password = data.get_string()
+                version = data.get_string()
+
+                if version not in self.config["accept_client_versions"]:
+                    self.send(10000)
                     return
 
-                self.client.version = args[2]
-                self.handle_register(args[0], args[1])
+                self.client.version = version
+                self.handle_register(login, password)
                 return
 
-            if com == "login":
-                if args[2] not in self.config["accept_client_versions"]:
-                    self.send(["version_not_accepted"])
+            if code == 1:
+                login = data.get_string()
+                password = data.get_string()
+                version = data.get_string()
+
+                if version not in self.config["accept_client_versions"]:
+                    self.send(10000)
                     return
 
-                self.client.version = args[2]
-                self.handle_login(args[0], args[1])
+                self.client.version = version
+                self.handle_login(login, password)
                 return
 
         except BaseException:
             self.logger.log_error_data()
             self.close()
-
             return
 
     def receive(self, data):
@@ -109,43 +116,43 @@ class NetworkedClient:
 
         if rudp is False:
             self.close()
-
             return
 
         if rudp is None:
             return
 
-        pdata = rudp
+        request_code = data.get_u16()
 
-        if pdata[0] in ["client_disconnected", "leave_battle"]:
+        if request_code in [7, 11]:
             clients.pop(self.addr)
 
-            if pdata[0] == "client_disconnected":
+            if request_code == "client_disconnected":
                 return
 
+        # Console is (temporary) unsupported
         if self.console is not None:
-            self.console.receive(pdata)
+            data.seek(2)
+            self.console.receive(data)
             return
 
         if self.send_client:
-            self.client.receive(pdata)
+            data.seek(2)
+            self.client.receive(data)
             return
 
-        com = pdata[0]
-        args = pdata[1:]
-        self.handle(com, args)
+        self.handle(request_code, data)
 
-    def check_is_first(self, data):
-        """Проверяет является ли data нормальной для первого receive()."""
+    def check_is_first(self, pdata):
+        """Проверяет является ли pdata нормальной для первого receive()."""
         if self.send_client:
             return True
 
-        pdata = loads(data.decode("utf8"))
-
-        if pdata[0] < 0:
+        if data.get_u16() < 2:
             return False
 
-        return pdata[1][0] in ["login", "register"]
+        response = data.get_u16() < 2
+        data.rewind()
+        return response
 
 
 def is_active():
@@ -223,41 +230,24 @@ def start_server(config, logger):
         except (ConnectionResetError, ConnectionAbortedError):
             continue
 
-        data = adrdata[0]
+        data = ByteBuffer(adrdata[0])
         addr = adrdata[1]
 
         if on_new_client(logger, sock_, addr, data):
             continue
 
         try:
-            tdata = loads(data.decode('utf8'))
-            func = [logger.debug, logger.slow][int(tdata[0] == -1)]
+            func = [logger.debug, logger.slow][int(data.get_u16() < 2)]
             func(
-                f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{tdata[1]}'"
+                f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{data.get_fully()}'"
             )
+            data.rewind()
             clients[addr].receive(data)
-        except JSONDecodeError:
-            try:
-                tdata = data.decode('utf8')
-                logger.warning(
-                    f"Клиент '{addr[0]}:{addr[1]}' отправил не JSON данные: \
-'{tdata}'"
-                )
-            except UnicodeDecodeError:
-                tdata = data
-                logger.warning(
-                    f"Клиент '{addr[0]}:{addr[1]}' отправил не UTF-8 данные: \
-'{tdata}'"
-                )
-        except IndexError:
-            clients[addr].sendto(
-                dumps(["version_not_accepted"]).encode("utf8"),
-                addr
-            )
-            tdata = data
+        except ByteBufferException():
+            clients[addr].sendto(ByteBuffer(4).put_16(1).put_16(10000), addr)
             logger.warning(
                 f"Клиент '{addr[0]}:{addr[1]}' отправил неверные данные: \
-'{tdata}'"
+'{data.barr}'"
             )
 
     sock_.close()

@@ -1,173 +1,169 @@
 from struct import pack
+from struct import unpack
+from struct import error
 
 
-class ByteTranslatorException(Exception):
-    """Базовое исключение для ByteTranslator."""
+class ByteBufferException(Exception):
+    """Base exception for ByteBuffer."""
 
 
-class ByteTranslator:
-    """Класс для преобразования байтов в данные и наоборот."""
+class ByteBufferOutOfRange(ByteBufferException):
+    """Raised when trying to write value, that is bigger / smaller, than acceptable."""
 
-    COM_BYTE_TRANSLATIONS = {
-        "something_wrong": (0, 1),
-        "register": (0, 2),
-        "login": (0, 3),
-        "get_account_data": (0, 4),
-        "client_disconnected": (0, 5),
-        "console_command": (0, 6)
-    }
-    DATATYPES = {
-        int: 1,
-        str: 2,
-        float: 3,
-        list: 4,
-        tuple: 4,
-        dict: 5,
-        type(None): 6,
-        bool: 7
-    }
 
-    @classmethod
-    def get_com_bytes(cls, com):
-        """Возвращает bytearray из com-строки."""
+class ByteBuffer:
+    """Class for binary data manipulation."""
+
+    def __init__(self, arg: bytearray | int):
+        self.barr = None
+        self.position = 0
+
+        if isinstance(arg, int):
+            self.__init_int(arg)
+        elif isinstance(arg, bytearray):
+            self.__init_bytearray(arg)
+
+    def __init_int(self, capacity: int):
+        self.barr = bytearray(capacity)
+
+    def __init_bytearray(self, barr: bytearray):
+        self.barr = barr
+
+    def is_reached_end(self, size=0):
+        return self.position + size > len(self.barr)
+
+    def _check(self, size):
+        if self.is_reached_end(size):
+            raise ByteBufferException("End of ByteBuffer reached")
+
+    def _base_put(self, value, size, pack_val):
+        self._check(size)
         try:
-            return bytearray(cls.COM_BYTE_TRANSLATIONS[com])
-        except KeyError:
-            pass
+            packed_value = pack(f">{pack_val}", value)
+        except error:
+            raise ByteBufferOutOfRange("Invalid value")
 
-        raise ByteTranslatorException("Указанная com-строка не найдена")
+        for i in range(size):
+            self.barr[self.position] = packed_value[i]
+            self.position += 1
 
-    @classmethod
-    def get_datatype(cls, data):
-        """Возвращает тип данных как число."""
-        try:
-            return cls.DATATYPES[type(data)]
-        except KeyError:
-            pass
+        return self
 
-        raise ByteTranslatorException("Тип указанных данных не найден")
+    def put_u8(self, value: int):
+        return self._base_put(value, 1, "B")
 
-    @staticmethod
-    def bappend(original_barr, appending_barr):
-        """Добавляет appending_barr к original_barr."""
-        for byte in appending_barr:
-            original_barr.append(byte)
+    def put_u16(self, value: int):
+        return self._base_put(value, 2, "H")
 
-    @staticmethod
-    def str_to_bytes(data):
-        """Преобразует строку в байты."""
-        barr = bytearray()
+    def put_u32(self, value: int):
+        return self._base_put(value, 4, "I")
 
-        for byte in data.encode("utf8"):
-            barr.append(byte)
+    def put_u64(self, value: int):
+        return self._base_put(value, 8, "Q")
 
-        barr.append(0)
-        return barr
+    def put_8(self, value: int):
+        return self._base_put(value, 1, "b")
 
-    @staticmethod
-    def int_to_bytes(data):
-        """Преобразует целое число в байты."""
-        barr = bytearray()
-        last_length = -1
+    def put_16(self, value: int):
+        return self._base_put(value, 2, "h")
 
-        for length in range(1, 257):
-            try:
-                bytes_ = int.to_bytes(data, length, "big", signed=True)
-                last_length = length - 1
+    def put_32(self, value: int):
+        return self._base_put(value, 4, "i")
+
+    def put_64(self, value: int):
+        return self._base_put(value, 8, "q")
+
+    def put_boolean(self, value: int):
+        return self._base_put(value, 1, "?")
+
+    def put_float(self, value: float):
+        return self._base_put(value, 4, "f")
+
+    def put_double(self, value: float):
+        return self._base_put(value, 8, "d")
+
+    def put_string(self, string: str):
+        utf8_bytes = string.encode("utf8")
+        return self._base_put(utf8_bytes, len(utf8_bytes) + 1, f"{len(utf8_bytes) + 1}s")
+
+    def _base_get(self, size, pack_val):
+        self._check(size)
+        bytes_ = bytearray(size)
+
+        for i in range(size):
+            bytes_[i] = self.barr[self.position]
+            self.position += 1
+
+        return unpack(f">{pack_val}", bytes_)[0]
+
+    def get_u8(self):
+        return self._base_get(1, "B")
+
+    def get_u16(self):
+        return self._base_get(2, "H")
+
+    def get_u32(self):
+        return self._base_get(4, "I")
+
+    def get_u64(self):
+        return self._base_get(8, "Q")
+
+    def get_8(self):
+        return self._base_get(1, "b")
+
+    def get_16(self):
+        return self._base_get(2, "h")
+
+    def get_32(self):
+        return self._base_get(4, "i")
+
+    def get_64(self):
+        return self._base_get(8, "q")
+
+    def get_boolean(self):
+        return self._base_get(1, "?")
+
+    def get_float(self):
+        return self._base_get(4, "f")
+
+    def get_double(self):
+        return self._base_get(8, "d")
+
+    def get_string(self):
+        bytes_ = bytearray()
+
+        for byte in self.barr[self.position:]:
+            if byte == 0:
                 break
-            except OverflowError:
-                continue
 
-        barr.append(last_length)
-        ByteTranslator.bappend(barr, bytes_)
-        return barr
+            bytes_.append(byte)
 
-    @staticmethod
-    def float_to_bytes(data):
-        """Преобразует дробное число в байты."""
-        barr = bytearray()
-        ByteTranslator.bappend(barr, pack("f", data))
-        return barr
+        return bytes_.decode("UTF-8")
 
-    @staticmethod
-    def array_to_bytes(data):
-        """Преобразует массив в байты."""
-        barr = bytearray()
+    def get_fully(self):
+        self._check()
+        result = self.barr[self.position:]
+        self.position = len(self.barr)
+        return result
 
-        try:
-            barr.append(len(data))
-            ByteTranslator.bappend(barr, ByteTranslator.to_bytes(data))
-            return barr
-        except ValueError:
-            pass
+    def rewind(self):
+        self.position = 0
+        return self
 
-        raise ByteTranslatorException("Длина массива больше максимальной")
+    def seek(self, position):
+        self.position = position
+        return self
 
-    @staticmethod
-    def dict_to_bytes(data):
-        """Преобразует словарь в байты."""
-        barr = bytearray()
-        dictval = []
+    def seekcur(self, position):
+        self.position += position
+        return self
 
-        for key, value in data.items():
-            dictval.append((key, value))
+    def seekend(self, position):
+        self.position = len(self.barr) - position
+        return self
 
-        try:
-            barr.append(len(dictval))
+    def tell(self):
+        return self.position
 
-            for byte in ByteTranslator.to_bytes(dictval):
-                barr.append(byte)
-
-            return barr
-        except ValueError:
-            pass
-
-        raise ByteTranslatorException("Длина словаря больше максимальной")
-
-    @staticmethod
-    def bool_to_bytes(data):
-        """Преобразует булевое значение в байты."""
-        return bytearray([1]) if data else bytearray([0])
-
-    @staticmethod
-    def to_bytes(data):
-        """Преобразует data в байты."""
-        barr = bytearray()
-
-        for arg in data:
-            dtype = ByteTranslator.get_datatype(arg)
-            barr.append(dtype)
-
-            if dtype == 1:
-                ByteTranslator.bappend(
-                    barr,
-                    ByteTranslator.int_to_bytes(arg)
-                )
-            elif dtype == 2:
-                ByteTranslator.bappend(
-                    barr,
-                    ByteTranslator.str_to_bytes(arg)
-                )
-            elif dtype == 3:
-                ByteTranslator.bappend(
-                    barr,
-                    ByteTranslator.float_to_bytes(arg)
-                )
-            elif dtype == 4:
-                ByteTranslator.bappend(
-                    barr,
-                    ByteTranslator.array_to_bytes(arg)
-                )
-            elif dtype == 5:
-                ByteTranslator.bappend(
-                    barr,
-                    ByteTranslator.dict_to_bytes(arg)
-                )
-            elif dtype == 7:
-                barr.append(1 if arg else 0)
-
-        return barr
-
-    @staticmethod
-    def to_data(bytes_):
-        """Преобразует bytes_ в данные."""
+    def to_bytes(self):
+        return self.barr

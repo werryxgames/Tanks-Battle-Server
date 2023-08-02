@@ -1,6 +1,5 @@
 """Модуль гарантированной доставки UDP пакетов."""
 from json import dumps
-from json import loads
 from threading import Thread
 from time import sleep
 
@@ -61,7 +60,7 @@ class ReliableUDP:
             message
         )
 
-    def new_jdt(self, jdt, packet_id):
+    def new_jdt(self, packet_id):
         """Вызывается при получении нового пакета."""
         if packet_id in self.received:
             return None
@@ -77,20 +76,20 @@ class ReliableUDP:
         if len(self.received) > max_packets:
             self.received = self.received[len(self.received) - max_packets:]
 
-        return jdt[1]
+        return True
 
     def receive(self, data):
         """Обрабатывает и декодирует Reliable данные клиента."""
         try:
-            jdt = loads(data.decode("utf8"))
+            packet_id = data.get_u16() - 2
 
-            packet_id = jdt[0]
-
+            # Unreliable packet
             if packet_id == -1:
-                return jdt[1]
+                return True
 
+            # ACK packet
             if packet_id == -2:
-                arg = jdt[1]
+                arg = data.get_u16()
 
                 if arg in self.sender_threads:
                     thr = self.sender_threads[arg]
@@ -99,12 +98,8 @@ class ReliableUDP:
 
                 return None
 
-            self.sock.sendto(dumps([-2, packet_id]).encode("utf8"), self.addr)
-
-            return self.new_jdt(jdt, packet_id)
-
+            self.sock.sendto(ByteBuffer(2 + 2).put_u16(0).put_u16(packet_id).to_bytes(), self.addr)
+            return self.new_jdt(packet_id)
         except BaseException:
             self.logger.log_error_data()
             return False
-
-        return None

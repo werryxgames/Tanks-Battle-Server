@@ -25,7 +25,9 @@ import singleton
 
 from accounts import AccountManager
 from message import GlobalMessage
-from serializer import ByteTranslator, ByteTranslatorException
+from serializer import ByteBuffer
+from serializer import ByteBufferException
+from serializer import ByteBufferOutOfRange
 
 
 @pytest.mark.parametrize("config", [{}, "123", 456, True, False])
@@ -261,187 +263,63 @@ def test_global_message(type_, text):
     assert GlobalMessage(type_, text).get() == (type_, text)
 
 
-@pytest.mark.parametrize("com, result", (
-    ("something_wrong", bytearray((0, 1))),
-    ("register", bytearray((0, 2))),
-    ("login", bytearray((0, 3))),
-    ("get_account_data", bytearray((0, 4))),
-    ("client_disconnected", bytearray((0, 5))),
-    ("console_command", bytearray((0, 6))),
-    ("", ByteTranslatorException),
-    ("Тест", ByteTranslatorException)
-))
-def test_get_com_bytes(com, result):
-    """Тесты ByteTranslator.get_com_bytes()."""
-    try:
-        assert ByteTranslator.get_com_bytes(com) == result
-    except ByteTranslatorException:
-        assert result == ByteTranslatorException
-
-
 @pytest.mark.parametrize("data, result", (
-    (0, 1),
-    ("", 2),
-    (0.0, 3),
-    ([], 4),
-    ((), 4),
-    ({}, 5),
-    (None, 6),
-    (False, 7),
-    (True, 7),
-    (print, ByteTranslatorException)
+    (6, bytearray((6))),
+    (-124, ByteBufferOutOfRange),
+    (290, ByteBufferOutOfRange),
+    (-5432, ByteBufferOutOfRange),
+    (250, bytearray((250)))
 ))
-def test_get_datatype(data, result):
-    """Тесты ByteTranslator.get_datatype()."""
+def test_put_u8(data, result):
+    """Tests for ByteBuffer.put_u8()."""
     try:
-        assert ByteTranslator.get_datatype(data) == result
-    except ByteTranslatorException:
-        assert result == ByteTranslatorException
+        buffer = ByteBuffer(1).put_u8(data).rewind().to_bytes() == result
+    except ByteBufferException as exc:
+        assert isinstance(exc, result)
 
 
-@pytest.mark.parametrize("data, result", (
-    (0, bytearray((1, 0, 0))),
-    (999, bytearray((1, 1, 3, 231))),
-    (-999, bytearray((1, 1, 252, 25))),
-    ("", bytearray((2, 0))),
-    ("Qwerty", bytearray((2, 81, 119, 101, 114, 116, 121, 0))),
-    ("Йцукен", bytearray((
-        2,
-        208,
-        153,
-        209,
-        134,
-        209,
-        131,
-        208,
-        186,
-        208,
-        181,
-        208,
-        189,
-        0
-    ))),
-    (0.0, bytearray((3, 0, 0, 0, 0))),
-    (4.8, bytearray((3, 154, 153, 153, 64))),
-    (-3.2489, bytearray((3, 250, 237, 79, 192))),
-    ([1, 2], bytearray((4, 2, 1, 0, 1, 1, 0, 2))),
-    (("", 543), bytearray((4, 2, 2, 0, 1, 1, 2, 31))),
-    ([5.7, 31, "Тест"], bytearray((
-        4,
-        3,
-        3,
-        102,
-        102,
-        182,
-        64,
-        1,
-        0,
-        31,
-        2,
-        208,
-        162,
-        208,
-        181,
-        209,
-        129,
-        209,
-        130,
-        0
-    ))),
-    ({"1est": 1}, bytearray((
-        5,
-        1,
-        4,
-        2,
-        2,
-        49,
-        101,
-        115,
-        116,
-        0,
-        1,
-        0,
-        1
-    ))),
-    ({"t2st": 432, 10: 20}, bytearray((
-        5,
-        2,
-        4,
-        2,
-        2,
-        116,
-        50,
-        115,
-        116,
-        0,
-        1,
-        1,
-        1,
-        176,
-        4,
-        2,
-        1,
-        0,
-        10,
-        1,
-        0,
-        20
-    ))),
-    ({"te3t": [1, 2]}, bytearray((
-        5,
-        1,
-        4,
-        2,
-        2,
-        116,
-        101,
-        51,
-        116,
-        0,
-        4,
-        2,
-        1,
-        0,
-        1,
-        1,
-        0,
-        2
-    ))),
-    ({"tes4": [1, 2], 10: 20}, bytearray((
-        5,
-        2,
-        4,
-        2,
-        2,
-        116,
-        101,
-        115,
-        52,
-        0,
-        4,
-        2,
-        1,
-        0,
-        1,
-        1,
-        0,
-        2,
-        4,
-        2,
-        1,
-        0,
-        10,
-        1,
-        0,
-        20
-    ))),
-    (None, bytearray([6])),
-    (True, bytearray([7, 1])),
-    (False, bytearray([7, 0]))
-))
-def test_to_bytes(data, result):
-    """Тесты ByteTranslator.to_bytes()."""
+def test_put_u8_overflow():
+    """Test for ByteBuffer.put_u8() with overflow."""
     try:
-        assert ByteTranslator.to_bytes([data]) == result
-    except ByteTranslatorException:
-        assert result == ByteTranslatorException
+        buffer = ByteBuffer(1).put_u8(0).put_u8(8)
+    except ByteBufferException:
+        assert True
+    else:
+        assert False
+
+    try:
+        buffer = ByteBuffer(2).put_u8(0).put_u8(8)
+    except ByteBufferException:
+        assert False
+    else:
+        assert True
+
+
+@pytest.mark.parametrize("data", (
+    (6),
+    (-124),
+    (290),
+    (-5432),
+    (250)
+))
+def test_put_get_16(data):
+    """Tests for ByteBuffer.put_16() and ByteBuffer.get_16()."""
+    assert ByteBuffer(2).put_16(data).rewind().get_16() == data
+
+
+@pytest.mark.parametrize("data", (
+    ("a"),
+    (""),
+    ("Hello, World!"),
+    ("Прывітанне, свет!"),
+    ("Вы ўпэўнены?!..."),
+    (" "),
+    ("VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING\n\
+VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONГ STRING VERY LONG STRING VERY LONG STRING VERY \n\
+VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG\tSTRING VERY \n\
+VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY \n\
+VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY LONG STRING VERY \r\n")
+))
+def test_put_get_string(data):
+    """Tests for ByteBuffer.put_string() and ByteBuffer.get_string()."""
+    assert ByteBuffer(bytearray(len(data.encode("utf8")) + 1)).put_string(data).rewind().get_string() == data

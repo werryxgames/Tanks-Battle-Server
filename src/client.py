@@ -40,15 +40,14 @@ class Client(NetUser):
         except OSError:
             pass
 
-    def redirect_player(self, jdt):
+    def redirect_to_player(self, data):
         """Перенаправляет пакет на Player, если возможно."""
         if self.send_player:
-            if self.player.receive(jdt) == Player.BACK_TO_MENU:
+            if self.player.receive(data) == Player.BACK_TO_MENU:
                 self.send_player = False
                 self.player = None
 
             return True
-
         return False
 
     def handle_account(self, com, _args):
@@ -337,32 +336,29 @@ ers_in_game"]:
 
         return False
 
-    def handle(self, com, args):
+    def handle(self, code, data):
         """Обрабатывает пакет клиента."""
-        if self.handle_account(com, args):
+        if self.handle_account(code, data):
             return
 
-        if self.handle_garage(com, args):
+        if self.handle_garage(code, data):
             return
 
-        if self.handle_matches(com, args):
+        if self.handle_matches(code, data):
             return
 
-        if self.handle_settings(com, args):
+        if self.handle_settings(code, data):
             return
 
-    def receive(self, jdt):
+    def receive(self, data):
         """Получает пакет клиента."""
-        if self.redirect_player(jdt):
+        if self.redirect_to_player(data):
             return
 
         try:
-            com = jdt[0]
-            args = jdt[1:]
-
-            self.handle(com, args)
+            code = data.get_u16()
+            self.handle(code, data)
         except BaseException:
             self.logger.log_error_data()
             self.close()
-
             return
