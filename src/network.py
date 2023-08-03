@@ -229,7 +229,8 @@ def start_server(config, logger):
     logger.debug("Address:", config["host"] + ",", "port:", config["port"])
 
     with open(to_absolute("../run"), "wb") as file:
-        file.write(bytes.fromhex(hex(getpid())[2:]))
+        pid = hex(getpid())[2:]
+        file.write(bytes.fromhex(("0" if len(pid) % 2 else "") + pid))
 
     while True:
         try:
