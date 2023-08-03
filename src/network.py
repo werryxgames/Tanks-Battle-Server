@@ -4,11 +4,14 @@ from json import dumps
 from json import loads
 from multiprocessing import Process
 from multiprocessing import freeze_support
+from os import getpid
+from os import remove
 from socket import AF_INET
 from socket import SOCK_DGRAM
 from socket import socket
 from sys import platform
 
+from absolute import to_absolute
 from accounts import AccountManager
 from client import Client
 from console import Console
@@ -171,6 +174,7 @@ def stop_server():
             )
 
     thr = None
+    remove(to_absolute("../run"))
 
 
 def start_server_async():
@@ -216,6 +220,9 @@ def start_server(config, logger):
 
     logger.info("Server started")
     logger.debug("Address:", config["host"] + ",", "port:", config["port"])
+
+    with open(to_absolute("../run"), "wb") as file:
+        file.write(bytes.fromhex(hex(getpid())[2:]))
 
     while True:
         try:
