@@ -4,6 +4,8 @@ from json import dumps
 from json import loads
 from multiprocessing import Process
 from multiprocessing import freeze_support
+from os import getpid
+from os import remove
 from socket import AF_INET
 from socket import SOCK_DGRAM
 from socket import socket
@@ -13,8 +15,6 @@ from absolute import to_absolute
 from accounts import AccountManager
 from client import Client
 from console import Console
-from os import getpid
-from os import remove
 from reliable_udp import ReliableUDP
 from singleton import get_clients
 from singleton import get_data
