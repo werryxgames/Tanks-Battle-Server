@@ -1,4 +1,4 @@
-"""Модуль с тестами к Tanks Battle Server."""
+"""Module with tests for Tanks Battle Server."""
 from os import path as path_
 from sys import path
 
@@ -34,13 +34,13 @@ from serializer import ByteBufferOutOfRange
 @pytest.mark.parametrize("logger", [{}, "123", 456, True, False])
 @pytest.mark.parametrize("win", [{}, "123", 456, True, False])
 def test_signleton_setget_data(config, logger, win):
-    """Тестирует установку и получения различных типов данных."""
+    """Tests signleton's set_data() and get_data() with diferent data types."""
     assert singleton.set_data(config, logger, win) is None
     assert singleton.get_data() == [config, logger, win]
 
 
 def test_signleton_matches():
-    """Тесты матчей синглтона."""
+    """Tests matches in singleton."""
     config = mjson.read("../config.json")
     singleton.set_data(config)
 
@@ -59,7 +59,7 @@ def test_signleton_matches():
 
 
 def test_signleton_clients():
-    """Тесты клиентов синглтона."""
+    """Tests clients of signleton."""
     assert singleton.get_clients() == {}
     singleton.st.clients[("127.0.0.1", 10000)] = None
     assert singleton.get_clients() == {("127.0.0.1", 10000): None}
@@ -72,7 +72,7 @@ def test_signleton_clients():
     ("Никнейм", True)
 ))
 def test_accounts_check(nick, result):
-    """Тесты AccountManager.check()."""
+    """Tests for AccountManager.check()."""
     assert AccountManager.check(nick) is result
 
 
@@ -114,7 +114,7 @@ def test_accounts_check(nick, result):
     )
 ))
 def test_accounts_get_account(nick, data, result):
-    """Тесты AccountManager.get_account_()."""
+    """Tests for AccountManager.get_account_()."""
     print(nick, data, result)
     assert AccountManager.get_account_(nick, data) == result
 
@@ -149,7 +149,7 @@ def test_accounts_get_account(nick, data, result):
     )
 ))
 def test_accounts_del_account_key(nick, key, data, result):
-    """Тесты AccountManager.del_account_key_()."""
+    """Tests for AccountManager.del_account_key_()."""
     assert AccountManager.del_account_key_(nick, key, data) == result
 
 
@@ -184,7 +184,7 @@ def test_accounts_del_account_key(nick, key, data, result):
     )
 ))
 def test_accounts_set_account(nick, key, value, data, result):
-    """Тесты AccountManager.set_account()."""
+    """Tests for AccountManager.set_account_()."""
     assert AccountManager.set_account_(nick, key, value, data) == result
 
 
@@ -216,7 +216,7 @@ def test_accounts_set_account(nick, key, value, data, result):
     )
 ))
 def test_accounts_check_login_data(data, lenfail, result):
-    """Тесты AccountManager.check_login_data()."""
+    """Tests for AccountManager.check_login_data()."""
     assert AccountManager.check_login_data(data, lenfail) == result
 
 
@@ -248,7 +248,7 @@ def test_accounts_check_login_data(data, lenfail, result):
     )
 ))
 def test_accounts_get_ban_status(data, account, result):
-    """Тесты AccountManager.get_ban_status()."""
+    """Tests for AccountManager.get_ban_status()."""
     assert AccountManager.get_ban_status_(data, account) == result
 
 
@@ -259,7 +259,7 @@ def test_accounts_get_ban_status(data, account, result):
     ("тест", "Тест GlobalMessage")
 ))
 def test_global_message(type_, text):
-    """Тесты GlobalMessage."""
+    """Tests for GlobalMessage."""
     assert GlobalMessage(type_, text).get() == (type_, text)
 
 

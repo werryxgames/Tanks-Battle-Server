@@ -1,4 +1,4 @@
-"""Модуль гарантированной доставки UDP пакетов."""
+"""Module, that guarantees receive of UDP packets."""
 from json import dumps
 from threading import Thread
 from time import sleep
@@ -7,10 +7,10 @@ from singleton import get_data
 
 
 class ReliableUDP:
-    """Класс гарантированной доставки UDP пакетов."""
+    """Class, that guarantees receive of UDP packets."""
 
     def __init__(self, sock, addr):
-        """Инициализация Reliable UDP."""
+        """Constructor of Reliable UDP."""
         self.sender_packet_id = 0
         self.sender_threads = {}
         self.received = []
@@ -23,7 +23,7 @@ class ReliableUDP:
 
     @staticmethod
     def spam_thread(sock, addr, message, packet_id, thr_array, config):
-        """Отправляет пакеты клиенту, пока не получит ответ."""
+        """Sends packet to client, until gets ACK."""
         mesg = dumps([packet_id, message]).encode("utf8")
         thr_keys = thr_array.keys()
         timeout = config["udp_reliable_resend_timeout"]
@@ -33,7 +33,7 @@ class ReliableUDP:
             sleep(timeout)
 
     def send(self, message):
-        """Отправляет Reliable UDP данные клиенту."""
+        """Sends Reliable UDP data to client."""
         self.sender_threads[self.sender_packet_id] = Thread(
             target=self.spam_thread,
             args=(
@@ -48,20 +48,20 @@ class ReliableUDP:
         self.sender_threads[self.sender_packet_id].start()
         self.sender_packet_id += 1
         self.logger.debug(
-            f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':",
+            f"Data, sent to client '{self.addr[0]}:{self.addr[1]}':",
             message
         )
 
     def send_unreliable(self, message):
-        """Отправляет Unreliable UDP данные клиенту."""
+        """Sends data of Unreliable UDP to client."""
         self.sock.sendto(dumps([-1, message]).encode("utf8"), self.addr)
         self.logger.slow(
-            f"Отправлены данные клиенту '{self.addr[0]}:{self.addr[1]}':",
+            f"Data, sent to client '{self.addr[0]}:{self.addr[1]}':",
             message
         )
 
     def new_jdt(self, packet_id):
-        """Вызывается при получении нового пакета."""
+        """Called, when new packet is received."""
         if packet_id in self.received:
             return None
 
@@ -79,7 +79,7 @@ class ReliableUDP:
         return True
 
     def receive(self, data):
-        """Обрабатывает и декодирует Reliable данные клиента."""
+        """Decodes and handles Reliable data of client."""
         try:
             packet_id = data.get_u16() - 2
 

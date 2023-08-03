@@ -1,24 +1,24 @@
-# Как создать хорошую проблему или пул реквест
-## Создание проблемы (issue)
-Для правильного создания проблемы, опишите её и добавьте шаги к её получению (steps to reproduce)
+# How to correctly report issue or create good pull request
+## Reporting issue
+Describe issue, add steps to reproduce, some screenshots or videos.
+Please, don't create already existing opened or wontfix issues
 
-Не создавайте проблемы, которые уже имеются и находятся в открытом, или wontfix состоянии
+## Creating pull request
+Follow PEP8 guidelines
 
-## Создание пул реквеста
-Соблюдайте основные стили кода (PEP8)
-
-Соблюдайте один стиль кода, например если везде в коде функции создаются как
+Follow one code style, for example, if functions everywhere in code created like
 ```python
-def test():
-    """Подробное описание для чего нужна эта функция."""
+def example():
+    """Description, about what this function is."""
     ...
 ```
-то не создавайте подобные функции:
+please, don't create functions like
 ```python
-def Test():
-    """Test()"""
+def Example ():
+    """Example()"""
     ...
 ```
 
-# Ожидания
-Мы надеемся, что вы сможете помочь нашему репозиторию хорошо описаной проблемой, или отличным пул реквестом ❤️
+# Our hopes
+We hope, that you can help our repository with detailed issue or excellent pull request ❤️
+

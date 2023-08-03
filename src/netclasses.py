@@ -1,13 +1,13 @@
-"""Сетевые классы."""
+"""Network classes."""
 from accounts import AccountManager
 from singleton import get_data
 
 
 class NetUser:
-    """Класс пользователя."""
+    """Class for user."""
 
     def __init__(self, rudp):
-        """Инициализация пользователя."""
+        """User initializarion."""
         self.rudp = rudp
 
         self.login = None
@@ -19,7 +19,7 @@ class NetUser:
         self.logger = data[1]
 
     def set_login_data(self, login, password):
-        """Устанавливает данные для авторизации."""
+        """Sets data for authorization."""
         self.login = login
         self.password = password
         self.account = AccountManager.get_account(login)
@@ -32,7 +32,7 @@ class NetUser:
         return True
 
     def refresh_account(self):
-        """Перезагружает аккаунт и проверяет доступен ли он."""
+        """Refreshes account and checks is it available."""
         self.account = AccountManager.get_account(self.login)
 
         if self.account == AccountManager.FAILED_UNKNOWN or \
@@ -43,5 +43,5 @@ class NetUser:
         return True
 
     def send(self, *args, **kwargs):
-        """Отправляет Reliable UDP пакет клиенту."""
+        """Sends Reliable UDP packet to client."""
         self.rudp.send(*args, **kwargs)

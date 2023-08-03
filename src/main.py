@@ -1,4 +1,4 @@
-"""Tanks Battle Server - Сервер для Tanks Battle."""
+"""Tanks Battle Server - Server for Tanks Battle."""
 from json.decoder import JSONDecodeError
 from sys import argv
 
@@ -33,7 +33,7 @@ except NameError:
 
 
 def current_clear(win):
-    """Действие кнопки "Очистить"."""
+    """Action for button "Clear"."""
     if win.state == Window.STATE_CONSOLE:
         elem = win.elements[2]
     elif win.state == Window.STATE_LOG:
@@ -49,7 +49,7 @@ def current_clear(win):
 
 
 def console_run(win, cexec):
-    """Запускает команду, указанную в графическом интерфейсе."""
+    """Runs command, specified in graphical inteface."""
     if win.state == Window.STATE_CONSOLE:
         text = win.elements[1].get()
         win.elements[1].delete(0, "end")
@@ -61,7 +61,7 @@ def console_run(win, cexec):
 
 
 def save_config(win):
-    """Сохраняет текущую конфигурацию."""
+    """Saves current configuration."""
     if win.state == Window.STATE_CONFIG:
         text = win.elements[1].get("1.0", "end")[:-1]
         with open(to_absolute("../config.json"), "w", encoding="utf8") as file:
@@ -69,12 +69,12 @@ def save_config(win):
 
 
 def tab_config(config, win):
-    """Показывает вкладку конфигурации в графическом интерфейсе."""
+    """Shows configuration tab in graphical interface."""
     win.clear(Window.STATE_CONFIG)
 
     win.place(
         Label,
-        {"text": "Конфигурация", "font": "Arial 30 bold"},
+        {"text": "Configuration", "font": "Arial 30 bold"},
         relx=0.5,
         rely=0,
         y=10,
@@ -103,7 +103,7 @@ def tab_config(config, win):
     )
     win.place(
         Button,
-        {"text": "Вернуться", "command": lambda: tab_main(config, win)},
+        {"text": "Back", "command": lambda: tab_main(config, win)},
         relx=0,
         rely=1,
         x=5,
@@ -112,7 +112,7 @@ def tab_config(config, win):
     )
     win.place(
         Button,
-        {"text": "Сохранить", "command": lambda: save_config(win)},
+        {"text": "Save", "command": lambda: save_config(win)},
         relx=1,
         rely=1,
         x=-5,
@@ -125,14 +125,14 @@ def tab_config(config, win):
 
 
 def tab_console(config, win):
-    """Показывает вкладку консоли в графическом интерфейсе."""
+    """Shows console tab in grpahical interface."""
     win.clear(Window.STATE_CONSOLE)
 
     cexec = ConsoleExecutor(win=win)
 
     win.place(
         Label,
-        {"text": "Консоль", "font": "Arial 30 bold"},
+        {"text": "Console", "font": "Arial 30 bold"},
         relx=0.5,
         rely=0,
         y=10,
@@ -180,7 +180,7 @@ def tab_console(config, win):
     )
     win.place(
         Button,
-        {"text": "Вернуться", "command": lambda: tab_main(config, win)},
+        {"text": "Back", "command": lambda: tab_main(config, win)},
         relx=0,
         rely=1,
         x=5,
@@ -189,7 +189,7 @@ def tab_console(config, win):
     )
     win.place(
         Button,
-        {"text": "Очистить", "command": lambda: current_clear(win)},
+        {"text": "Clear", "command": lambda: current_clear(win)},
         relx=0.5,
         rely=1,
         y=-5,
@@ -197,7 +197,7 @@ def tab_console(config, win):
     )
     win.place(
         Button,
-        {"text": "Отправить", "command": lambda: console_run(win, cexec)},
+        {"text": "Send", "command": lambda: console_run(win, cexec)},
         relx=1,
         rely=1,
         x=-5,
@@ -209,12 +209,12 @@ def tab_console(config, win):
 
 
 def tab_log(config, win):
-    """Показывает вкладку лога в графическом интерфейсе."""
+    """Shows log tab in graphical interface."""
     win.clear(Window.STATE_LOG)
 
     win.place(
         Label,
-        {"text": "Лог", "font": "Arial 30 bold"},
+        {"text": "Log", "font": "Arial 30 bold"},
         relx=0.5,
         rely=0,
         y=10,
@@ -241,7 +241,7 @@ def tab_log(config, win):
     )
     win.place(
         Button,
-        {"text": "Вернуться", "command": lambda: tab_main(config, win)},
+        {"text": "Back", "command": lambda: tab_main(config, win)},
         relx=0,
         rely=1,
         x=5,
@@ -250,7 +250,7 @@ def tab_log(config, win):
     )
     win.place(
         Button,
-        {"text": "Очистить", "command": lambda: current_clear(win)},
+        {"text": "Clear", "command": lambda: current_clear(win)},
         relx=1,
         rely=1,
         x=-5,
@@ -264,7 +264,7 @@ def tab_log(config, win):
 
 
 def tab_main(config, win):
-    """Показывает главную вкладку в графическом интерфейсе."""
+    """Shows main tab in graphical interface."""
     win.clear(Window.STATE_MAIN)
 
     win.place(
@@ -277,7 +277,7 @@ def tab_main(config, win):
     )
     win.place(
         Label,
-        {"text": "Сервер", "font": "Arial 20"},
+        {"text": "Server", "font": "Arial 20"},
         relx=0.5,
         rely=0,
         y=75,
@@ -285,7 +285,7 @@ def tab_main(config, win):
     )
     win.place(
         Label,
-        {"text": "Статус: не запущен", "font": "Arial 16"},
+        {"text": "Status: stopped", "font": "Arial 16"},
         relx=0,
         rely=0,
         x=10,
@@ -294,7 +294,7 @@ def tab_main(config, win):
     )
     win.place(
         Button,
-        {"text": "Запустить", "command": start_server_async},
+        {"text": "Start", "command": start_server_async},
         relx=1,
         rely=0,
         x=-10,
@@ -303,7 +303,7 @@ def tab_main(config, win):
     )
     win.place(
         Label,
-        {"text": f"Порт: {config['port']}", "font": "Arial 16"},
+        {"text": f"Port: {config['port']}", "font": "Arial 16"},
         relx=0,
         rely=0,
         x=10,
@@ -312,7 +312,7 @@ def tab_main(config, win):
     )
     win.place(
         Button,
-        {"text": "Настроить", "command": lambda: tab_config(config, win)},
+        {"text": "Setup", "command": lambda: tab_config(config, win)},
         relx=1,
         rely=0,
         x=-10,
@@ -321,7 +321,7 @@ def tab_main(config, win):
     )
     win.place(
         Label,
-        {"text": "Консоль", "font": "Arial 16"},
+        {"text": "Console", "font": "Arial 16"},
         relx=0,
         rely=0,
         x=10,
@@ -330,7 +330,7 @@ def tab_main(config, win):
     )
     win.place(
         Button,
-        {"text": "Перейти", "command": lambda: tab_console(config, win)},
+        {"text": "Go to", "command": lambda: tab_console(config, win)},
         relx=1,
         rely=0,
         x=-10,
@@ -339,7 +339,7 @@ def tab_main(config, win):
     )
     win.place(
         Label,
-        {"text": "Лог", "font": "Arial 16"},
+        {"text": "Log", "font": "Arial 16"},
         relx=0,
         rely=0,
         x=10,
@@ -348,7 +348,7 @@ def tab_main(config, win):
     )
     win.place(
         Button,
-        {"text": "Показать", "command": lambda: tab_log(config, win)},
+        {"text": "Show", "command": lambda: tab_log(config, win)},
         relx=1,
         rely=0,
         x=-10,
@@ -365,25 +365,26 @@ def tab_main(config, win):
         y=-2,
         anchor="sw"
     )
-    win.place(
-        Label,
-        {"text": "Вебсайт: https://werryxgames.ml", "font": "Arial 8"},
-        relx=1,
-        rely=1,
-        x=-2,
-        y=-2,
-        anchor="se"
-    )
+    # Website temporary unavailable
+    # win.place(
+    #     Label,
+    #     {"text": "Website: https://werryxgames.ml", "font": "Arial 8"},
+    #     relx=1,
+    #     rely=1,
+    #     x=-2,
+    #     y=-2,
+    #     anchor="se"
+    # )
 
     if is_active():
         win.elements[2].configure(
-            text=f"Статус: запущен\tIP: {config['host']}"
+            text=f"Status: started\tIP: {config['host']}"
         )
-        win.elements[3].configure(text="Остановить", command=stop_server)
+        win.elements[3].configure(text="Stop", command=stop_server)
 
 
 def init_window(config, logger):
-    """Настраивет окно перед его появлением."""
+    """Initializes window before it appears."""
     win = Window()
     win.wm_title("Tanks Battle Server")
     win.geometry("600x320")
@@ -420,7 +421,7 @@ def init_window(config, logger):
 
 
 def serve(config, logger):
-    """Включает сервер/запускает графический интерфейс."""
+    """Starts server/starts graphical interface."""
     try:
         if is_support_gui:
             init_window(config, logger)
@@ -429,14 +430,14 @@ def serve(config, logger):
         set_data(config, logger)
         start_server(config, logger)
     except KeyboardInterrupt:
-        logger.info("Сервер остановлен")
+        logger.info("Server stopped")
         stop(0)
     except BaseException:
         logger.log_error_data(logger.critical)
 
 
 def main():
-    """Функция, вызываемая при запуске скрипта."""
+    """Function, that is called, when script called."""
     global is_support_gui
 
     log_print_level = Logger.LEVEL_DEBUG
@@ -457,16 +458,16 @@ def main():
     try:
         config = read("../config.json")
     except JSONDecodeError:
-        logger.critical("Не удалось загрузить конфигурацию. \
-Возможно файл был повреждён")
+        logger.critical("Unable to load configuration. \
+Maybe file was corrupted")
 
         if is_support_gui:
             root = Tk()
             root.withdraw()
             showerror(
-                "Ошибка запуска Tanks Battle Server",
-                "Не удалось загрузить конфигурацию. \
-Возможно файл был повреждён"
+                "Error loading Tanks Battle Server",
+                "Unable to load configuration. \
+Maybe file was corrupted"
             )
 
         stop(1)

@@ -1,6 +1,7 @@
-# Политика безопасности
-## Поддерживаемые версии
-Поддерживаемые версии указаны в файле [README.md](https://github.com/werryxgames/Tanks-Battle-Server#версии)
+# Security policy
+## Supported versions
+Supported versions specified in file [README.md](https://github.com/werryxgames/Tanks-Battle-Server#versions)
 
-## Контакты для уязвимости безопасности
-Для связи с нами используйте почту **security@werryxgames.ml**
+## Found security issue or exploit?
+Please contact us via emailing **werryxgames@proton.me**
+

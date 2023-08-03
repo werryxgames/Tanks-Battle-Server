@@ -1,4 +1,4 @@
-"""Модуль управления относительным путём."""
+"""Module for relative and absolute pathes."""
 import sys
 
 from os import mkdir
@@ -10,7 +10,7 @@ VERSION = "1.4.1"
 
 
 def get_rp(file):
-    """Возвращает абсолютный путь к файлу."""
+    """Returns absolute path to file."""
     return path.dirname(path.realpath(file))
 
 
@@ -18,14 +18,14 @@ rp = get_rp(__file__)
 
 
 def pjoin(*args, **kwargs):
-    """Возвращает абсолютный путь из относительного."""
+    """Returns absolute path from relative."""
     return path.join(*args, **kwargs)
 
 
 def to_absolute(*args, temp=False, **kwargs):
-    """Превращает относительный путь в асболютный.
+    """Makes relative path absolute.
 
-    Если не задан temp, в исполняемом файле, то будет сохранять данные.
+    If temp is not set in executable file, it will save data.
     """
     orig_path = pjoin(rp, *args, **kwargs)
 
@@ -53,5 +53,5 @@ def to_absolute(*args, temp=False, **kwargs):
 
 
 def add_imports(ipath=""):
-    """Добавляет путь импортов."""
+    """Adds imports path."""
     sys.path.append(to_absolute(ipath))

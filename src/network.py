@@ -1,4 +1,4 @@
-"""Модуль управления сетью."""
+"""Module for network sockets."""
 from json import dumps
 from multiprocessing import Process
 from multiprocessing import freeze_support
@@ -23,12 +23,12 @@ clients = get_clients()
 
 
 class NetworkedClient:
-    """Класс клиента."""
+    """Class of client."""
 
     CONSOLE = Console
 
     def __init__(self, sock_, addr):
-        """Инициализация клиента."""
+        """Initialization of client."""
         self.sock = sock_
         self.addr = addr
         self.rudp = ReliableUDP(sock_, addr)
@@ -42,22 +42,22 @@ class NetworkedClient:
         self.console = None
 
     def close(self):
-        """Закрывает соединение с клиентом."""
+        """Closes connection with client."""
         try:
             self.send(["something_wrong"])
             clients.pop(self.addr)
             self.logger.info(
-                f"Клиент '{self.addr[0]}:{self.addr[1]}' отключён"
+                f"Client '{self.addr[0]}:{self.addr[1]}' disconnected"
             )
         except OSError:
             pass
 
     def send(self, *args, **kwargs):
-        """Отправляет Reliable UDP данные клиенту."""
+        """Sends Reliable UDP data to client."""
         self.rudp.send(*args, **kwargs)
 
     def handle_register(self, login, password):
-        """Обрабатывает рагистрацию клиента."""
+        """Handles registration of client."""
         if not AccountManager.add_account_async(
             login,
             password,
@@ -67,7 +67,7 @@ class NetworkedClient:
             clients.pop(self.addr)
 
     def handle_login(self, login, password):
-        """Обрабатывает вход клиента в аккаунт."""
+        """Handles login of client into account."""
         if not AccountManager.login_account_async(
             login,
             password,
@@ -77,7 +77,7 @@ class NetworkedClient:
             clients.pop(self.addr)
 
     def handle(self, code, data):
-        """Обрабатывает данные от клиента."""
+        """Handles data, received from client."""
         try:
             if code == 0:
                 login = data.get_string()
@@ -111,7 +111,7 @@ class NetworkedClient:
             return
 
     def receive(self, data):
-        """Обрабатывает данные от клиента."""
+        """Handles data from client."""
         rudp = self.rudp.receive(data)
 
         if rudp is False:
@@ -143,7 +143,7 @@ class NetworkedClient:
         self.handle(request_code, data)
 
     def check_is_first(self, pdata):
-        """Проверяет является ли pdata нормальной для первого receive()."""
+        """Checks is pdata correct for first receive()."""
         if self.send_client:
             return True
 
@@ -156,12 +156,12 @@ class NetworkedClient:
 
 
 def is_active():
-    """Проверяет запущен ли сервер."""
+    """Checks is server running."""
     return thr is not None
 
 
 def stop_server():
-    """Останавливает сервер."""
+    """Stops server."""
     global thr
 
     thr.terminate()
@@ -171,9 +171,9 @@ def stop_server():
 
     if gui is not None:
         if gui.state == gui.STATE_MAIN:
-            gui.elements[2].configure(text="Статус: не запущен")
+            gui.elements[2].configure(text="Status: stopped")
             gui.elements[3].configure(
-                text="Запустить",
+                text="Start",
                 command=start_server_async
             )
 
@@ -181,7 +181,7 @@ def stop_server():
 
 
 def start_server_async():
-    """Асинхронно запускает сервер."""
+    """Asynchronously starts server."""
     global thr
 
     data = get_data()
@@ -195,18 +195,18 @@ def start_server_async():
     if gui is not None:
         if gui.state == gui.STATE_MAIN:
             gui.elements[2].configure(
-                text=f"Статус: запущен\tIP: {config['host']}"
+                text=f"Status: started\tIP: {config['host']}"
             )
-            gui.elements[3].configure(text="Остановить", command=stop_server)
+            gui.elements[3].configure(text="Stop", command=stop_server)
 
 
 def on_new_client(logger, sock_, addr, data):
-    """Функция, вызываемая при подключении клиента."""
+    """Function, that is called, when client connects."""
     if addr not in clients:
         clients[addr] = NetworkedClient(sock_, addr)
 
         if clients[addr].check_is_first(data):
-            logger.info(f"Клиент '{addr[0]}:{addr[1]}' подключён")
+            logger.info(f"Client '{addr[0]}:{addr[1]}' connected")
         else:
             del clients[addr]
             return True
@@ -215,14 +215,14 @@ def on_new_client(logger, sock_, addr, data):
 
 
 def start_server(config, logger):
-    """Синхронно запускает сервер."""
+    """Synchronously starts server."""
     set_data(config, logger)
 
     sock_ = socket(AF_INET, SOCK_DGRAM)
     sock_.bind((config["host"], config["port"]))
 
-    logger.info("Сервер запущен")
-    logger.debug("Адрес:", config["host"] + ",", "порт:", config["port"])
+    logger.info("Server started")
+    logger.debug("Address:", config["host"] + ",", "port:", config["port"])
 
     while True:
         try:
@@ -239,14 +239,14 @@ def start_server(config, logger):
         try:
             func = [logger.debug, logger.slow][int(data.get_u16() < 2)]
             func(
-                f"Клиент '{addr[0]}:{addr[1]}' отправил данные: '{data.get_fully()}'"
+                f"Client '{addr[0]}:{addr[1]}' sent data: '{tdata[1]}'"
             )
             data.rewind()
             clients[addr].receive(data)
-        except ByteBufferException():
+        except ByteBufferException:
             clients[addr].sendto(ByteBuffer(4).put_16(1).put_16(10000), addr)
             logger.warning(
-                f"Клиент '{addr[0]}:{addr[1]}' отправил неверные данные: \
+                f"Client '{addr[0]}:{addr[1]}' sent invalid data: \
 '{data.barr}'"
             )
 
