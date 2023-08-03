@@ -7,3 +7,4 @@ dist
 venv
 *.bat
 src/accounts.json
+run
