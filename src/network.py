@@ -46,7 +46,7 @@ class NetworkedClient:
     def close(self):
         """Closes connection with client."""
         try:
-            self.send(["something_wrong"])
+            self.send(ByteBuffer(2).put_16(2).to_bytes())
             clients.pop(self.addr)
             self.logger.info(
                 f"Client '{self.addr[0]}:{self.addr[1]}' disconnected"

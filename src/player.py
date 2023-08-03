@@ -41,7 +41,7 @@ class Player(NetUser):
         self.still_check_time = False
 
         try:
-            self.send(["something_wrong"])
+            self.send(ByteBuffer(2).put_16(2).to_bytes())
             clients.pop(self.addr)
             self.logger.info(
                 f"Client '{self.bp.nick}' ('{self.addr[0]}:{self.addr[1]}') \

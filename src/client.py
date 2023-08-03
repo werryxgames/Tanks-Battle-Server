@@ -35,7 +35,7 @@ class Client(NetUser):
     def close(self):
         """Closes connection with client due to error."""
         try:
-            self.send(["something_wrong"])
+            self.send(ByteBuffer(2).put_16(2).to_bytes())
             clients.pop(self.addr)
             self.logger.info(
                 f"Client '{self.account['nick']}' ('{self.addr[0]}:\
