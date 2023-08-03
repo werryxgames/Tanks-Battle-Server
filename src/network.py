@@ -60,7 +60,6 @@ class NetworkedClient:
 
     def handle_register(self, login, password):
         """Handles registration of client."""
-        self.logger.debug("REGISTER")
         if not AccountManager.add_account_async(
             login,
             password,
@@ -70,14 +69,12 @@ class NetworkedClient:
 
     def handle_login(self, login, password):
         """Handles login of client into account."""
-        self.logger.debug("REGISTER")
         if not AccountManager.login_account_async(
             login,
             password,
             self
         ):
             clients.pop(self.addr)
-            print("LOGIN")
 
     def handle(self, code, data):
         """Handles data, received from client."""
@@ -92,7 +89,7 @@ class NetworkedClient:
                     return
 
                 self.client.version = version
-                self.handle_login(login, password)
+                self.handle_register(login, password)
                 return
 
             if code == 1:
@@ -105,9 +102,8 @@ class NetworkedClient:
                     return
 
                 self.client.version = version
-                self.handle_register(login, password)
+                self.handle_login(login, password)
                 return
-
         except BaseException:
             self.logger.log_error_data()
             self.close()

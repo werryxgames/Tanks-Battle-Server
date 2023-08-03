@@ -193,6 +193,7 @@ class ByteBuffer:
 
             bytes_.append(byte)
 
+        self.position += len(bytes_) + 1
         return bytes_.decode("UTF-8")
 
     def get_fully(self):

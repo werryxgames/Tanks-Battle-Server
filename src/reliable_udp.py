@@ -12,7 +12,7 @@ class ReliableUDP:
 
     def __init__(self, sock, addr):
         """Constructor of Reliable UDP."""
-        self.sender_packet_id = 0
+        self.sender_packet_id = 2
         self.sender_threads = {}
         self.received = []
         self.sock = sock

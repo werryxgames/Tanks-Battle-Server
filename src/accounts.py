@@ -304,24 +304,24 @@ class AccountManager:
                             .put_u16(AccountManager.LOGGED_IN)
                             .put_string(nick)
                             .put_string(password)
-                            .to_butes()
+                            .to_bytes()
                         )
                         client.client.set_login_data(nick, password)
                         client.send_client = True
                         return
 
-                    client.send(ByteBuffer(2).put_u8(ban_status).to_bytes())
+                    client.send(ByteBuffer(2).put_u16(ban_status).to_bytes())
                     return
 
                 client.send(
                     ByteBuffer(2)
-                    .put_u8(AccountManager.FAILED_PASSWORD_NOT_MATCH)
+                    .put_u16(AccountManager.FAILED_PASSWORD_NOT_MATCH)
                     .to_bytes()
                 )
                 return
 
         client.send(
-            ByteBuffer(2).put_u8(AccountManager.FAILED_NOT_FOUND).to_bytes()
+            ByteBuffer(2).put_u16(AccountManager.FAILED_NOT_FOUND).to_bytes()
         )
 
     @staticmethod
