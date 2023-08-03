@@ -40,7 +40,7 @@ class Client(NetUser):
         except OSError:
             pass
 
-    def redirect_player(self, data):
+    def redirect_to_player(self, data):
         """Redirects packet to Player, if possible."""
         if self.send_player:
             if self.player.receive(data) == Player.BACK_TO_MENU:

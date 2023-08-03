@@ -4,6 +4,7 @@ from threading import Thread
 from time import sleep
 
 from singleton import get_data
+from serializer import ByteBuffer
 
 
 class ReliableUDP:
@@ -24,7 +25,10 @@ class ReliableUDP:
     @staticmethod
     def spam_thread(sock, addr, message, packet_id, thr_array, config):
         """Sends packet to client, until gets ACK."""
-        mesg = dumps([packet_id, message]).encode("utf8")
+        mesg = (ByteBuffer(2 + len(message))
+        .put_u16(packet_id)
+        .put_bytes(message)
+        .to_bytes())
         thr_keys = thr_array.keys()
         timeout = config["udp_reliable_resend_timeout"]
 
@@ -98,7 +102,10 @@ class ReliableUDP:
 
                 return None
 
-            self.sock.sendto(ByteBuffer(2 + 2).put_u16(0).put_u16(packet_id).to_bytes(), self.addr)
+            self.sock.sendto(
+                ByteBuffer(2 + 2).put_u16(0).put_u16(packet_id).to_bytes(),
+                self.addr
+            )
             return self.new_jdt(packet_id)
         except BaseException:
             self.logger.log_error_data()

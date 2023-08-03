@@ -1,5 +1,4 @@
 """Module for network sockets."""
-from json import dumps
 from multiprocessing import Process
 from multiprocessing import freeze_support
 from socket import AF_INET
@@ -58,23 +57,24 @@ class NetworkedClient:
 
     def handle_register(self, login, password):
         """Handles registration of client."""
+        self.logger.debug("REGISTER")
         if not AccountManager.add_account_async(
             login,
             password,
             self
         ):
-            self.send(["already_queued"])
             clients.pop(self.addr)
 
     def handle_login(self, login, password):
         """Handles login of client into account."""
+        self.logger.debug("REGISTER")
         if not AccountManager.login_account_async(
             login,
             password,
             self
         ):
-            self.send(["already_queued"])
             clients.pop(self.addr)
+            print("LOGIN")
 
     def handle(self, code, data):
         """Handles data, received from client."""
@@ -85,11 +85,11 @@ class NetworkedClient:
                 version = data.get_string()
 
                 if version not in self.config["accept_client_versions"]:
-                    self.send(10000)
+                    self.send(ByteBuffer(2).put_u16(9).to_bytes())
                     return
 
                 self.client.version = version
-                self.handle_register(login, password)
+                self.handle_login(login, password)
                 return
 
             if code == 1:
@@ -98,11 +98,11 @@ class NetworkedClient:
                 version = data.get_string()
 
                 if version not in self.config["accept_client_versions"]:
-                    self.send(10000)
+                    self.send(ByteBuffer(2).put_u16(9).to_bytes())
                     return
 
                 self.client.version = version
-                self.handle_login(login, password)
+                self.handle_register(login, password)
                 return
 
         except BaseException:
@@ -142,17 +142,17 @@ class NetworkedClient:
 
         self.handle(request_code, data)
 
-    def check_is_first(self, pdata):
-        """Checks is pdata correct for first receive()."""
+    def check_is_first(self, data):
+        """Checks is data correct for first receive()."""
         if self.send_client:
             return True
 
-        if data.get_u16() < 2:
+        if data.get_u16() != 1:
             return False
 
-        response = data.get_u16() < 2
+        response = data.get_u16()
         data.rewind()
-        return response
+        return response < 2
 
 
 def is_active():
@@ -239,7 +239,7 @@ def start_server(config, logger):
         try:
             func = [logger.debug, logger.slow][int(data.get_u16() < 2)]
             func(
-                f"Client '{addr[0]}:{addr[1]}' sent data: '{tdata[1]}'"
+                f"Client '{addr[0]}:{addr[1]}' sent data: {data.barr}"
             )
             data.rewind()
             clients[addr].receive(data)
