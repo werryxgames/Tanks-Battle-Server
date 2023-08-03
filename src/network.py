@@ -9,9 +9,12 @@ from socket import SOCK_DGRAM
 from socket import socket
 from sys import platform
 
+from absolute import to_absolute
 from accounts import AccountManager
 from client import Client
 from console import Console
+from os import getpid
+from os import remove
 from reliable_udp import ReliableUDP
 from singleton import get_clients
 from singleton import get_data
@@ -171,6 +174,7 @@ def stop_server():
             )
 
     thr = None
+    remove(to_absolute("../run"))
 
 
 def start_server_async():
@@ -216,6 +220,9 @@ def start_server(config, logger):
 
     logger.info("Server started")
     logger.debug("Address:", config["host"] + ",", "port:", config["port"])
+
+    with open(to_absolute("../run"), "wb") as file:
+        file.write(bytes.fromhex(hex(getpid())[2:]))
 
     while True:
         try:
