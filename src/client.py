@@ -2,13 +2,16 @@
 from copy import deepcopy
 
 from accounts import AccountManager
+from custom_structs import MapStruct
+from custom_structs import RankStruct
 from mjson import read
 from netclasses import NetUser
 from player import Player
+from serializer import ByteBuffer
 from singleton import add_match
 from singleton import get_clients
-from singleton import get_const_params
 from singleton import get_data
+from singleton import get_maps
 from singleton import get_matches
 
 clients = get_clients()
@@ -40,27 +43,60 @@ class Client(NetUser):
         except OSError:
             pass
 
-    def redirect_to_player(self, data):
+    def redirect_to_player(self, code, data):
         """Redirects packet to Player, if possible."""
         if self.send_player:
-            if self.player.receive(data) == Player.BACK_TO_MENU:
+            if self.player.receive(code, data) == Player.BACK_TO_MENU:
                 self.send_player = False
                 self.player = None
 
             return True
         return False
 
-    def handle_account(self, com, _args):
+    def handle_account(self, code, _data):
         """Handles data of client's account."""
-        if com == "get_account_data":
+        if code == 2:
             self.refresh_account()
-            self.send([
-                "account_data",
-                self.config["ranks"],
-                self.account["xp"],
-                self.account["crystals"],
-                get_const_params()
-            ])
+
+            ranks_size_sum: int = 0
+            ranks_array: list = []
+
+            for rank in self.config["ranks"]:
+                rank_struct = RankStruct(rank)
+                ranks_array.append(rank_struct)
+                ranks_size_sum += rank_struct.__bb_size__()
+
+            maps_size_sum: int = 0
+            maps_array: list = []
+
+            for map_ in get_maps():
+                map_struct = MapStruct(map_)
+                maps_array.append(map_struct)
+                maps_size_sum += map_struct.__bb_size__()
+
+            buffer: ByteBuffer = ByteBuffer(
+                2 + 2 + ranks_size_sum + 4 + 4 + 2 + maps_size_sum
+            )
+            (
+                buffer
+                .put_u16(11)
+                .put_u16(len(ranks_array))
+            )
+
+            for rank in ranks_array:
+                buffer.put_struct(rank)
+
+            (
+                buffer
+                .put_u32(self.account["xp"])
+                .put_32(self.account["crystals"])
+                .put_u16(len(maps_array))
+            )
+
+            for map_ in maps_array:
+                buffer.put_struct(map_)
+
+            self.send(buffer.to_bytes())
             return True
 
         return False
@@ -350,13 +386,12 @@ ers_in_game"]:
         if self.handle_settings(code, data):
             return
 
-    def receive(self, data):
+    def receive(self, code, data):
         """Received client's packet."""
-        if self.redirect_to_player(data):
+        if self.redirect_to_player(code, data):
             return
 
         try:
-            code = data.get_u16()
             self.handle(code, data)
         except BaseException:
             self.logger.log_error_data()

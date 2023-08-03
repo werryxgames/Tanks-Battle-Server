@@ -240,59 +240,57 @@ disconnected"
         if self.bp is not None:
             self.handle_messages()
 
-    def receive(self, jdt):
+    def receive(self, code, data):
         """Handles client data."""
-        try:
-            self.try_handle_messages()
-            self.last_request = datetime.today().timestamp()
 
-            com = jdt[0]
-            args = jdt[1:]
+        # try:
+        #     self.try_handle_messages()
+        #     self.last_request = datetime.today().timestamp()
 
-            if com == "get_battle_data":
-                self.receive_get_batte_data()
-                return None
+        #     if com == "get_battle_data":
+        #         self.receive_get_batte_data()
+        #         return None
 
-            if com == "request_tanks_data":
-                self.receive_request_tanks_data(args)
-                return None
+        #     if com == "request_tanks_data":
+        #         self.receive_request_tanks_data(args)
+        #         return None
 
-            if com == "leave_battle":
-                self.bdata["players"].remove(self.bp)
-                self.bdata["messages"].append(GlobalMessage(
-                    "player_leave",
-                    self.bp.nick
-                ))
-                self.still_check_time = False
-                return None
+        #     if com == "leave_battle":
+        #         self.bdata["players"].remove(self.bp)
+        #         self.bdata["messages"].append(GlobalMessage(
+        #             "player_leave",
+        #             self.bp.nick
+        #         ))
+        #         self.still_check_time = False
+        #         return None
 
-            if com == "leave_battle_menu":
-                self.bdata["players"].remove(self.bp)
-                self.bdata["messages"].append(GlobalMessage(
-                    "player_leave",
-                    self.bp.nick
-                ))
-                self.still_check_time = False
-                return self.BACK_TO_MENU
+        #     if com == "leave_battle_menu":
+        #         self.bdata["players"].remove(self.bp)
+        #         self.bdata["messages"].append(GlobalMessage(
+        #             "player_leave",
+        #             self.bp.nick
+        #         ))
+        #         self.still_check_time = False
+        #         return self.BACK_TO_MENU
 
-            if com == "shoot":
-                self.bdata["messages"].append(GlobalMessage(
-                    "player_shoot",
-                    [self.bp.nick, args[0]]
-                ))
-                return None
+        #     if com == "shoot":
+        #         self.bdata["messages"].append(GlobalMessage(
+        #             "player_shoot",
+        #             [self.bp.nick, args[0]]
+        #         ))
+        #         return None
 
-            if com == "damaged_by":
-                self.bp.last_damage = args[0]
-                return None
+        #     if com == "damaged_by":
+        #         self.bp.last_damage = args[0]
+        #         return None
 
-            if com == "respawned":
-                self.respawn_id = args[0] + 1
-                self.qr_sended = False
-                return None
+        #     if com == "respawned":
+        #         self.respawn_id = args[0] + 1
+        #         self.qr_sended = False
+        #         return None
 
-        except BaseException:
-            self.logger.log_error_data()
-            self.close()
+        # except BaseException:
+        #     self.logger.log_error_data()
+        #     self.close()
 
-        return None
+        # return None

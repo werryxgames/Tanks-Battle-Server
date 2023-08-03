@@ -13,7 +13,7 @@
     "ranks": [
         {
             "name": "Private",
-            "texture": false,
+            "texture": "none",
             "max_xp": 10
         },
         {
@@ -61,6 +61,5 @@
             "texture": "general",
             "max_xp": false
         }
-    ],
-    "constant_params": {}
+    ]
 }

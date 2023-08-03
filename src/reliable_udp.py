@@ -25,10 +25,12 @@ class ReliableUDP:
     @staticmethod
     def spam_thread(sock, addr, message, packet_id, thr_array, config):
         """Sends packet to client, until gets ACK."""
-        mesg = (ByteBuffer(2 + len(message))
-        .put_u16(packet_id)
-        .put_bytes(message)
-        .to_bytes())
+        mesg = (
+            ByteBuffer(2 + len(message))
+            .put_u16(packet_id)
+            .put_bytes(message)
+            .to_bytes()
+        )
         thr_keys = thr_array.keys()
         timeout = config["udp_reliable_resend_timeout"]
 
@@ -71,7 +73,7 @@ class ReliableUDP:
 
         max_packets = self.config["udp_reliable_max_packets"]
 
-        for i in range(max(packet_id - max_packets, 0), packet_id):
+        for i in range(max(packet_id - max_packets, 2), packet_id):
             if i not in self.received:
                 return None
 
@@ -85,14 +87,14 @@ class ReliableUDP:
     def receive(self, data):
         """Decodes and handles Reliable data of client."""
         try:
-            packet_id = data.get_u16() - 2
+            packet_id = data.get_u16()
 
             # Unreliable packet
-            if packet_id == -1:
+            if packet_id == 1:
                 return True
 
             # ACK packet
-            if packet_id == -2:
+            if packet_id == 0:
                 arg = data.get_u16()
 
                 if arg in self.sender_threads:

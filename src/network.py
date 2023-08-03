@@ -135,8 +135,7 @@ class NetworkedClient:
             return
 
         if self.send_client:
-            data.seek(2)
-            self.client.receive(data)
+            self.client.receive(request_code, data)
             return
 
         self.handle(request_code, data)
@@ -248,8 +247,9 @@ def start_server(config, logger):
             data.rewind()
             clients[addr].receive(data)
         except ByteBufferException:
-            clients[addr].sendto(ByteBuffer(4).put_16(1).put_16(10000), addr)
-            logger.warning(
+            clients[addr].sendto(ByteBuffer(4).put_16(1).put_16(2), addr)
+            # Slow in case of DDoS
+            logger.slow(
                 f"Client '{addr[0]}:{addr[1]}' sent invalid data: \
 '{data.barr}'"
             )

@@ -2,6 +2,7 @@
 from struct import pack
 from struct import unpack
 from struct import error
+from typing import Self
 
 
 class ByteBufferException(Exception):
@@ -15,6 +16,27 @@ class ByteBufferOutOfRange(ByteBufferException):
     """
 
 
+class BinaryStruct:
+    """Base structure for `ByteBuffer` `put_struct()` / `get_struct()`."""
+
+    @staticmethod
+    def __bb_init__(buffer) -> Self:
+        """Initializes structure and saves it's value."""
+        raise NotImplementedError
+
+    def __bb_get__(self):
+        """Returns saved structure value."""
+        raise NotImplementedError
+
+    def __bb_size__(self):
+        """Returns size of structure."""
+        raise NotImplementedError
+
+    def __bb_put__(self, buffer):
+        """Puts structure to `buffer`."""
+        raise NotImplementedError
+
+
 class ByteBuffer:
     """Class for binary data manipulation."""
 
@@ -25,7 +47,7 @@ class ByteBuffer:
 
         if isinstance(arg, int):
             self.__init_int(arg)
-        elif isinstance(arg, bytearray) or isinstance(arg, bytes):
+        elif isinstance(arg, (bytearray, bytes)):
             self.__init_bytearray(arg)
         else:
             raise ByteBufferException("Invalid __init__() arguments")
@@ -128,6 +150,11 @@ class ByteBuffer:
             f"{len(bytes_)}s"
         )
 
+    def put_struct(self, struct: BinaryStruct):
+        """Puts struct to buffer."""
+        struct.__bb_put__(self)
+        return self
+
     def _base_get(self, size, pack_val):
         """Gets value with size `size` using `struct.unpack(pack_val)`."""
         self._check(size)
@@ -205,6 +232,16 @@ class ByteBuffer:
         result = self.barr[self.position:]
         self.position = len(self.barr)
         return result
+
+    def get_struct(self, struct_type):
+        """Returns struct from bytearray and moves buffer cursor."""
+        self._check()
+
+        if not isinstance(struct_type, type):
+            raise ValueError("Type required")
+
+        struct = struct_type.__bb_init__(self)
+        return struct.__bb_get__()
 
     def rewind(self):
         """Returns cursor position to beginning."""
