@@ -267,6 +267,10 @@ class ByteBuffer:
         """Returns buffer cursor position."""
         return self.position
 
+    def size(self):
+        """Returns size of byte array."""
+        return len(self.barr)
+
     def to_bytes(self):
         """Returns bytearray of this buffer."""
         return self.barr

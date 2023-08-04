@@ -4,6 +4,7 @@ from copy import deepcopy
 from accounts import AccountManager
 from custom_structs import MapStruct
 from custom_structs import RankStruct
+from custom_structs import TankStruct
 from mjson import read
 from netclasses import NetUser
 from player import Player
@@ -111,20 +112,21 @@ class Client(NetUser):
 
         self.refresh_account()
 
-        tanks = []
+        # First argument is False, because it doesn't impact size
+        tanks = ByteBuffer(4 + sum([TankStruct(tank, False).__bb_size__() for tank in data["tanks"]]))
+        tanks.put_u32(len(data["tanks"]))
 
         for i, tank_ in enumerate(data["tanks"]):
-            tanks.append({
-                **tank_,
-                "have": i in self.account["tanks"]
-            })
+            tanks.put_struct(TankStruct(tank_, i in self.account["tanks"]))
 
-        self.send([
-            "garage_data",
-            tanks,
-            self.account["selected_tank"],
-            self.account["crystals"]
-        ])
+        self.send(
+            ByteBuffer(2 + tanks.size() + 4 + 4)
+            .put_u16(13)
+            .put_bytes(tanks.to_bytes())
+            .put_u32(self.account["selected_tank"])
+            .put_32(self.account["crystals"])
+            .to_bytes()
+        )
 
     def select_tank(self, args):
         """Handles client's request to select args[0] from type_."""
@@ -206,10 +208,10 @@ class Client(NetUser):
 
         return False
 
-    def handle_garage(self, com, args):
-        """Handles garade data of client."""
-        if com == "get_garage_data":
-            self.update_client_data(["garage_failed"])
+    def handle_hangar(self, code, data):
+        """Handles hangar data of client."""
+        if code == 3:
+            self.update_client_data(ByteBuffer(2).put_16(12).to_bytes())
             return True
 
         if self.handle_tanks(com, args):
@@ -377,7 +379,7 @@ ers_in_game"]:
         if self.handle_account(code, data):
             return
 
-        if self.handle_garage(code, data):
+        if self.handle_hangar(code, data):
             return
 
         if self.handle_matches(code, data):

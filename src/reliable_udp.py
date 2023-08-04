@@ -40,6 +40,9 @@ class ReliableUDP:
 
     def send(self, message):
         """Sends Reliable UDP data to client."""
+        if not isinstance(message, (bytes, bytearray)):
+            raise ValueError("Message should be bytes or bytearray")
+
         self.sender_threads[self.sender_packet_id] = Thread(
             target=self.spam_thread,
             args=(
