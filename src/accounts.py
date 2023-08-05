@@ -81,7 +81,7 @@ class AccountManager:
     @staticmethod
     def get_account(nick):
         """Returns account with login nick."""
-        data = read("accounts.json", [])
+        data = read("../accounts.json", [])
 
         return AccountManager.get_account_(nick, data)
 
@@ -103,13 +103,13 @@ class AccountManager:
     @staticmethod
     def call_method(method, *args):
         """Calls method."""
-        data = read("accounts.json", [])
+        data = read("../accounts.json", [])
         result = method(*args, data)
 
         if isinstance(result, int):
             return result
 
-        if write("accounts.json", result):
+        if write("../accounts.json", result):
             return AccountManager.SUCCESSFUL
 
         return AccountManager.FAILED_UNKNOWN
@@ -133,7 +133,7 @@ class AccountManager:
 
         del data[data.index(acc)]
 
-        if write("accounts.json", data):
+        if write("../accounts.json", data):
             return AccountManager.SUCCESSFUL
 
         return AccountManager.FAILED_UNKNOWN
@@ -226,7 +226,7 @@ class AccountManager:
         if isinstance(result, int):
             return result
 
-        write("accounts.json", data)
+        write("../accounts.json", data)
         return AccountManager.SUCCESSFUL
 
     @staticmethod
@@ -261,7 +261,7 @@ class AccountManager:
         nick = nick.strip()
         password = password.strip()
 
-        data = read("accounts.json", [])
+        data = read("../accounts.json", [])
 
         for account in data:
             if account["nick"] == nick:
@@ -370,7 +370,7 @@ class AccountManager:
         nick = nick.strip()
         password = password.strip()
 
-        data = read("accounts.json", [])
+        data = read("../accounts.json", [])
 
         for account in data:
             if account["nick"] == nick:
@@ -393,7 +393,7 @@ class AccountManager:
             "settings": get_data()[0]["default_settings"]
         }
 
-        if append("accounts.json", None, acc, []):
+        if append("../accounts.json", None, acc, []):
             client.send(
                 ByteBuffer(
                     2 + len(nick.encode("UTF-8")) + 1 + len(
