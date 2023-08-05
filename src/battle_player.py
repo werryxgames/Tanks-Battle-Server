@@ -57,3 +57,7 @@ class BattlePlayer:
     def json(self):
         """Returns data in JSON-serializable format."""
         return self.__dict__
+
+    def arr(self):
+        """Returns data in byte-serializable format."""
+        return [self.nick, self.position, self.rotation, self.tank, self.gun_rotation, self.durability]

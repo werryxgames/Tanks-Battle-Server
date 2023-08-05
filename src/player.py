@@ -6,10 +6,15 @@ from time import sleep
 
 from accounts import AccountManager
 from battle_player import BattlePlayer
+from custom_structs import BattlePlayerStruct
+from custom_structs import BattleDataStruct
+from custom_structs import BattleTankStruct
+from custom_structs import SettingsStruct
 from message import GlobalMessage
 from mjson import read
 from netclasses import NetUser
 from singleton import get_clients
+from serializer import ByteBuffer
 
 clients = get_clients()
 
@@ -142,15 +147,14 @@ disconnected"
         pls = []
 
         for bp in self.bdata["players"]:
-            pls.append([bp.json(), bp.get_tank(), bp.get_gun()])
+            pls.append([BattlePlayerStruct(bp.arr()), BattleTankStruct({"tank": bp.get_tank(), "gun": bp.get_gun()})])
 
-        self.send([
-            "battle_data",
-            self.bdata["map"],
-            pls[-1],
-            pls[:-1],
-            self.account["settings"]
-        ])
+        # cast to str because on client it is string concatenation
+        bdata = BattleDataStruct([str(self.bdata["map"]), pls[-1], pls[:-1], SettingsStruct(self.account["settings"])])
+        pck = ByteBuffer(2 + bdata.__bb_size__())
+        pck.put_u16(23)
+        pck.put_struct(bdata)
+        self.send(pck.to_bytes())
 
         self.bdata["messages"].append(GlobalMessage(
             "player_join",
@@ -242,55 +246,54 @@ disconnected"
 
     def receive(self, code, data):
         """Handles client data."""
+        try:
+            self.try_handle_messages()
+            self.last_request = datetime.today().timestamp()
 
-        # try:
-        #     self.try_handle_messages()
-        #     self.last_request = datetime.today().timestamp()
+            if code == 14:
+                self.receive_get_batte_data()
+                return None
 
-        #     if com == "get_battle_data":
-        #         self.receive_get_batte_data()
-        #         return None
+            if code == 16:
+                self.receive_request_tanks_data(args)
+                return None
 
-        #     if com == "request_tanks_data":
-        #         self.receive_request_tanks_data(args)
-        #         return None
+            if code == 7:
+                self.bdata["players"].remove(self.bp)
+                self.bdata["messages"].append(GlobalMessage(
+                    "player_leave",
+                    self.bp.nick
+                ))
+                self.still_check_time = False
+                return None
 
-        #     if com == "leave_battle":
-        #         self.bdata["players"].remove(self.bp)
-        #         self.bdata["messages"].append(GlobalMessage(
-        #             "player_leave",
-        #             self.bp.nick
-        #         ))
-        #         self.still_check_time = False
-        #         return None
+            if code == 11:
+                self.bdata["players"].remove(self.bp)
+                self.bdata["messages"].append(GlobalMessage(
+                    "player_leave",
+                    self.bp.nick
+                ))
+                self.still_check_time = False
+                return self.BACK_TO_MENU
 
-        #     if com == "leave_battle_menu":
-        #         self.bdata["players"].remove(self.bp)
-        #         self.bdata["messages"].append(GlobalMessage(
-        #             "player_leave",
-        #             self.bp.nick
-        #         ))
-        #         self.still_check_time = False
-        #         return self.BACK_TO_MENU
+            if code == 18:
+                self.bdata["messages"].append(GlobalMessage(
+                    "player_shoot",
+                    [self.bp.nick, args[0]]
+                ))
+                return None
 
-        #     if com == "shoot":
-        #         self.bdata["messages"].append(GlobalMessage(
-        #             "player_shoot",
-        #             [self.bp.nick, args[0]]
-        #         ))
-        #         return None
+            if code == 17:
+                self.bp.last_damage = args[0]
+                return None
 
-        #     if com == "damaged_by":
-        #         self.bp.last_damage = args[0]
-        #         return None
+            if code == 15:
+                self.respawn_id = args[0] + 1
+                self.qr_sended = False
+                return None
 
-        #     if com == "respawned":
-        #         self.respawn_id = args[0] + 1
-        #         self.qr_sended = False
-        #         return None
+        except BaseException:
+            self.logger.log_error_data()
+            self.close()
 
-        # except BaseException:
-        #     self.logger.log_error_data()
-        #     self.close()
-
-        # return None
+        return None
