@@ -6,6 +6,7 @@ from custom_structs import MapStruct
 from custom_structs import RankStruct
 from custom_structs import TankStruct
 from custom_structs import SettingsStruct
+from custom_structs import MatchStruct
 from mjson import read
 from netclasses import NetUser
 from player import Player
@@ -228,7 +229,7 @@ class Client(NetUser):
         res = deepcopy(matches)
 
         # MatchStruct has constant size
-        buffer: ByteBuffer = ByteBuffer(2 + 4 + len(res) * MatchStruct({"max_players": 0, "players": 0, "map": 0}))
+        buffer: ByteBuffer = ByteBuffer(2 + 4 + len(res) * MatchStruct({"max_players": 0, "players": 0, "map": 0}).__bb_size__())
         buffer.put_u16(18)
         buffer.put_u32(len(res))
 
