@@ -191,3 +191,32 @@ class SettingsStruct(BinaryStruct):
             .put_boolean(self.settings[1])
             .put_u16(self.settings[2])
         )
+
+
+class MatchStruct(BinaryStruct):
+    def __init__(self, match_data):
+        self.match_ = match_data
+
+    @staticmethod
+    def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
+        return MatchStruct(
+            {
+                "max_players": buffer.get_u8(),
+                "players": buffer.get_u8(),
+                "map": buffer.get_u16()
+            }
+        )
+
+    def __bb_get__(self):
+        return self.match_
+
+    def __bb_size__(self):
+        return 1 + 1 + 2
+
+    def __bb_put__(self, buffer: ByteBuffer):
+        (
+            buffer
+            .put_u8(self.match_["max_players"])
+            .put_u8(self.match_["players"])
+            .put_u16(self.match_["map"])
+        )

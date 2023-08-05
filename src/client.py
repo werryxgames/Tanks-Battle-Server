@@ -227,11 +227,17 @@ class Client(NetUser):
         matches = get_matches()
         res = deepcopy(matches)
 
+        # MatchStruct has constant size
+        buffer: ByteBuffer = ByteBuffer(2 + 4 + len(res) * MatchStruct({"max_players": 0, "players": 0, "map": 0}))
+        buffer.put_u16(18)
+        buffer.put_u32(len(res))
+
         for match_ in res:
             match_["players"] = len(match_["players"])
             del match_["messages"]
+            buffer.put_struct(match_)
 
-        self.send(["matches", res])
+        self.send(buffer.to_bytes())
 
     def handle_create_match(self, args):
         """Handles match creation from client."""
@@ -319,18 +325,18 @@ ers_in_game"]:
 
         self.send(["battle_not_joined", 0])
 
-    def handle_matches(self, com, args):
+    def handle_matches(self, code, data):
         """Handles matches."""
-        if com == "get_matches":
+        if code == 10:
             self.handle_get_matches()
             return True
 
-        if com == "create_match":
-            self.handle_create_match(args)
+        if code == 11:
+            self.handle_create_match(data)
             return True
 
-        if com == "join_battle":
-            self.handle_join_battle(args)
+        if code == 13:
+            self.handle_join_battle(data)
             return True
 
         return False
