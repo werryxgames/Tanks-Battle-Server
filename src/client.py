@@ -128,21 +128,23 @@ class Client(NetUser):
             .to_bytes()
         )
 
-    def select_tank(self, args):
+    def select_tank(self, data):
         """Handles client's request to select args[0] from type_."""
-        if args[0] in self.account["tanks"]:
+        tank_id = data.get_u32()
+
+        if tank_id in self.account["tanks"]:
             if AccountManager.set_account(
                 self.account["nick"],
                 "selected_tank",
-                args[0]
+                tank_id
             ) != AccountManager.SUCCESSFUL:
-                self.send(["not_selected", 1])
+                self.send(ByteBuffer(2).put_u16(14).to_bytes())
                 return
 
-            self.update_client_data(["not_selected", 1])
+            self.update_client_data(ByteBuffer(2).put_u16(14).to_bytes())
             return
 
-        self.send(["not_selected", 0])
+        self.send(ByteBuffer(2).put_u16(14).to_bytes())
         return
 
     def buy_tank_data(self, tank_id, data):
@@ -159,7 +161,7 @@ class Client(NetUser):
                     "crystals",
                     self.account["crystals"] - tank["price"]
                 ) != AccountManager.SUCCESSFUL:
-                    self.send(["not_selected", 1])
+                    self.send(ByteBuffer(2).put_u16(2).to_bytes())
                     return
 
                 if AccountManager.set_account(
@@ -167,7 +169,7 @@ class Client(NetUser):
                     "tanks",
                     [*self.account["tanks"], tank_id]
                 ) != AccountManager.SUCCESSFUL:
-                    self.send(["not_selected", 1])
+                    self.send(ByteBuffer(2).put_u16(2).to_bytes())
                     return
 
                 if AccountManager.set_account(
@@ -175,35 +177,35 @@ class Client(NetUser):
                     "selected_tank",
                     tank_id
                 ) != AccountManager.SUCCESSFUL:
-                    self.send(["not_selected", 1])
+                    self.send(ByteBuffer(2).put_u16(2).to_bytes())
                     return
 
-                self.update_client_data(["not_selected", 1])
+                self.update_client_data(ByteBuffer(2).put_u16(2).to_bytes())
                 return
 
-            self.send(["buy_failed", 0])
+            self.send(ByteBuffer(2).put_u16(15).to_bytes())
             return
 
-        self.send(["not_selected", 0])
+        self.send(ByteBuffer(2).put_u16(15).to_bytes())
 
-    def buy_tank(self, args):
+    def buy_tank(self, pck):
         """Handles purchase request with data reading."""
         data = read("../data.json")
 
         if data is None:
-            self.send(["not_selected", 2])
+            self.send(ByteBuffer(2).put_u16(2).to_bytes())
             return
 
-        self.buy_tank_data(args[0], data)
+        self.buy_tank_data(pck.get_u32(), data)
 
-    def handle_tanks(self, com, args):
+    def handle_tanks(self, code, data):
         """Handles client's tanks."""
-        if com == "select_tank":
-            self.select_tank(args)
+        if code == 4:
+            self.select_tank(data)
             return True
 
-        if com == "buy_tank":
-            self.buy_tank(args)
+        if code == 5:
+            self.buy_tank(data)
             return True
 
         return False
@@ -214,7 +216,7 @@ class Client(NetUser):
             self.update_client_data(ByteBuffer(2).put_16(12).to_bytes())
             return True
 
-        if self.handle_tanks(com, args):
+        if self.handle_tanks(code, data):
             return True
 
         return False
