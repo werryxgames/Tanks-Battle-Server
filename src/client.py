@@ -2,7 +2,6 @@
 from copy import deepcopy
 
 from accounts import AccountManager
-from custom_structs import MapStruct
 from custom_structs import RankStruct
 from custom_structs import TankStruct
 from custom_structs import SettingsStruct
@@ -73,9 +72,8 @@ class Client(NetUser):
             maps_array: list = []
 
             for map_ in get_maps():
-                map_struct = MapStruct(map_)
-                maps_array.append(map_struct)
-                maps_size_sum += map_struct.__bb_size__()
+                maps_array.append(map_["name"])
+                maps_size_sum += len(map_["name"].encode("UTF-8")) + 1
 
             buffer: ByteBuffer = ByteBuffer(
                 2 + 2 + ranks_size_sum + 4 + 4 + 2 + maps_size_sum
@@ -96,8 +94,8 @@ class Client(NetUser):
                 .put_u16(len(maps_array))
             )
 
-            for map_ in maps_array:
-                buffer.put_struct(map_)
+            for map_name in maps_array:
+                buffer.put_string(map_name)
 
             self.send(buffer.to_bytes())
             return True
@@ -236,43 +234,20 @@ class Client(NetUser):
         for match_ in res:
             match_["players"] = len(match_["players"])
             del match_["messages"]
-            buffer.put_struct(match_)
+            buffer.put_struct(MatchStruct(match_))
 
         self.send(buffer.to_bytes())
 
-    def handle_create_match(self, args):
+    def handle_create_match(self, data):
         """Handles match creation from client."""
         self.refresh_account()
 
-        if not isinstance(args[0], int):
-            self.send(["game_create_failed", 1])
-            return
-
-        if not isinstance(args[1], str):
-            self.send(["game_create_failed", 1])
-            return
-
-        map_id = args[0]
-
-        if map_id < 0 or map_id >= len(read("../data.json")["maps"]):
-            self.send(["game_create_failed", 1])
-            return
-
-        max_players = args[1].strip()
-
-        if len(max_players) < 1:
-            self.send(["game_create_failed", 2])
-            return
-
-        if not AccountManager.check(max_players, "0123456789"):
-            self.send(["game_create_failed", 2])
-            return
-
-        max_players = int(max_players)
+        map_id = data.get_u16()
+        max_players = data.get_u16()
 
         if max_players < 1 or max_players > self.config["max_play\
 ers_in_game"]:
-            self.send(["game_create_failed", 0])
+            self.send(ByteBuffer(2).put_u16(22).to_bytes())
             return
 
         match_ = add_match(
@@ -280,7 +255,7 @@ ers_in_game"]:
             max_players
         )
 
-        self.send(["game_created"])
+        self.send(ByteBuffer(2).put_u16(21).to_bytes())
 
         self.player = Player(
             self.sock,
@@ -293,18 +268,19 @@ ers_in_game"]:
         self.player.set_login_data(self.login, self.password)
         self.send_player = True
 
-    def handle_join_battle(self, args):
+    def handle_join_battle(self, data):
         """Handles client join battle request."""
         matches = get_matches()
         player_match = None
+        join_id: int = data.get_u16()
 
         for match_id, match_ in enumerate(matches):
-            if match_id == args[0]:
+            if match_id == join_id:
                 if len(
                     match_["players"]
                 ) < match_["max_players"]:
                     player_match = match_
-                    self.send(["battle_joined"])
+                    self.send(ByteBuffer(2).put_u16(19).to_bytes())
 
                     self.player = Player(
                         self.sock,
@@ -321,10 +297,10 @@ ers_in_game"]:
                     self.send_player = True
                     return
 
-                self.send(["battle_not_joined", 1])
+                self.send(ByteBuffer(2).put_u16(20).to_bytes())
                 return
 
-        self.send(["battle_not_joined", 0])
+        self.send(ByteBuffer(2).put_u16(20).to_bytes())
 
     def handle_matches(self, code, data):
         """Handles matches."""
@@ -332,7 +308,7 @@ ers_in_game"]:
             self.handle_get_matches()
             return True
 
-        if code == 11:
+        if code == 12:
             self.handle_create_match(data)
             return True
 

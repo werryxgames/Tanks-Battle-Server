@@ -1,0 +1,35 @@
+CLIENT CODES:
+Register = 0
+Login = 1
+3 = Get hangar data
+4 = Select tank
+5 = Buy tank
+6 = Request settings
+Client disconnected = 7
+8 = Reset settings
+9 = Apply settings
+10 = Get matches
+Leave battle = 11
+12 = Create match
+13 = Join match
+14 = Match loaded
+15 = Respawned
+16 = Request tanks data
+17 = Damaged by
+
+SERVER CODES:
+2 = Unknown error
+0-10 = Login screen
+11 = Account data
+12 = Hangar error
+13 = Hangar data
+14 = Not selected
+15 = Buy failed
+16 = Settings are
+17 = Failed settings
+18 = Matches are
+19 = Battle joined
+20 = Battle not joined
+21 = Game created
+22 = Game create failed
+23 = Battle data is
