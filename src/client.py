@@ -5,6 +5,7 @@ from accounts import AccountManager
 from custom_structs import MapStruct
 from custom_structs import RankStruct
 from custom_structs import TankStruct
+from custom_structs import SettingsStruct
 from mjson import read
 from netclasses import NetUser
 from player import Player
@@ -334,13 +335,18 @@ ers_in_game"]:
 
         return False
 
-    def handle_settings(self, com, args):
+    def handle_settings(self, code, data):
         """Handles client's settings."""
-        if com == "request_settings":
-            self.send(["settings", *self.account["settings"]])
+        if code == 6:
+            # SettingsStruct has constant size
+            account_settings = SettingsStruct(self.account["settings"])
+            buffer: ByteBuffer = ByteBuffer(2 + account_settings.__bb_size__())
+            buffer.put_16(16)
+            buffer.put_struct(account_settings)
+            self.send(buffer.to_bytes())
             return True
 
-        if com == "reset_settings":
+        if code == 8:
             dsets = self.config["default_settings"]
 
             if AccountManager.set_account(
@@ -348,29 +354,34 @@ ers_in_game"]:
                 "settings",
                 dsets
             ) != AccountManager.SUCCESSFUL:
-                self.send(["failed", 0])
+                self.send(ByteBuffer(2).put_u16(2))
                 return True
 
-            self.send(["settings", *dsets])
+            account_settings = SettingsStruct(self.account["settings"])
+            buffer: ByteBuffer = ByteBuffer(2 + account_settings.__bb_size__())
+            buffer.put_16(16)
+            buffer.put_struct(account_settings)
+            self.send(buffer.to_bytes())
             return True
 
-        if com == "apply_settings":
+        if code == 9:
             try:
-                if 99999 > int(args[2]) > 10:
-                    nsets = args
+                print(data.position, data.to_bytes())
+                settings = data.get_struct(SettingsStruct)
 
+                if 65535 > settings[2] > 10:
                     if AccountManager.set_account(
                         self.account["nick"],
                         "settings",
-                        nsets
+                        settings
                     ) != AccountManager.SUCCESSFUL:
-                        self.send(["failed", 1])
+                        self.send(ByteBuffer(2).put_u16(2).to_bytes())
 
                     return True
 
-                self.send(["failed", 2])
+                self.send(ByteBuffer(2).put_u16(17).to_bytes())
             except ValueError:
-                self.send(["failed", 3])
+                self.send(ByteBuffer(2).put_u16(17).to_bytes())
 
             return True
 

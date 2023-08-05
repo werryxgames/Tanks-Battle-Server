@@ -168,3 +168,26 @@ class TankStruct(BinaryStruct):
             .put_u8(self.tank["type"])
             .put_boolean(self.tank["have"])
         )
+
+
+class SettingsStruct(BinaryStruct):
+    def __init__(self, settings_data):
+        self.settings = settings_data
+
+    @staticmethod
+    def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
+        return SettingsStruct([buffer.get_boolean(), buffer.get_boolean(), buffer.get_u16()])
+
+    def __bb_get__(self):
+        return self.settings
+
+    def __bb_size__(self):
+        return 1 + 1 + 2
+
+    def __bb_put__(self, buffer: ByteBuffer):
+        (
+            buffer
+            .put_boolean(self.settings[0])
+            .put_boolean(self.settings[1])
+            .put_u16(self.settings[2])
+        )
