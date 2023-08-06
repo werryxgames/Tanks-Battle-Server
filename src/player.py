@@ -10,6 +10,8 @@ from custom_structs import BattlePlayerStruct
 from custom_structs import BattleDataStruct
 from custom_structs import BattleTankStruct
 from custom_structs import SettingsStruct
+from custom_structs import TankDataStruct
+from custom_structs import BattlePlayerDataStruct
 from message import GlobalMessage
 from mjson import read
 from netclasses import NetUser
@@ -147,7 +149,7 @@ disconnected"
         pls = []
 
         for bp in self.bdata["players"]:
-            pls.append([BattlePlayerStruct(bp.arr()), BattleTankStruct({"tank": bp.get_tank(), "gun": bp.get_gun()})])
+            pls.append([BattlePlayerStruct(bp.arr())])
 
         # cast to str because on client it is string concatenation
         bdata = BattleDataStruct([str(self.bdata["map"]), pls[-1], pls[:-1], SettingsStruct(self.account["settings"])])
@@ -168,23 +170,34 @@ disconnected"
 
         Thread(target=self.check_time).start()
 
-    def receive_request_tanks_data(self, args):
+    def receive_request_tanks_data(self, data):
         """Receives requested data of tanks."""
-        if args[3] > 0:
-            if args[0][1] > self.map["kill_y"]:
-                self.bp.position = args[0]
-                self.bp.rotation = args[1]
-                self.bp.gun_rotation = args[2]
-                self.bp.durability = args[3]
+        tank_data = data.get_struct(BattlePlayerDataStruct)
+
+        if tank_data[9] > 0:
+            if tank_data[1] > self.map["kill_y"]:
+                self.bp.position = [tank_data[0], tank_data[1], tank_data[2]]
+                self.bp.rotation = [tank_data[3], tank_data[4], tank_data[5]]
+                self.bp.gun_rotation = [tank_data[6], tank_data[7], tank_data[8]]
+                self.bp.durability = tank_data[9]
 
                 players = self.bdata["players"]
                 res = []
+                sum_size: int = 0
 
                 for pl in players:
                     if pl is not self.bp:
-                        res.append([pl.json()])
+                        bp: BattlePlayerStruct = BattlePlayerStruct([pl.arr()])
+                        sum_size += bp._bb_size()
+                        res.append(bp)
 
-                self.send_unreliable(["tanks_data", res])
+                buffer: ByteBuffer = ByteBuffer(1 + sum_size)
+                buffer.put_u8(len(res))
+
+                for pl in res:
+                    buffer.put_struct(pl)
+
+                self.send_unreliable(buffer.to_bytes())
                 return None
 
             if not self.qr_sended:
@@ -255,7 +268,7 @@ disconnected"
                 return None
 
             if code == 16:
-                self.receive_request_tanks_data(args)
+                self.receive_request_tanks_data(data)
                 return None
 
             if code == 7:

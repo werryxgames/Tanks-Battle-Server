@@ -63,7 +63,10 @@ class ReliableUDP:
 
     def send_unreliable(self, message):
         """Sends data of Unreliable UDP to client."""
-        self.sock.sendto(dumps([-1, message]).encode("utf8"), self.addr)
+        buffer: ByteBuffer = ByteBuffer(2 + len(message))
+        buffer.put_u16(1)
+        buffer.put_bytes(message)
+        self.sock.sendto(buffer.to_bytes(), self.addr)
         self.logger.slow(
             f"Data, sent to client '{self.addr[0]}:{self.addr[1]}':",
             message

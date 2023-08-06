@@ -16,6 +16,7 @@ Leave battle = 11
 15 = Respawned
 16 = Request tanks data
 17 = Damaged by
+18 = Shoot
 
 SERVER CODES:
 2 = Unknown error
@@ -33,3 +34,6 @@ SERVER CODES:
 21 = Game created
 22 = Game create failed
 23 = Battle data is
+24 = Tanks data is
+25 = New player joined
+26 = Player leaved

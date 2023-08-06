@@ -247,14 +247,6 @@ class BattlePlayerStruct(BinaryStruct):
             (buffer.get_float(), buffer.get_float(), buffer.get_float()),
             buffer.get_u32()
         ]
-        players_count = buffer.get_u8()
-        players = []
-
-        for _i in range(players_count):
-            players.append(buffer.get_struct(BattlePlayerStruct))
-
-        arr.append(players)
-        arr.append(buffer.get_struct(SettingsStruct))
         return BattleDataStruct(arr)
 
     def __bb_get__(self):
@@ -318,3 +310,64 @@ class BattleDataStruct(BinaryStruct):
             buffer.put_struct(i[1])
 
         buffer.put_struct(self.battle[3])
+
+
+class TankDataStruct(BinaryStruct):
+    def __init__(self, tank_data):
+        self.data = tank_data
+
+    @staticmethod
+    def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
+        tanks_count: int = buffer.get_u8()
+        arr = [buffer.get_struct(BattlePlayerStruct) for _i in range(tanks_count)]
+        return TankDataStruct(arr)
+
+    def __bb_get__(self):
+        return self.data
+
+    def __bb_size__(self):
+        return 1 + sum([bp.__bb_size__() for bp in self.arr])
+
+    def __bb_put__(self, buffer: ByteBuffer):
+        buffer.put_u8(len(self.data))
+
+        for bp in self.data:
+            buffer.put_struct(bp)
+
+
+class BattlePlayerDataStruct(BinaryStruct):
+    def __init__(self, bp_data):
+        self.data = bp_data
+
+    @staticmethod
+    def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
+        return BattlePlayerDataStruct([
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_float(),
+            buffer.get_u32()
+        ])
+
+    def __bb_get__(self):
+        return self.data
+
+    def __bb_size__(self):
+        return 40
+
+    def __bb_put__(self, buffer: ByteBuffer):
+        buffer.put_float(self.data[0])
+        buffer.put_float(self.data[1])
+        buffer.put_float(self.data[2])
+        buffer.put_float(self.data[3])
+        buffer.put_float(self.data[4])
+        buffer.put_float(self.data[5])
+        buffer.put_float(self.data[6])
+        buffer.put_float(self.data[7])
+        buffer.put_float(self.data[8])
+        buffer.put_u32(self.data[9])
