@@ -21,12 +21,11 @@ jobs:
     - uses: actions/stale@v5
       with:
         days-before-issue-stale: 30
-        days-before-issue-close: 14
+        days-before-issue-close: -1
         days-before-pr-stale: 30
         days-before-pr-close: -1
         stale-issue-label: "no activity"
         stale-issue-message: "This issue was labelled as 'no activity', because there were no activity in last 30 days."
-        close-issue-message: "This issue was closed, because there were no activity in last 14 days.'"
         stale-pr-label: "no activity"
         stale-pr-message: "This pull request was labelled as 'no activity', because there were no activity in last 30 days."
         repo-token: ${{ secrets.GITHUB_TOKEN }}
