@@ -1,10 +1,9 @@
 """Module, that guarantees receive of UDP packets."""
-from json import dumps
-from json import loads
 from threading import Thread
 from time import sleep
 
 from singleton import get_data
+from serializer import ByteBuffer
 
 
 class ReliableUDP:
@@ -12,7 +11,7 @@ class ReliableUDP:
 
     def __init__(self, sock, addr):
         """Constructor of Reliable UDP."""
-        self.sender_packet_id = 0
+        self.sender_packet_id = 2
         self.sender_threads = {}
         self.received = []
         self.sock = sock
@@ -23,14 +22,14 @@ class ReliableUDP:
         self.logger = data[1]
 
     @staticmethod
-    def custom_sort(item):
-        """Returns first element in list `item`."""
-        return item[0]
-
-    @staticmethod
     def spam_thread(sock, addr, message, packet_id, thr_array, config):
         """Sends packet to client, until gets ACK."""
-        mesg = dumps([packet_id, message]).encode("utf8")
+        mesg = (
+            ByteBuffer(2 + len(message))
+            .put_u16(packet_id)
+            .put_bytes(message)
+            .to_bytes()
+        )
         thr_keys = thr_array.keys()
         timeout = config["udp_reliable_resend_timeout"]
 
@@ -40,6 +39,9 @@ class ReliableUDP:
 
     def send(self, message):
         """Sends Reliable UDP data to client."""
+        if not isinstance(message, (bytes, bytearray)):
+            raise ValueError("Message should be bytes or bytearray")
+
         self.sender_threads[self.sender_packet_id] = Thread(
             target=self.spam_thread,
             args=(
@@ -60,52 +62,45 @@ class ReliableUDP:
 
     def send_unreliable(self, message):
         """Sends data of Unreliable UDP to client."""
-        self.sock.sendto(dumps([-1, message]).encode("utf8"), self.addr)
+        buffer: ByteBuffer = ByteBuffer(2 + len(message))
+        buffer.put_u16(1)
+        buffer.put_bytes(message)
+        self.sock.sendto(buffer.to_bytes(), self.addr)
         self.logger.slow(
             f"Data, sent to client '{self.addr[0]}:{self.addr[1]}':",
             message
         )
 
-    def new_jdt(self, jdt, packet_id):
+    def new_jdt(self, packet_id):
         """Called, when new packet is received."""
-        matches = 0
-        last_i = 0
-        check = True
+        if packet_id in self.received:
+            return None
 
-        self.received.append(jdt)
-        self.received.sort(key=self.custom_sort)
+        max_packets = self.config["udp_reliable_max_packets"]
 
-        for i in self.received:
-            if i[0] == packet_id:
-                matches += 1
+        for i in range(max(packet_id - max_packets, 2), packet_id):
+            if i not in self.received:
+                return None
 
-                if matches >= 2:
-                    return None
+        self.received.append(packet_id)
 
-            if check and i[0] == last_i:
-                last_i += 1
-            elif check:
-                check = False
+        if len(self.received) > max_packets:
+            self.received = self.received[len(self.received) - max_packets:]
 
-        last_i -= 1
-
-        if packet_id <= last_i:
-            return jdt[1]
-
-        return None
+        return True
 
     def receive(self, data):
         """Decodes and handles Reliable data of client."""
         try:
-            jdt = loads(data.decode("utf8"))
+            packet_id = data.get_u16()
 
-            packet_id = jdt[0]
+            # Unreliable packet
+            if packet_id == 1:
+                return True
 
-            if packet_id == -1:
-                return jdt[1]
-
-            if packet_id == -2:
-                arg = jdt[1]
+            # ACK packet
+            if packet_id == 0:
+                arg = data.get_u16()
 
                 if arg in self.sender_threads:
                     thr = self.sender_threads[arg]
@@ -114,13 +109,11 @@ class ReliableUDP:
 
                 return None
 
-            self.sock.sendto(dumps([-2, packet_id]).encode("utf8"), self.addr)
-
-            if jdt not in self.received:
-                return self.new_jdt(jdt, packet_id)
-
+            self.sock.sendto(
+                ByteBuffer(2 + 2).put_u16(0).put_u16(packet_id).to_bytes(),
+                self.addr
+            )
+            return self.new_jdt(packet_id)
         except BaseException:
             self.logger.log_error_data()
             return False
-
-        return None

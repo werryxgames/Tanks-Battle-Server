@@ -6,5 +6,5 @@ dist
 *.spec
 venv
 *.bat
-src/accounts.json
+accounts.json
 run

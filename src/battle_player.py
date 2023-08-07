@@ -27,7 +27,7 @@ class BattlePlayer:
     @staticmethod
     def st_get_tank(tank):
         """Returns tank."""
-        data = read(to_absolute("data.json"))
+        data = read(to_absolute("../data.json"))
 
         if data is None:
             return None
@@ -42,7 +42,7 @@ class BattlePlayer:
     @staticmethod
     def st_get_gun(tank):
         """Returns gun of player."""
-        data = read(to_absolute("data.json"))
+        data = read(to_absolute("../data.json"))
 
         if data is None:
             return None
@@ -57,3 +57,14 @@ class BattlePlayer:
     def json(self):
         """Returns data in JSON-serializable format."""
         return self.__dict__
+
+    def arr(self):
+        """Returns data in byte-serializable format."""
+        return [
+            self.nick,
+            self.position,
+            self.rotation,
+            self.tank,
+            self.gun_rotation,
+            self.durability
+        ]

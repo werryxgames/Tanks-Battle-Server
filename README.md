@@ -148,15 +148,17 @@ Added tank with ID *0*, it's given by default; pt wasn't selected (*-1*), so `se
 Version support statuses:
 
 **full** - Bug-fixing and security improvements
+
 **security** - Only security fixes
+
 **none** - Unsupported
 
-| Version | Support status     | Approzimate change status date |
-| ------- | ------------------ | ------------------------------ |
-| 2.0     | **full**           | 18.01.2023                     |
-| 1.5.0   | **full**           | 24.12.2022                     |
-| 1.4.0   | **full**           | 24.11.2022                     |
-| 1.3.0   | **full**           | 24.09.2022                     |
-| 1.2.0   | **security**       | 30.06.2023                     |
-| 1.1.0   | **security**       | 30.06.2023                     |
-| 1.0.0   | **none**           |                                |
+| Version | Support status     | Approximate change of status date |
+| ------- | ------------------ | --------------------------------- |
+| 2.0     | **full**           | 01.08.2024                        |
+| 1.5.0   | **none**           |                                   |
+| 1.4.0   | **none**           |                                   |
+| 1.3.0   | **none**           |                                   |
+| 1.2.0   | **none**           |                                   |
+| 1.1.0   | **none**           |                                   |
+| 1.0.0   | **none**           |                                   |

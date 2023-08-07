@@ -1,7 +1,7 @@
 {
     "host": "0.0.0.0",
     "port": 7490,
-    "accept_client_versions": ["2.0"],
+    "accept_client_versions": ["2.1"],
     "max_players_in_game": 10,
     "maps": 1,
     "default_settings": [true, true, 1500],
@@ -9,10 +9,11 @@
     "kill_reward_xp": 5,
     "max_player_noresponse_time": 10,
     "udp_reliable_resend_timeout": 0.1,
+    "udp_reliable_max_packets": 4,
     "ranks": [
         {
             "name": "Private",
-            "texture": false,
+            "texture": "none",
             "max_xp": 10
         },
         {
@@ -60,6 +61,5 @@
             "texture": "general",
             "max_xp": false
         }
-    ],
-    "constant_params": {}
+    ]
 }
