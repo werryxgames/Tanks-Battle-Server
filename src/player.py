@@ -128,6 +128,9 @@ disconnected"
         """Receives battle data."""
         self.refresh_account()
         self.map = read("../data.json")["maps"][self.bdata["map"]]
+        tank = BattlePlayer.st_get_tank(
+            self.account["selected_tank"]
+        )
         gun = BattlePlayer.st_get_gun(
             self.account["selected_tank"]
         )
@@ -149,7 +152,7 @@ disconnected"
         pls = []
 
         for bp in self.bdata["players"]:
-            pls.append([BattlePlayerStruct(bp.arr())])
+            pls.append([BattlePlayerStruct(bp.arr()), BattleTankStruct({"tank": tank, "gun": gun})])
 
         # cast to str because on client it is string concatenation
         bdata = BattleDataStruct([str(self.bdata["map"]), pls[-1], pls[:-1], SettingsStruct(self.account["settings"])])
@@ -187,8 +190,8 @@ disconnected"
 
                 for pl in players:
                     if pl is not self.bp:
-                        bp: BattlePlayerStruct = BattlePlayerStruct([pl.arr()])
-                        sum_size += bp._bb_size()
+                        bp: BattlePlayerStruct = BattlePlayerStruct(pl.arr())
+                        sum_size += bp.__bb_size__()
                         res.append(bp)
 
                 buffer: ByteBuffer = ByteBuffer(1 + sum_size)
