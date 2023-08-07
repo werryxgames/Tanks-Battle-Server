@@ -122,11 +122,8 @@ class NetworkedClient:
 
         request_code = data.get_u16()
 
-        if request_code in [7, 11]:
+        if request_code == 7:
             clients.pop(self.addr)
-
-            if request_code == "client_disconnected":
-                return
 
         # Console is (temporary) unsupported
         if self.console is not None:

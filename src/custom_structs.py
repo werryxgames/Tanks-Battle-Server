@@ -247,7 +247,7 @@ class BattlePlayerStruct(BinaryStruct):
             (buffer.get_float(), buffer.get_float(), buffer.get_float()),
             buffer.get_u32()
         ]
-        return BattleDataStruct(arr)
+        return BattlePlayerStruct(arr)
 
     def __bb_get__(self):
         return self.player

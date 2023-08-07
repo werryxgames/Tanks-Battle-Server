@@ -32,8 +32,8 @@ class ConsoleExecutor:
 
     def send(self, message):
         """Sends Reliable UDP message to client."""
-        if self.sock is not None:
-            self.rudp.send(["console_result", message])
+        # if self.sock is not None:
+            # self.rudp.send(["console_result", message])
 
         if self.logger is not None:
             if self.addr is not None:

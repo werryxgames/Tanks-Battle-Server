@@ -1,19 +1,22 @@
+#{code} = Deprecated
+x{code} = Removed
+
 CLIENT CODES:
-Register = 0
-Login = 1
+0 = Register
+1 = Login
 3 = Get hangar data
 4 = Select tank
 5 = Buy tank
 6 = Request settings
-Client disconnected = 7
+7 = Client disconnected
 8 = Reset settings
 9 = Apply settings
 10 = Get matches
-Leave battle = 11
+11 = Leave match
 12 = Create match
 13 = Join match
 14 = Match loaded
-15 = Respawned
+x15 = Respawned
 16 = Request tanks data
 17 = Damaged by
 18 = Shoot
@@ -37,3 +40,5 @@ SERVER CODES:
 24 = Tanks data is
 25 = New player joined
 26 = Player leaved
+27 = Respawn
+28 = Player shooted
