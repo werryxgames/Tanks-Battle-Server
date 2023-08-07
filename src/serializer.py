@@ -2,7 +2,13 @@
 from struct import pack
 from struct import unpack
 from struct import error
-from typing import Self
+
+from typing import Union
+
+try:
+    from typing import Self
+except ImportError:
+    Self = None
 
 
 class ByteBufferException(Exception):
@@ -40,7 +46,7 @@ class BinaryStruct:
 class ByteBuffer:
     """Class for binary data manipulation."""
 
-    def __init__(self, arg: bytearray | int):
+    def __init__(self, arg: Union[bytearray, int]):
         """Default constructor for ByteBuffer."""
         self.barr = None
         self.position = 0
