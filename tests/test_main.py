@@ -250,11 +250,11 @@ def test_global_message(type_, text):
 
 
 @pytest.mark.parametrize("data, result", (
-    (6, bytearray((6))),
+    (6, bytearray((6,))),
     (-124, ByteBufferOutOfRange),
     (290, ByteBufferOutOfRange),
     (-5432, ByteBufferOutOfRange),
-    (250, bytearray((250)))
+    (250, bytearray((250,)))
 ))
 def test_put_u8(data, result):
     """Tests for ByteBuffer.put_u8()."""
