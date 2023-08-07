@@ -113,7 +113,11 @@ class Client(NetUser):
         self.refresh_account()
 
         # First argument is False, because it doesn't impact size
-        tanks = ByteBuffer(4 + sum([TankStruct(tank, False).__bb_size__() for tank in data["tanks"]]))
+        tanks = ByteBuffer(
+            4 + sum(
+                TankStruct(tank, False).__bb_size__() for tank in data["tanks"]
+            )
+        )
         tanks.put_u32(len(data["tanks"]))
 
         for i, tank_ in enumerate(data["tanks"]):
@@ -227,7 +231,11 @@ class Client(NetUser):
         res = deepcopy(matches)
 
         # MatchStruct has constant size
-        buffer: ByteBuffer = ByteBuffer(2 + 4 + len(res) * MatchStruct({"max_players": 0, "players": 0, "map": 0}).__bb_size__())
+        buffer: ByteBuffer = ByteBuffer(
+            2 + 4 + len(res) * MatchStruct(
+                {"max_players": 0, "players": 0, "map": 0}
+            ).__bb_size__()
+        )
         buffer.put_u16(18)
         buffer.put_u32(len(res))
 

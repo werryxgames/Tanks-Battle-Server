@@ -89,7 +89,7 @@ class TankStruct(BinaryStruct):
         }, have_tank)
 
     def __bb_get__(self):
-        return (self.have, self.tank)
+        return self.tank
 
     def __bb_size__(self):
         return len(self.tank["name"].encode("UTF-8")) + 1 + 58
@@ -119,12 +119,17 @@ class TankStruct(BinaryStruct):
 
 
 class SettingsStruct(BinaryStruct):
+    """Class, that represents settings of player's account."""
     def __init__(self, settings_data):
         self.settings = settings_data
 
     @staticmethod
     def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
-        return SettingsStruct([buffer.get_boolean(), buffer.get_boolean(), buffer.get_u16()])
+        return SettingsStruct([
+            buffer.get_boolean(),
+            buffer.get_boolean(),
+            buffer.get_u16()
+        ])
 
     def __bb_get__(self):
         return self.settings
@@ -142,6 +147,8 @@ class SettingsStruct(BinaryStruct):
 
 
 class MatchStruct(BinaryStruct):
+    """Class, that represents match (battle)."""
+
     def __init__(self, match_data):
         self.match_ = match_data
 
@@ -234,6 +241,8 @@ class BattleTankStruct(BinaryStruct):
 
 
 class BattlePlayerStruct(BinaryStruct):
+    """Class, that represents player in battle."""
+
     def __init__(self, battle_player):
         self.player = battle_player
 
@@ -271,6 +280,8 @@ class BattlePlayerStruct(BinaryStruct):
 
 
 class BattleDataStruct(BinaryStruct):
+    """Class, that represents data of battle."""
+
     def __init__(self, battle_data):
         self.battle = battle_data
 
@@ -278,7 +289,10 @@ class BattleDataStruct(BinaryStruct):
     def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
         arr = [
             buffer.get_string(),
-            [buffer.get_struct(BattlePlayerStruct), buffer.get_struct(BattleTankStruct)]
+            [
+                buffer.get_struct(BattlePlayerStruct),
+                buffer.get_struct(BattleTankStruct)
+            ]
         ]
         players_count = buffer.get_u8()
         players = []
@@ -297,7 +311,13 @@ class BattleDataStruct(BinaryStruct):
         return self.battle
 
     def __bb_size__(self):
-        return len(self.battle[0].encode("UTF-8")) + 1 + self.battle[1][0].__bb_size__() + self.battle[1][1].__bb_size__() + 1 + sum([i[0].__bb_size__() + i[1].__bb_size__() for i in self.battle[2]]) + self.battle[3].__bb_size__()
+        return len(self.battle[0].encode("UTF-8")) + 1 + self.battle[1][
+            0
+        ].__bb_size__() + self.battle[1][1].__bb_size__() + 1 + sum(i[
+            0
+        ].__bb_size__() + i[1].__bb_size__() for i in self.battle[
+            2
+        ]) + self.battle[3].__bb_size__()
 
     def __bb_put__(self, buffer: ByteBuffer):
         buffer.put_string(self.battle[0])
@@ -313,20 +333,24 @@ class BattleDataStruct(BinaryStruct):
 
 
 class TankDataStruct(BinaryStruct):
+    """Class, that represents class data."""
+
     def __init__(self, tank_data):
         self.data = tank_data
 
     @staticmethod
     def __bb_init__(buffer: ByteBuffer) -> BinaryStruct:
         tanks_count: int = buffer.get_u8()
-        arr = [buffer.get_struct(BattlePlayerStruct) for _i in range(tanks_count)]
+        arr = [
+            buffer.get_struct(BattlePlayerStruct) for _i in range(tanks_count)
+        ]
         return TankDataStruct(arr)
 
     def __bb_get__(self):
         return self.data
 
     def __bb_size__(self):
-        return 1 + sum([bp.__bb_size__() for bp in self.arr])
+        return 1 + sum(bp.__bb_size__() for bp in self.data)
 
     def __bb_put__(self, buffer: ByteBuffer):
         buffer.put_u8(len(self.data))
@@ -336,6 +360,8 @@ class TankDataStruct(BinaryStruct):
 
 
 class BattlePlayerDataStruct(BinaryStruct):
+    """Class, that represents data of player in match (battle)."""
+
     def __init__(self, bp_data):
         self.data = bp_data
 

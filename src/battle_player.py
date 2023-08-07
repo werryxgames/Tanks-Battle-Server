@@ -60,4 +60,11 @@ class BattlePlayer:
 
     def arr(self):
         """Returns data in byte-serializable format."""
-        return [self.nick, self.position, self.rotation, self.tank, self.gun_rotation, self.durability]
+        return [
+            self.nick,
+            self.position,
+            self.rotation,
+            self.tank,
+            self.gun_rotation,
+            self.durability
+        ]

@@ -10,7 +10,6 @@ from custom_structs import BattlePlayerStruct
 from custom_structs import BattleDataStruct
 from custom_structs import BattleTankStruct
 from custom_structs import SettingsStruct
-from custom_structs import TankDataStruct
 from custom_structs import BattlePlayerDataStruct
 from message import GlobalMessage
 from mjson import read
@@ -102,10 +101,21 @@ disconnected"
 
             if msg[0] == "player_leave":
                 if msg[1] != self.bp.nick:
-                    self.send(ByteBuffer(2 + len(msg[1].encode("UTF-8")) + 1).put_string(msg[1]).to_bytes())
+                    self.send(
+                        ByteBuffer(2 + len(msg[1].encode("UTF-8")) + 1)
+                        .put_string(msg[1])
+                        .to_bytes()
+                    )
             elif msg[0] == "player_join":
                 if msg[1][0].player[0] != self.bp.nick:
-                    self.send(ByteBuffer(2 + msg[1][0].__bb_size__() + msg[1][1].__bb_size__()).put_u16(25).put_struct(msg[1][0]).put_struct(msg[1][1]).to_bytes())
+                    self.send(
+                        ByteBuffer(2 + msg[1][0].__bb_size__(
+                        ) + msg[1][1].__bb_size__())
+                        .put_u16(25)
+                        .put_struct(msg[1][0])
+                        .put_struct(msg[1][1])
+                        .to_bytes()
+                    )
             elif msg[0] == "player_shoot":
                 if msg[1][0] != self.bp.nick:
                     self.on_player_shoot(msg[1])
@@ -164,10 +174,18 @@ disconnected"
         pls = []
 
         for bp in self.bdata["players"]:
-            pls.append([BattlePlayerStruct(bp.arr()), BattleTankStruct({"tank": tank, "gun": gun})])
+            pls.append([
+                BattlePlayerStruct(bp.arr()),
+                BattleTankStruct({"tank": tank, "gun": gun})
+            ])
 
         # cast to str because on client it is string concatenation
-        bdata = BattleDataStruct([str(self.bdata["map"]), pls[-1], pls[:-1], SettingsStruct(self.account["settings"])])
+        bdata = BattleDataStruct([
+            str(self.bdata["map"]),
+            pls[-1],
+            pls[:-1],
+            SettingsStruct(self.account["settings"])
+        ])
         pck = ByteBuffer(2 + bdata.__bb_size__())
         pck.put_u16(23)
         pck.put_struct(bdata)
@@ -177,7 +195,9 @@ disconnected"
             "player_join",
             [
                 BattlePlayerStruct(self.bp.arr()),
-                BattleTankStruct({"tank": self.bp.get_tank(), "gun": self.bp.get_gun()})
+                BattleTankStruct(
+                    {"tank": self.bp.get_tank(), "gun": self.bp.get_gun()}
+                )
             ]
         ))
 
@@ -191,7 +211,11 @@ disconnected"
             if tank_data[1] > self.map["kill_y"]:
                 self.bp.position = [tank_data[0], tank_data[1], tank_data[2]]
                 self.bp.rotation = [tank_data[3], tank_data[4], tank_data[5]]
-                self.bp.gun_rotation = [tank_data[6], tank_data[7], tank_data[8]]
+                self.bp.gun_rotation = [
+                    tank_data[6],
+                    tank_data[7],
+                    tank_data[8]
+                ]
                 self.bp.durability = tank_data[9]
 
                 players = self.bdata["players"]
@@ -215,7 +239,15 @@ disconnected"
                 return None
 
             randpoint = self.randpoint()
-            self.send(ByteBuffer(18).put_u16(27).put_u32(self.bp.get_tank()["durability"]).put_float(randpoint[0]).put_float(randpoint[1]).put_float(randpoint[2]).to_bytes())
+            self.send(
+                ByteBuffer(18)
+                .put_u16(27)
+                .put_u32(self.bp.get_tank()["durability"])
+                .put_float(randpoint[0])
+                .put_float(randpoint[1])
+                .put_float(randpoint[2])
+                .to_bytes()
+            )
             return None
 
         if self.bp.last_damage is not None:
@@ -243,7 +275,15 @@ disconnected"
             self.bp.last_damage = None
 
         randpoint = self.randpoint()
-        self.send(ByteBuffer(18).put_u16(27).put_u32(self.bp.get_tank()["durability"]).put_float(randpoint[0]).put_float(randpoint[1]).put_float(randpoint[2]).to_bytes())
+        self.send(
+            ByteBuffer(18)
+            .put_u16(27)
+            .put_u32(self.bp.get_tank()["durability"])
+            .put_float(randpoint[0])
+            .put_float(randpoint[1])
+            .put_float(randpoint[2])
+            .to_bytes()
+        )
         self.bp.durability = -1
         return None
 
@@ -290,32 +330,34 @@ disconnected"
                     [
                         self.bp.nick,
                         [data.get_float(), data.get_float(), data.get_float()],
-                        [[
-                            data.get_float(),
-                            data.get_float(),
-                            data.get_float()
-                        ],
                         [
-                            data.get_float(),
-                            data.get_float(),
-                            data.get_float()
-                        ],
-                        [
-                            data.get_float(),
-                            data.get_float(),
-                            data.get_float()
-                        ],
-                        [
-                            data.get_float(),
-                            data.get_float(),
-                            data.get_float()
-                        ]]
+                            [
+                                data.get_float(),
+                                data.get_float(),
+                                data.get_float()
+                            ],
+                            [
+                                data.get_float(),
+                                data.get_float(),
+                                data.get_float()
+                            ],
+                            [
+                                data.get_float(),
+                                data.get_float(),
+                                data.get_float()
+                            ],
+                            [
+                                data.get_float(),
+                                data.get_float(),
+                                data.get_float()
+                            ]
+                        ]
                     ]
                 ))
                 return None
 
             if code == 17:
-                self.bp.last_damage = args[0]
+                self.bp.last_damage = data.get_u16()
                 return None
 
         except BaseException:

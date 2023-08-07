@@ -1,5 +1,4 @@
 """Module, that guarantees receive of UDP packets."""
-from json import dumps
 from threading import Thread
 from time import sleep
 

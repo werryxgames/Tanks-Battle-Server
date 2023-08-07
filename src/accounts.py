@@ -203,7 +203,7 @@ class AccountManager:
                     AccountManager.FAILED_BAN,
                     ByteBuffer(2 + 4 + len(aban[1].encode("UTF-8")) + 1)
                     .put_u16(AccountManager.FAILED_BAN)
-                    .put_u32(aban[0])
+                    .put_32(aban[0])
                     .put_string(aban[1])
                     .to_bytes()
                 ]
@@ -212,7 +212,7 @@ class AccountManager:
                 AccountManager.FAILED_BAN,
                 ByteBuffer(2 + 4)
                 .put_u16(AccountManager.FAILED_BAN)
-                .put_u32(aban[0])
+                .put_32(aban[0])
                 .to_bytes()
             ]
 

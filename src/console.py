@@ -7,6 +7,7 @@ from accounts import AccountManager
 from message import GlobalMessage
 from singleton import get_data
 from singleton import get_matches
+from serializer import ByteBuffer
 
 
 class ConsoleExecutor:
@@ -33,7 +34,7 @@ class ConsoleExecutor:
     def send(self, message):
         """Sends Reliable UDP message to client."""
         # if self.sock is not None:
-            # self.rudp.send(["console_result", message])
+        #     self.rudp.send(["console_result", message])
 
         if self.logger is not None:
             if self.addr is not None:
