@@ -142,6 +142,9 @@ class NetworkedClient:
         if self.send_client:
             return True
 
+        if data.size() < 2:
+            return False
+
         if data.get_u16() != 1:
             return False
 
