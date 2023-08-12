@@ -120,6 +120,9 @@ class NetworkedClient:
         if rudp is None:
             return
 
+        if data.size() < 2:
+            return
+
         request_code = data.get_u16()
 
         if request_code == 7:
@@ -142,7 +145,7 @@ class NetworkedClient:
         if self.send_client:
             return True
 
-        if data.size() < 2:
+        if data.size() < 4:
             return False
 
         if data.get_u16() != 1:
