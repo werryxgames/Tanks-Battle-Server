@@ -440,7 +440,7 @@ def main():
     """Function, that is called, when script called."""
     global is_support_gui
 
-    log_print_level = Logger.LEVEL_DEBUG
+    log_print_level = Logger.LEVEL_INFO
     log_file_level = Logger.LEVEL_INFO
 
     for arg in argv:
