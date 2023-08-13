@@ -10,6 +10,7 @@ class Singleton:
     win = None
     matches = []
     clients = {}
+    run_file = None
 
     def __new__(cls):
         """Returns instance of singleton."""
@@ -75,3 +76,13 @@ def get_maps():
     """Returns all constant parameters."""
     maps = read("../data.json")["maps"]
     return maps
+
+
+def set_run_file(run_file):
+    """Sets 'run' file, used to indicate if server is running."""
+    st.run_file = run_file
+
+
+def get_run_file():
+    """Gets 'run' file. See `set_run_file` for more information."""
+    return st.run_file

@@ -4,16 +4,16 @@
             "name": "LT-21 \"Hamster\"",
             "tank": {
                 "durability": 450,
-                "mass": 12000,
-                "speed": 36000000,
-                "gravity": 30000000,
-                "rotation_speed": 75000000
+                "mass": 40,
+                "speed": 120000,
+                "gravity": 100000,
+                "rotation_speed": 250000
             },
             "gun": {
                 "damage": 300,
                 "rotation_speed": 90,
                 "shot_speed": 180,
-                "recoil": 4000000,
+                "recoil": 140,
                 "recharge": 5,
                 "limits": [180, 20]
             },
@@ -25,16 +25,16 @@
             "name": "WZ-Kj. 90",
             "tank": {
                 "durability": 600,
-                "mass": 25000,
-                "speed": 45000000,
-                "gravity": 40000000,
-                "rotation_speed": 40000000
+                "mass": 64,
+                "speed": 130000,
+                "gravity": 100000,
+                "rotation_speed": 300000
             },
             "gun": {
                 "damage": 590,
                 "rotation_speed": 0,
                 "shot_speed": 360,
-                "recoil": 20000000,
+                "recoil": 200,
                 "recharge": 7,
                 "limits": [0, 0]
             },

@@ -1,5 +1,6 @@
 """Tanks Battle Server - Server for Tanks Battle."""
 from json.decoder import JSONDecodeError
+from os import remove
 from sys import argv
 
 from absolute import to_absolute
@@ -11,7 +12,9 @@ from network import is_active
 from network import start_server
 from network import start_server_async
 from network import stop_server
+from singleton import get_run_file
 from singleton import set_data
+from singleton import set_run_file
 
 is_support_gui = True
 
@@ -430,6 +433,17 @@ def serve(config, logger):
         set_data(config, logger)
         start_server(config, logger)
     except KeyboardInterrupt:
+        print("\r  \r", end="")  # KeyboardInterrupt may left ^C in terminal
+
+        try:
+            get_run_file().close()
+            set_run_file(None)
+            remove(to_absolute("../run"))
+        except FileNotFoundError:
+            logger.warning(
+                "File 'run' is already removed, while server was running"
+            )
+
         logger.info("Server stopped")
         stop(0)
     except BaseException:
@@ -440,7 +454,7 @@ def main():
     """Function, that is called, when script called."""
     global is_support_gui
 
-    log_print_level = Logger.LEVEL_DEBUG
+    log_print_level = Logger.LEVEL_INFO
     log_file_level = Logger.LEVEL_INFO
 
     for arg in argv:
