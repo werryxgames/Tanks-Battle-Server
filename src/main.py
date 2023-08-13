@@ -11,7 +11,10 @@ from network import is_active
 from network import start_server
 from network import start_server_async
 from network import stop_server
+from os import remove
+from singleton import get_run_file
 from singleton import set_data
+from singleton import set_run_file
 
 is_support_gui = True
 
@@ -430,6 +433,17 @@ def serve(config, logger):
         set_data(config, logger)
         start_server(config, logger)
     except KeyboardInterrupt:
+        print("\r  \r", end="") # KeyboardInterrupt may left ^C in terminal
+
+        try:
+            get_run_file().close()
+            set_run_file(None)
+            remove(to_absolute("../run"))
+        except FileNotFoundError:
+            logger.warning(
+                "File 'run' is already removed, while server was running"
+            )
+
         logger.info("Server stopped")
         stop(0)
     except BaseException:
