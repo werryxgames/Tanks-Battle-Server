@@ -143,22 +143,3 @@ will be replaced by
 ```
 
 Added tank with ID *0*, it's given by default; pt wasn't selected (*-1*), so `selected_tank` changed to *0*
-
-# Versions
-Version support statuses:
-
-**full** - Bug-fixing and security improvements
-
-**security** - Only security fixes
-
-**none** - Unsupported
-
-| Version | Support status     | Approximate change of status date |
-| ------- | ------------------ | --------------------------------- |
-| 2.0     | **full**           | 01.08.2024                        |
-| 1.5.0   | **none**           |                                   |
-| 1.4.0   | **none**           |                                   |
-| 1.3.0   | **none**           |                                   |
-| 1.2.0   | **none**           |                                   |
-| 1.1.0   | **none**           |                                   |
-| 1.0.0   | **none**           |                                   |
