@@ -433,7 +433,7 @@ def serve(config, logger):
         set_data(config, logger)
         start_server(config, logger)
     except KeyboardInterrupt:
-        print("\r  \r", end="") # KeyboardInterrupt may left ^C in terminal
+        print("\r  \r", end="")  # KeyboardInterrupt may left ^C in terminal
 
         try:
             get_run_file().close()
