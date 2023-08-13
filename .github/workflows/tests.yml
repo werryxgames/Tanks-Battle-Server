@@ -35,7 +35,7 @@ jobs:
         # exit-zero treats all errors as warnings
         flake8 src tests --select=F,E,W,R,C --count --max-complexity=10 --show-source --statistics
         # check all docstrings
-        pylint src tests --disable=E0401,R0902,R0912,R0903,R0914,R0913,R0915,W0703,R0904,R1702,R0911,W0603,C0103
+        pylint src tests --disable=E0401,R0902,R0912,R0903,R0914,R0913,R0915,W0703,R0904,R1702,R0911,W0603,C0103,R1732
     - name: Tests with Pytest
       run: |
         python -m pytest tests

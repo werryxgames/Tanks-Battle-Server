@@ -1,5 +1,6 @@
 """Tanks Battle Server - Server for Tanks Battle."""
 from json.decoder import JSONDecodeError
+from os import remove
 from sys import argv
 
 from absolute import to_absolute
@@ -11,7 +12,6 @@ from network import is_active
 from network import start_server
 from network import start_server_async
 from network import stop_server
-from os import remove
 from singleton import get_run_file
 from singleton import set_data
 from singleton import set_run_file
