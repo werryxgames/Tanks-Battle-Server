@@ -15,7 +15,7 @@
                 "shot_speed": 180,
                 "recoil": 140,
                 "recharge": 5,
-                "limits": [180, 20]
+                "limits": [180, 90]
             },
             "price": 0,
             "position": [0, 1],
@@ -36,7 +36,7 @@
                 "shot_speed": 360,
                 "recoil": 200,
                 "recharge": 7,
-                "limits": [0, 0]
+                "limits": [0, 20]
             },
             "price": 1949,
             "position": [1, 0],
@@ -46,16 +46,16 @@
             "name": "NS-Merrion II",
             "tank": {
                 "durability": 400,
-                "mass": 20000,
-                "speed": 66000000,
-                "gravity": 30000000,
-                "rotation_speed": 81000000
+                "mass": 44,
+                "speed": 130000,
+                "gravity": 100000,
+                "rotation_speed": 360000
             },
             "gun": {
                 "damage": 90,
                 "rotation_speed": 112,
                 "shot_speed": 190,
-                "recoil": 6000000,
+                "recoil": 110,
                 "recharge": 1.2,
                 "limits": [180, 20]
             },
