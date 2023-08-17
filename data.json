@@ -83,6 +83,27 @@
             "price": 1500,
             "position": [2, 1],
             "type": 2
+        },
+        {
+            "name": "SRU \"Sapphire\"",
+            "tank": {
+                "durability": 845,
+                "mass": 84,
+                "speed": 130000,
+                "gravity": 100000,
+                "rotation_speed": 360000
+            },
+            "gun": {
+                "damage": 580,
+                "rotation_speed": 30,
+                "shot_speed": 1200,
+                "recoil": 500,
+                "recharge": 4.2,
+                "limits": [180, 80]
+            },
+            "price": 2100,
+            "position": [3, 1],
+            "type": 2
         }
     ],
     "maps": [
